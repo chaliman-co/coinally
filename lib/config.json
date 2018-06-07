@@ -1,0 +1,7 @@
+{
+    "TOKEN_SECRET" : "f440cc5e-0126-47a5-9e52-9feff6235254",
+    "EMAIL_ADDRESS" : "chaliman.co@gmail.com",
+    "EMAIL_PASSWORD": "0058612690gA.",
+    "EMAIL_SERVICE": "gmail",
+    "HOSTNAME": "localhost:8000"
+}

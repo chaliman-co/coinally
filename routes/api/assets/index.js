@@ -1,0 +1,209 @@
+const router = require("express").Router({ mergeParams: true }),
+  path = require("path"),
+  multer = require("multer"),
+  serverUtils = require("../../../lib/utils"),
+  { Asset } = require(path.join(serverUtils.getRootDirectory(), "lib/db")),
+  assetsStoragePath = path.join(
+    serverUtils.getPublicDirectory(),
+    "images/assets"
+  );
+module.exports = router;
+
+router
+  .post(
+    "/",
+    multer({ dest: assetsStoragePath }).single("image"),
+    handlePostAsset
+  )
+  .get("/", handleGetAssets)
+  .param("_id", resolveAsset)
+  .get("/:_id", handleGetAsset)
+  .delete("/:_id", handleDeleteAsset)
+  .post("/:_id/deposit_address", handlePostDepositAddress)
+  .put("/:_id/sellable", handlePutSellable)
+  .put("/:_id/buyable", handlePutBuyable)
+  .put("/:_id/selling_profit", handlePutAssetSellingProfit)
+  .put("/:_id/buying_profit", handlePutAssetBuyingProfit)
+  .put("/:_id/image", multer({ dest: assetsStoragePath }).single("image"), handlePutAssetImage)
+;
+
+function handlePostAsset(req, res, next) {
+  const rawInput = req.body,
+    assetDetails = new Asset.Fields();
+  try {
+    serverUtils.deepAssign(assetDetails, rawInput);
+  } catch (err) {
+    let unknownField = err.message.match(/property (.+),/)[1];
+    return res._sendError(
+      "unknown field",
+      new serverUtils.ErrorReport(400, {
+        [unknownField]: `${unknownField} not recognized`
+      })
+    );
+  }
+  if (req.file)
+    details.imagePath = path.join("images/assets", req.file.filename);
+  asset = new Asset(assetDetails);
+  asset.save().then(
+    function savedAsset(asset) {
+      Asset.add( asset);
+      return res._success(asset);
+    },
+    function failedToSave(err) {
+      return next(err);
+    }
+  );
+}
+
+function handleGetAssets(req, res, next) {
+  const { skip = 0, limit = 20 } = req.query;
+  Asset.find({})
+    .limit(limit)
+    .skip(skip)
+    .exec()
+    .then(
+      function foundAssets(assets) {
+        if (!assets.length)
+          return res._sendError(
+            "No matching documents",
+            new serverUtils.ErrorReport(404, { assets: "no assets found" })
+          );
+        assets.forEach(function(asset) {
+          asset.price_usd = Asset.get("price_usd", asset.code);
+        });
+        return res._success(assets);
+      },
+      function failedToFind(err) {
+        return next(err);
+      }
+    );
+}
+
+function handleGetAsset(req, res, next) {
+  const { asset } = req._params;
+  return res._success(asset);
+}
+
+function handleDeleteAsset(req, res, next) {
+  const { asset } = req._params;
+  asset.remove().then(
+    function deletedAsset(asset) {
+      return res._success({ asset });
+    },
+    function failedToDelete(err) {
+      return next(err);
+    }
+  );
+}
+function handlePostDepositAddress(req, res, next) {
+  const address = req.body,
+    { asset } = req._params;
+  asset.depositAddress = address;
+  asset.save().then(
+    function updatedAsset(asset) {
+      return res._success(address);
+    },
+    function failedToUpdate(err) {
+      return next(err);
+    }
+  );
+}
+
+function handlePutSellable(req, res, next) {
+    if (! (req.body && req.body.hasOwnProperty("sellable")) ) return res._sendError("missing or invalid parameters", new serverUtils.ErrorReport(400, {sellable: "sellable not provided"}));
+  const { asset } = req._params,
+    { sellable } = req.body;
+  asset.sellable = sellable;
+  asset.save().then(
+    function savedAsset(asset) {
+      return res._success(asset.sellable);
+    },
+    function failedToSave(err) {
+      return next(err);
+    }
+  );
+}
+
+function handlePutBuyable(req, res, next) {
+  if (! (req.body && req.body.hasOwnProperty("buyable")) ) return res._sendError("missing or invalid parameters", new serverUtils.ErrorReport(400, {buyable: "buyable not provided"}));
+  const { asset } = req._params,
+    { buyable } = req.body;
+  asset.buyable = buyable;
+  asset.save().then(
+    function savedAsset(asset) {
+      return res._success(asset.buyable);
+    },
+    function failedToSave(err) {
+      return next(err);
+    }
+  );
+}
+
+function handlePutAssetImage(req, res, next) {
+  if (!req.file)
+    return res._sendError(
+      "missing or invalid parameters",
+      new serverUtils.ErrorReport(400, { image: "image not provided" })
+    );
+  const imagePath = path.posix.join("images/assets", req.file.filename),
+    { asset } = req._params;
+  asset.imagePath = imagePath;
+  asset.save().then(
+    function savedAsset(asset) {
+      return res._success(asset.imagePath);
+    },
+    function failedToSave(err) {
+      return next(err);
+    }
+  );
+}
+
+function handlePutAssetBuyingProfit(req, res, next) {
+  if (!(req.body && req.body.hasOwnProperty("buyingProfit"))) return res._sendError("missing or invalid parameters", new serverUtils.ErrorReport({ buyingProfit: "buying profit not provided" }));
+  const
+    { asset } = req._params,
+    { buyingProfit } = req.body,
+    { _id } = req.params
+    ;
+  asset.buyingProfit = buyingProfit;
+  asset.save().then(function sendResponse(asset) {
+    res._success(asset.buyingProfit);
+    Asset.set("buyingProfit", asset.code, asset.buyingProfit);
+  }, function handleSaveError(err) {
+    return next(err)
+  })
+}
+
+function handlePutAssetSellingProfit(req, res, next) {
+  if (!(req.body && req.body.hasOwnProperty("sellingProfit"))) return res._sendError("missing or invalid parameters", new serverUtils.ErrorReport({ sellingProfit: "selling profit not provided" }));
+  const
+    { asset } = req._params,
+    { sellingProfit } = req.body,
+    { _id } = req.params
+    ;
+  asset.sellingProfit = sellingProfit;
+  asset.save().then(function sendResponse(asset) {
+    res._success(asset.sellingProfit);
+    Asset.set("sellingProfit", asset.code, asset.sellingProfit);
+  }, function handleSaveError(err) {
+    return next(err)
+  })
+}
+
+function resolveAsset(req, res, next, _id) {
+  Asset.findOne({ _id }).then(
+    function foundAsset(asset) {
+      if (!asset)
+        return res._sendError(
+          "item not found",
+          new serverUtils.ErrorReport(404, { _id: "_id not found" })
+        );
+      req._params = req._params || {};
+      req._params.asset = asset;
+      return next();
+    },
+    function failedToFind(err) {
+      return next(err);
+    }
+  );
+}
