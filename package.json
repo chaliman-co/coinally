@@ -21,6 +21,7 @@
     "uuid": "~3.2.1",
     "passport": "*",
     "passport-http-bearer": "*",
-    "bcrypt": "*"
+    "bcrypt": "*",
+    "multer": "*"
   }
 }
