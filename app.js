@@ -37,8 +37,8 @@ socketIoServer.attach(server, {
 
 
 db.Config.getLive(function () {
-    db.Asset.getLive(function() {
-        server.listen(process.env.port || Number(process.argv[2]) || 8000, function () {
+    db.Asset.getLive(function () {
+        server.listen(process.env.PORT || Number(process.argv[2]) || 8000, function () {
             console.log(`server listening on ${util.inspect(server.address(), { colors: true, depth: null })}`)
         })
 
