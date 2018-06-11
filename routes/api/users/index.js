@@ -30,7 +30,7 @@ router
 ;
 
 function provideUser(req, res, next, _id) {
-    User.findOne({ _id }).populate("assetAccounts.asset").then(function foundUser(user) {
+    User.findOne({ _id }).populate("assetAccounts.asset", 'addressType').then(function foundUser(user) {
         if (!user) return res._sendError("item not found", new serverUtils.ErrorReport(404, {_id: "_id not found"}));
         req._params = req._params || {};
         req._params.user = user;

@@ -36,33 +36,14 @@ function handlePostTransaction(req, res, next) {
     );
   }
   let transaction = new Transaction(transactionDetails);
-  let err = transaction.validateSync();
-  if (err) {
-    return next(err);
-  }
-  const deposit2DollarRate = Asset.convertToDollars(
-      transaction.depositAssetCode
-    ),
-    receipt2DollarRate = Asset.convertToDollars(transaction.receiptAssetCode),
-    salesProfit = Config.get("SALES_PROFIT"), //in USD
-    buyingProfit = Config.get("BUYING_PROFIT"),
-    dollar2ReceiptRate = 1 / receipt2DollarRate;
-  let paddedRate, deposit2ReceiptRate;
-  if (transaction.depositAssetCode === "naira") {
-    paddedRate = from2DollarRate - buyingProfit;
-    deposit2ReceiptRate = paddedRate * dollar2ReceiptRate;
-  } else {
-    paddedRate = deposit2DollarRate - salesProfit;
-    if (transaction.receiptAssetCode !== "naira") {
-      paddedRate -= buyingProfit;
-    }
-    deposit2ReceiptRate = paddedRate * dollar2ReceiptRate;
-  }
   transaction.save().then(
-    function savedAsset(asset) {
-      return res.json(asset);
+    function sendResponse(transaction) {
+      transaction.user.transactionCount++;
+      transaction.user.save().then(
+        user => res.json(transaction), err => next(err)
+      )
     },
-    function failedToSave(err) {
+    function handleError(err) {
       return next(err);
     }
   );
@@ -75,6 +56,8 @@ function handleGetTransactions(req, res, next) {
   Transaction.find(rest)
     .limit(limit)
     .skip(skip)
+    .populate('receiptAsset', 'type')
+    .populate('depositAsset', 'type')
     .exec()
     .then(
       function foundTransactions(transactions) {
