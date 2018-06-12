@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="/assets/font-awesome.min.css?8becb999e8e44e7c7027dfe47f69ff18">
   <link rel="stylesheet" href="/assets/bootstrap.min.css?8a473f2718b2f06a4b9c2390c0e3ca1b">
   <!-- <link rel="stylesheet" href="node_modules/vue-tel-input/dist/vue-tel-input.css"> -->
-  <link rel="stylesheet" href="/assets/css-bundle.css?fd21debd72d62bc277717be0d4c1a015">
+  <link rel="stylesheet" href="/assets/css-bundle.css?2806da2ecc54a2374df9f50364d935c2">
 </head>
 
 <body style="margin-top: 8rem">
@@ -22,7 +22,7 @@
         <div class="nav__table-row">
           <div class="nav__table-cell nav__logo">
             <!-- ONLY SHOW THIS HAMBURGER WHEN A USER IS LOGGED IN -->
-            <span class="hamburger">
+            <span class="hamburger" v-if="global.user">
                     <img src="/assets/menu.svg?d52dd7fe21b854248f49a68bbc40109e" alt="Menu">
                 </span>
             <!--  -->
@@ -30,13 +30,16 @@
                     <img src="/assets/logo.svg?60d6eba9eb7e287c61b42c2ea6416f56" alt="Logo">
                 </a>
           </div>
-          <div class="nav__table-cell nav__links">
+          <div v-if="!global.user" class="nav__table-cell nav__links">
             <a class="nav__link login">
               <router-link to="/login"> Login </router-link>
             </a>
             <a class="nav__link">
               <router-link to="/signup"> Signup </router-link>
             </a>
+          </div>
+          <div class="nav__table-cell nav__links" v-else>
+            <router-link to="/dashboard" class="nav__link login"> Dashboard </router-link>
           </div>
         </div>
       </div>
