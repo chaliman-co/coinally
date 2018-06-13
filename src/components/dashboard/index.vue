@@ -94,7 +94,12 @@ export default {
     inject: ['global'],
     data() {
         return {
-            userTransactions: [],
+            
+        }
+    },
+    computed: {
+        userTransactions() {
+
         }
     },
     components: {
