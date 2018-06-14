@@ -27,10 +27,9 @@ import dashboard from './components/dashboard';
 import account from './components/accounts';
 import './js/js-bundle';
 
-let apiRootUrl = 'http://localhost:9000';
+const apiRootUrl = 'http://localhost:9000';
 const apiUrl = 'http://localhost:9000/api';
 const request = (method, url, data, cb) => {
-
   if (!cb) {
     [cb, data] = [data, undefined];
   }
@@ -38,8 +37,8 @@ const request = (method, url, data, cb) => {
     method,
     url,
     data,
-    cb
-  })
+    cb,
+  });
   const headers = {};
   if (!/^https?:\/\//i.test(url)) {
     url = apiUrl + url;
@@ -68,95 +67,95 @@ window.jwtDecode = jwtDecode;
 
 
 const routes = [{
+  path: '/',
+  component: homePage,
+}, {
+  path: '/signup',
+  component: signup,
+  props: true,
+}, {
+  path: '/login',
+  component: login,
+  children: [{
     path: '/',
-    component: homePage,
+    component: loginComponents.emailAddressInput,
   }, {
-    path: '/signup',
-    component: signup,
-    props: true,
-  }, {
-    path: '/login',
-    component: login,
-    children: [{
-      path: '/',
-      component: loginComponents.emailAddressInput,
-    }, {
-      path: 'verify',
-      component: loginComponents.verificationCodeInput,
-    }],
-  }, {
-    path: '/account',
-    component: account,
-    meta: {
-      requiresUser: true
-    },
-  }, {
-    path: '/transaction',
-    component: transaction,
-    children: [{
-      path: '/',
-      component: transactionComponents.selectAssets,
-    }, {
-      path: 'account',
-      component: transactionComponents.selectAccount,
-    }, {
-      path: '/status',
-      component: transactionComponents.status,
-    }],
-  }, {
-    path: '/dashboard',
-    component: dashboard,
-    meta: {
-      requiresUser: true
-    },
-  }, {
-    path: '/profile',
-    component: profile,
-    meta: {
-      requiresUser: true
-    },
-  }, {
-    path: '/verify',
-    component: verify,
-    meta: {
-      requiresUser: true
-    },
-  }, {
-    path: '/users',
-    component: users,
-    meta: {
-      requiresUser: true,
-      requiresAdmin: true,
-    },
+    path: 'verify',
+    component: loginComponents.verificationCodeInput,
+  }],
+}, {
+  path: '/account',
+  component: account,
+  meta: {
+    requiresUser: true,
   },
-  {
-    path: '/users/:_id',
-    component: user,
-    meta: {
-      requiresUser: true
-    },
+}, {
+  path: '/transaction',
+  component: transaction,
+  children: [{
+    path: '/',
+    component: transactionComponents.selectAssets,
+  }, {
+    path: 'account',
+    component: transactionComponents.selectAccount,
+  }, {
+    path: '/status',
+    component: transactionComponents.status,
+  }],
+}, {
+  path: '/dashboard',
+  component: dashboard,
+  meta: {
+    requiresUser: true,
   },
-  {
-    path: '/settings',
-    component: settings,
-    meta: {
-      requiresUser: true
-    },
+}, {
+  path: '/profile',
+  component: profile,
+  meta: {
+    requiresUser: true,
   },
-  {
-    path: '/assets',
-    component: assets,
-    meta: {
-      requiresUser: true
-    },
+}, {
+  path: '/verify',
+  component: verify,
+  meta: {
+    requiresUser: true,
   },
-  {
-    path: '/transactions',
-    component: transactions,
-    meta: {
-      requiresUser: true
-    },
+}, {
+  path: '/users',
+  component: users,
+  meta: {
+    requiresUser: true,
+    requiresAdmin: true,
   },
+},
+{
+  path: '/users/:_id',
+  component: user,
+  meta: {
+    requiresUser: true,
+  },
+},
+{
+  path: '/settings',
+  component: settings,
+  meta: {
+    requiresUser: true,
+  },
+},
+{
+  path: '/assets',
+  component: assets,
+  meta: {
+    requiresUser: true,
+  },
+},
+{
+  path: '/transactions',
+  component: transactions,
+  meta: {
+    requiresUser: true,
+  },
+},
 ];
 const router = new VueRouter({
   mode: 'history',
@@ -168,7 +167,7 @@ const router = new VueRouter({
     for (const name in _queryObject) {
       pairs.push(`${encodeURIComponent(name)}=${encodeURIComponent(_queryObject[name])}`);
     }
-    return '?' + pairs.join('&');
+    return `?${pairs.join('&')}`;
 
     function queryObject(obj, query, namespace) {
       query = query || {};
@@ -176,7 +175,7 @@ const router = new VueRouter({
       for (const property in obj) {
         if (obj.hasOwnProperty(property)) {
           if (namespace) {
-            key = `${namespace  }[${  property  }]`;
+            key = `${namespace}[${property}]`;
           } else {
             key = property;
           }
@@ -196,8 +195,8 @@ router.beforeEach((to, from, next) => {
   console.log({
     to,
     from,
-    next
-  })
+    next,
+  });
   const requiresUser = to.matched.some(record => record.meta.requiresUser);
   if (!app) {
     const {
@@ -219,31 +218,34 @@ router.beforeEach((to, from, next) => {
     console.log('from beforeEach: ', userId);
 
     return request('GET', `/users/${userId}`, (err, fetchedUser) => {
-      console.log('done fetch')
+      console.log('done fetch');
       if (err) {
-        if (requiresUser) return next({
-          path: '/login',
-          query: {
-            redirect: to.fullPath,
-          },
-        });
+        if (requiresUser) {
+          return next({
+            path: '/login',
+            query: {
+              redirect: to.fullPath,
+            },
+          });
+        }
         return next();
       }
       app.global.user = globalUser = fetchedUser;
       return next();
     });
-
   }
   if (app.global.user == null) {
-    if (requiresUser) return next({
-      path: '/login',
-      query: {
-        redirect: to.fullPath,
-      },
-    });
+    if (requiresUser) {
+      return next({
+        path: '/login',
+        query: {
+          redirect: to.fullPath,
+        },
+      });
+    }
     return next();
   }
-})
+});
 
 
 var app = new Vue({
@@ -253,15 +255,13 @@ var app = new Vue({
       apiUrl,
       apiRootUrl,
       _usertransactions: [],
-      getTransactions(skip, limit) {
+      getTransactions(skip, limit, cb) {
         const transactions = this._usertransactions;
         const endIndex = skip + limit;
         if ((!transactions[endIndex] && transactions[transactions.length - 1] != 'end')) {
           return this.request();
-        } else if (transactions[skip] && (!transactions[endIndex] || transactions[transactions.length - 1] == 'end')) {
-          return this.request();
         }
-
+        return transactions.slice(skip, endIndex + 1)
       },
       user: null,
       request,
@@ -269,9 +269,10 @@ var app = new Vue({
         const userId = jwtDecode(token)._id;
         console.log('from setUser: ', userId);
         this.request('GET', `/users/${userId}`, (err, fetchedUser) => {
-          console.log('done with fetch from set, ', err, fetchedUser)
+          console.log('done with fetch from set, ', err, fetchedUser);
           if (err) console.log('could not load user: ', err.response);
-          this.global.user = globalUser = fetchedUser;
+          this.global.user = globalUser = fetchedUser || null;
+          return cb();
         });
       },
       logOut() {

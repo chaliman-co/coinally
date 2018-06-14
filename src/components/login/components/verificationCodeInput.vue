@@ -52,19 +52,21 @@ export default {
     methods: {
         verify() {
             this.isWaiting = true;
-            this.global.request("GET", `/auth/?code=${this.code}`, function(err, result) {
+            this.global.request("GET", `/auth/?code=${this.code}`, (err, result) => {
                 this.isWaiting = false;
                 if (err) { this.errorHandler(err); return console.log("error from post: ", window.err = err, err.response); }
                 console.log("success...", result)
                 localStorage.COINALLY_AUTH_TOKEN = result.token;
-                this.global.setUser(localStorage.COINALLY_AUTH_TOKEN);
-                let nextPage = this.$route.query.nextPage;
-                if (nextPage) {
-                    return this.$router.push(nextPage)
-                }
-                return this.$router.push('/');
+                this.global.setUser(localStorage.COINALLY_AUTH_TOKEN, () => {
+                    let nextPage = this.$route.query.nextPage;
+                    if (nextPage) {
+                        return this.$router.push(nextPage)
+                    }
+                    return this.$router.push('/');
+                });
 
-            }.bind(this))
+
+            })
         },
         errorHandler(err) {
             if (err.message == 'Network Error') {
