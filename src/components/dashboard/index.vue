@@ -119,7 +119,7 @@ export default {
     },
     created() {
         this.global.getTransactions(transactions => {
-            this.userTransactions = res;
+            this.userTransactions = transactions;
 
         });
     }

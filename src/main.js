@@ -298,7 +298,6 @@ var app = new Vue({
     if (!this.global.user) return console.log('null user');
   },
   methods: {
-
   },
   router,
 });
