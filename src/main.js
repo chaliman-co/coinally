@@ -244,7 +244,7 @@ router.beforeEach((to, from, next) => {
       });
     }
     return next();
-  }
+  } else return next();
 });
 
 
@@ -259,19 +259,25 @@ var app = new Vue({
         const transactions = this._usertransactions;
         const endIndex = skip + limit;
         if ((!transactions[endIndex] && transactions[transactions.length - 1] != 'end')) {
-          return this.request();
+          return this.request('GET', `/transactions/?user=${this.global.user._id}&skip=${transactions.length -1}&limit=${endIndex - transactions.length -1}`, (err, fetchedTransactions) => {
+            console.log('done with get from transactions: ', err, transactions);
+            if (err) console.log('could not load transactions: ', err.response);
+            if (fetchedTransactions.length < endIndex - transactions.length - 1 ) {
+              fetchedTransactions.push('end');
+            }
+            return cb(transactions.slice(skip, endIndex + 1));
+          });
         }
-        return transactions.slice(skip, endIndex + 1)
+        cb(transactions.slice(skip, endIndex + 1));
       },
       user: null,
       request,
       setUser(token, cb) {
         const userId = jwtDecode(token)._id;
-        console.log('from setUser: ', userId);
         this.request('GET', `/users/${userId}`, (err, fetchedUser) => {
-          console.log('done with fetch from set, ', err, fetchedUser);
+          console.log('done with fetch from set, ', 'global: ', this, {err, fetchedUser});
           if (err) console.log('could not load user: ', err.response);
-          this.global.user = globalUser = fetchedUser || null;
+          this.user = globalUser = fetchedUser || null;
           return cb();
         });
       },
