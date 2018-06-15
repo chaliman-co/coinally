@@ -27,18 +27,12 @@ import dashboard from './components/dashboard';
 import account from './components/accounts';
 import './js/js-bundle';
 
-const apiRootUrl = 'http://localhost:9000';
-const apiUrl = 'http://localhost:9000/api';
+const apiRootUrl = '';
+const apiUrl = '/api';
 const request = (method, url, data, cb) => {
   if (!cb) {
     [cb, data] = [data, undefined];
   }
-  console.log('requesting... ', {
-    method,
-    url,
-    data,
-    cb,
-  });
   const headers = {};
   if (!/^https?:\/\//i.test(url)) {
     url = apiUrl + url;
@@ -218,7 +212,6 @@ router.beforeEach((to, from, next) => {
     console.log('from beforeEach: ', userId);
 
     return request('GET', `/users/${userId}`, (err, fetchedUser) => {
-      console.log('done fetch');
       if (err) {
         if (requiresUser) {
           return next({
@@ -259,23 +252,22 @@ var app = new Vue({
         const transactions = this._usertransactions;
         const endIndex = skip + limit;
         if ((!transactions[endIndex] && transactions[transactions.length - 1] != 'end')) {
-          return this.request('GET', `/transactions/?user=${this.global.user._id}&skip=${transactions.length -1}&limit=${endIndex - transactions.length -1}`, (err, fetchedTransactions) => {
-            console.log('done with get from transactions: ', err, transactions);
-            if (err) console.log('could not load transactions: ', err.response);
+          return this.request('GET', `/transactions/?user=${this.user._id}&skip=${transactions.length}&limit=${endIndex - transactions.length -1}`, (err, fetchedTransactions) => {
+            console.log('done with get from transactions: ', err, fetchedTransactions);
+            if (err) return console.log('could not load transactions: ', err.response);
             if (fetchedTransactions.length < endIndex - transactions.length - 1 ) {
               fetchedTransactions.push('end');
             }
-            return cb(transactions.slice(skip, endIndex + 1));
+            return cb(fetchedTransactions.slice(skip, endIndex + 1));
           });
         }
-        cb(transactions.slice(skip, endIndex + 1));
+        cb(fetchedTransactions.slice(skip, endIndex + 1));
       },
       user: null,
       request,
       setUser(token, cb) {
         const userId = jwtDecode(token)._id;
         this.request('GET', `/users/${userId}`, (err, fetchedUser) => {
-          console.log('done with fetch from set, ', 'global: ', this, {err, fetchedUser});
           if (err) console.log('could not load user: ', err.response);
           this.user = globalUser = fetchedUser || null;
           return cb();

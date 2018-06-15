@@ -27,7 +27,7 @@
                 <div class="dashboard__transactions">
                     <div class="transactions__summary">
                         <div class="title">
-                            Total Transactions from January 01, 2017 - May 15, 2018
+                            <!-- Total Transactions {{Date(global.user.createdAt) >   from}} {{January 01, 2017 - May 15, 2018}} -->
                         </div>
                         <div class="body">
                             25
@@ -56,20 +56,14 @@
                                 <tbody>
                                     <tr v-for="(transaction, index) in userTransactions" :key="index">
                                         <td>{{index}}</td>
-                                        <td>Today</td>
+                                        <td>{{formatTime(transaction.createdAt)}}</td>
                                         <td>{{transaction.depositAssetCode}}</td>
                                         <td>{{transaction.receiptAssetCode}}</td>
                                         <td>{{transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1')}} ({{transaction.depositAssetCode}})</td>
                                         <td>{{transaction.receiptAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1')}} ({{transaction.receiptAssetCode}})</td>
                                         <td>{{transaction.rate.toFixed(3).replace(/\.([^0]*)(0+)$/g, '.$1')}}</td>
-                                        <td>{{transaction.receiptAsset.type == 'fiat'? `${global.user.assetAccounts[transaction.receiptAddress].address.number}, ${user.assetAccounts[transaction.receiptAddress].address.bankName}` : transaction.receiptAsset.type == 'digital'? transaction.receiptAddress : undefined}}</td>
-                                        <td>
-                                            <div class="custom-form-group ">
-                                                <select class="form-control custom-select" v-model="transaction.status" @change="changeTransactionStatus(transaction, $event.target.value, index)">
-                                                    <option v-for="(option, index) in transactionStatuses" :key="index" :disabled="transactionStatuses.indexOf(transaction.status) >= index" :value="option">{{option}}</option>
-                                                </select>
-                                            </div>
-                                        </td>
+                                        <td>{{transaction.receiptAsset.type == 'fiat'? `${global.user.assetAccounts[transaction.receiptAddress].address.number}, ${global.user.assetAccounts[transaction.receiptAddress].address.bankName}` : transaction.receiptAsset.type == 'digital'? transaction.receiptAddress : undefined}}</td>
+                                        <td>{{transaction.status}}</td>
 
                                         <td>
                                             <button class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
@@ -89,6 +83,24 @@
                                         <span class="sr-only">(current)</span>
                                     </a>
                                 </li>
+                                <li>
+                                    <a href="#">1</a>
+                                </li>
+                                <li>
+                                    <a href="#">2</a>
+                                </li>
+                                <li>
+                                    <a href="#">3</a>
+                                </li>
+                                <li>
+                                    <a href="#">4</a>
+                                </li>
+                                <li>
+                                    <a href="#">5</a>
+                                </li>
+                                <li>
+                                    <a href="#">&raquo;</a>
+                                </li>
                             </ul>
 
                         </div>
@@ -101,24 +113,39 @@
 </template>
 
 <script>
+import moment from 'moment';
 import sideBar from './../sideBar';
+window.moment = moment;
 export default {
     inject: ['global'],
     data() {
         return {
-
+            userTransactions: [],
         }
     },
     computed: {
-        userTransactions() {
+        _userTransactions() {
 
+        },
+        // caption() {
+        //     let caption = 'Total Transactions';
+        //     let userCreatedAt = new Date(this.global.user.createdAt);
+        //     if (userCreatedAt > } } { { January 01, 2017 - May 15, 2018 } }
+
+        // },
+    },
+    methods: {
+        formatTime(time) {
+            return moment().calendar(new Date(time))
         }
     },
     components: {
         'side-bar': sideBar,
     },
     created() {
-        this.global.getTransactions(transactions => {
+        this.global.getTransactions(0, Number.MAX_SAFE_INTEGER, transactions => {
+            console.log({ transactions })
+            if (transactions[transactions.length - 1] == 'end') transactions.splice(-1, 1);
             this.userTransactions = transactions;
 
         });
