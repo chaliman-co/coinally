@@ -37,12 +37,12 @@
                         </div>
                         <div class="top-bar__table-cell top-bar__controls">
                             <!-- <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
-                                                                                                                                                        <i class="fa fa-plus"></i> New Transaction
-                                                                                                                                                    </a> -->
+                                                                                                                                                            <i class="fa fa-plus"></i> New Transaction
+                                                                                                                                                        </a> -->
 
                             <!-- <a href="verify.html" class="btn-custom-transparent-astronaut-blue small">
-                                                                                                                                                        Verify Details
-                                                                                                                                                    </a> -->
+                                                                                                                                                            Verify Details
+                                                                                                                                                        </a> -->
                         </div>
                     </div>
                 </div>

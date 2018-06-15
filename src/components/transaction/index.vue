@@ -148,7 +148,7 @@ export default {
 function updateRate(query, context) {
     console.log(query)
     if (!context.state.socket) {
-        const socket = new socketIoClient(`http:://localhost:9000/rates`, {
+        const socket = new socketIoClient(`/rates`, {
             reconnectionDelay: 10000,
             query
         })
