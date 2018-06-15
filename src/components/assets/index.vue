@@ -10,7 +10,7 @@
                 Currencies ({{ assets.length }})
               </div>
             </div>
-            <div class="top-bar__table-cell top-bar__controls">
+            <div class="top-bar__table-cell top-bar__controls hidden">
               <button
                 class="btn-custom-japanese-laurel small"
                 data-toggle="modal"
@@ -42,63 +42,16 @@
                     <th>Deposit Address</th>
                     <th>Sellable</th>
                     <th>Buyable</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>Digital</td>
-                    <td>Bitcoin</td>
-                    <td>BTC</td>
-                    <td>
-                      <img
-                        src="https://shapeshift.io/images/coins/bitcoin.png"
-                        alt="Image">
-                    </td>
-                    <td>8314.49</td>
-                    <td>dhdu888hh22j92002jdkdk</td>
-                    <td>
-                      <div class="checkbox-component">
-                        <label>
-                          <input type="checkbox">
-                        </label>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="checkbox-component">
-                        <label>
-                          <input type="checkbox">
-                        </label>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td>Digital</td>
-                    <td>Ether</td>
-                    <td>ETH</td>
-                    <td>
-                      <img
-                        src="https://shapeshift.io/images/coins/ether.png"
-                        alt="Image">
-                    </td>
-                    <td>8314.49</td>
-                    <td>dhdu888hh22j92002jdkdk</td>
-                    <td>
-                      <div class="checkbox-component">
-                        <label>
-                          <input type="checkbox">
-                        </label>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="checkbox-component">
-                        <label>
-                          <input type="checkbox">
-                        </label>
-                      </div>
-                    </td>
-                  </tr>
+                  <single-asset
+                    v-for="(asset, index) in assets"
+                    :key="index"
+                    v-bind="asset"
+                    :index="index"
+                    @edit="selectAsset(asset)"/>
                 </tbody>
               </table>
             </div>
@@ -111,7 +64,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <span class="modal-title">
-                  Add a new currency
+                  Edit currency details
                 </span>
                 <button
                   type="button"
@@ -128,8 +81,10 @@
                           </label>
                           <input
                             id="currency-name"
+                            v-model="selectedAsset.name"
                             type="text"
-                            placeholder="Name" >
+                            placeholder="Name"
+                            disabled >
                         </div>
                         <div class="select-component">
                           <label for="currency-type">
@@ -137,8 +92,10 @@
                           </label>
                           <select
                             id="currency-type"
+                            v-model="selectedAsset.type"
                             name="currency-type"
-                            class="custom-select">
+                            class="custom-select"
+                            disabled>
                             <option value="fiat">Fiat</option>
                             <option value="digital">Digital</option>
                           </select>
@@ -146,40 +103,62 @@
                       </div>
                       <div class="form-row custom-form-group">
                         <div class="textbox-component custom-form-group">
-                          <label for="currency-code">
-                            Code
+                          <label for="selling_profit">
+                            Selling Profit
                           </label>
                           <input
-                            id="currency-code"
-                            type="text"
-                            placeholder="Code" >
+                            id="selling_profit"
+                            v-model="selectedAsset.sellingProfit"
+                            type="number"
+                            placeholder="0.00"
+                            step="0.00001">
                         </div>
                         <div class="textbox-component">
-                          <label for="currency-value">
-                            Value(USD)
+                          <label for="buying_profit">
+                            Buying Profit
                           </label>
                           <input
-                            id="currency-value"
+                            id="buying_profit"
+                            v-model="selectedAsset.buyingProfit"
                             type="number"
-                            placeholder="0.00 USD" >
+                            placeholder="0.00"
+                            step="0.00001">
                         </div>
                       </div>
                     </div>
                     <div class="modal__title">
                       Deposit Address
                     </div>
-                    <div class="input-fields">
+                    <div
+                      v-if="selectedAsset.type === 'digital'"
+                      class="input-fields" >
+                      <div class="select-component custom-form-group">
+                        <label for="bank-name">
+                          Wallet Address
+                        </label>
+                        <input
+                          id="account-number"
+                          v-model="selectedAsset.address"
+                          type="text"
+                          placeholder="0x00..." >
+                      </div>
+                    </div>
+                    <div
+                      v-else
+                      class="input-fields">
                       <div class="select-component custom-form-group">
                         <label for="bank-name">
                           Bank Name
                         </label>
                         <select
                           id="bank-name"
+                          v-model="selectedAsset.depositAccount.bankName"
                           name="bank-name"
                           class="custom-select">
-                          <option value="ACCESS">Access Bank</option>
-                          <option value="UBA">UBA</option>
-                          <option value="ZENITH">Zenith Bank</option>
+                          <option>Access Bank</option>
+                          <option>Diamond Bank</option>
+                          <option>UBA</option>
+                          <option>Zenith Bank</option>
                         </select>
                       </div>
                       <div class="select-component custom-form-group">
@@ -188,11 +167,22 @@
                         </label>
                         <select
                           id="account-type"
+                          v-model="selectedAsset.depositAccount.type"
                           name="account-type"
                           class="custom-select">
-                          <option value="CURRENT">Current</option>
-                          <option value="SAVINGS">Savings</option>
+                          <option value="Current">Current</option>
+                          <option value="Savings">Savings</option>
                         </select>
+                      </div>
+                      <div class="textbox-component custom-form-group">
+                        <label for="account-name">
+                          Account Name
+                        </label>
+                        <input
+                          id="account-name"
+                          v-model="selectedAsset.depositAccount.name"
+                          type="text"
+                          placeholder="Coinlly Admin" >
                       </div>
                       <div class="textbox-component custom-form-group">
                         <label for="account-number">
@@ -200,15 +190,22 @@
                         </label>
                         <input
                           id="account-number"
+                          v-model="selectedAsset.depositAccount.number"
                           type="number"
                           max="10"
                           placeholder="0..." >
                       </div>
                     </div>
-                    <button class="call-to-action btn-custom-astronaut-blue">
-                      Save
-                    </button>
                   </div>
+                  <button
+                    :disabled="!isValid || isSaving"
+                    class="call-to-action btn-custom-astronaut-blue"
+                    @click="save">
+                    Save
+                    <i
+                      v-if="isSaving"
+                      class="fa fa-spinner fa-pulse"/>
+                  </button>
                 </div>
               </div>
             </div>
@@ -217,7 +214,8 @@
       </div>
     </div>
   </div>
-  <!-- <div>
+  </div>
+<!-- <div>
 
         <div class="box box-default collapsed-box">
             <div class="box-header with-border">
@@ -354,10 +352,12 @@
 </template>
 
 <script>
+import jQuery from 'jquery';
 import singleAsset from './asset/index.vue';
 import sidebar from '../sideBar.vue';
 
 export default {
+  inject: ['global'],
   components: {
     'single-asset': singleAsset,
     sidebar,
@@ -365,41 +365,80 @@ export default {
   data() {
     return {
       assets: [],
+      isSaving: false,
+      selectedAsset: {
+        id: null,
+        name: null,
+        type: null,
+        address: null,
+        buyingProfit: 0,
+        sellingProfit: 0,
+        depositAccount: {
+          bankName: null,
+          name: null,
+          type: null,
+          number: null,
+        },
+      },
       availableTypes: ['fiat', 'digital', 'card'],
     };
   },
-  created() {
-    const request = this.request = new XMLHttpRequest();
-    request.open('GET', 'http://localhost:9000/api/assets/');
-    request.onreadystatechange = function (event) {
-      if (request.readyState === 4) {
-        this.assets = JSON.parse(request.response).result;
+  computed: {
+    isValid() {
+      if (this.selectedAsset.buyingProfit == null || this.selectedAsset.sellingProfit == null) {
+        return false;
       }
-    }.bind(this);
-    request.send();
+      if (this.selectedAsset.type === 'digital' && this.selectedAsset.address == null) {
+        return false;
+      }
+      if (this.selectedAsset.type === 'fiat') {
+        if (Object.values(this.selectedAsset.depositAccount).includes(null)) {
+          return false;
+        }
+      }
+      return true;
+    },
+  },
+  created() {
+    const url = '/assets';
+    this.global.request('GET', url, null, (err, response) => {
+      if (!err) {
+        this.assets = response;
+      }
+    });
   },
   methods: {
-    remove(_id, index) {
-      const request = this.request = new XMLHttpRequest(); this.addReq = request;
-      request.open('DELETE', `http://localhost:9000/api/config/${_id}`);
-      request.send();
-      request.onreadystatechange = function (event) {
-        if (request.readyState === 4) {
-          console.log(request.response);
-          this.configs.splice(index, 1);
-        }
-      }.bind(this);
+    selectAsset(asset) {
+      this.selectedAsset = {
+        id: asset._id,
+        name: asset.name,
+        type: asset.type,
+        buyingProfit: asset.buyingProfit,
+        sellingProfit: asset.sellingProfit,
+        address: asset.type === 'digital' ? asset.depositAddress : null,
+        depositAccount: asset.type === 'fiat' ? asset.depositAddress : {},
+      };
     },
-    add() {
-      const request = this.request = new XMLHttpRequest(); this.addReq = request;
-      request.open('POST', 'http://localhost:9000/api/config/');
-      request.setRequestHeader('Content-Type', 'application/json');
-      request.send(JSON.stringify({ key: this.newKey, value: this.newVal }));
-      request.onreadystatechange = function (event) {
-        if (request.readyState === 4) {
-          this.configs.push(JSON.parse(request.response).result);
+    save() {
+      const data = {
+        buyingProfit: Number(this.selectedAsset.buyingProfit),
+        sellingProfit: Number(this.selectedAsset.sellingProfit),
+        depositAddress: this.selectedAsset.type === 'digital' ? this.selectedAsset.address : this.selectedAsset.depositAccount,
+      };
+
+      const url = `/assets/${this.selectedAsset.id}`;
+
+      this.isSaving = true;
+      this.global.request('PUT', url, data, (err, response) => {
+        this.isSaving = false;
+        if (!err) {
+          let asset = this.assets.find(a => a._id == response._id);
+          if (asset != null) {
+            asset = response;
+          }
+          jQuery('#newCurrency').modal('hide');
         }
-      }.bind(this);
+      });
     },
   },
 };

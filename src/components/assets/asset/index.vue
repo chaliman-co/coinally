@@ -1,87 +1,87 @@
 <template>
-    <tr>
-        <td>
-            <span class="cell-content">{{index + 1}}</span>
-        </td>
-        <td>
-            <span class="cell-content">{{type}}</span>
-        </td>
-        <td>
-            <span class="cell-content">{{name}}</span>
-        </td>
-        <td>
-            <span class="cell-content">{{code}}</span>
-        </td>
-        <td><img :src="`http://localhost:9000/${imagePath}`"></td>
-        <td>
-            <span class="cell-content">{{price_usd}}</span>
-        </td>
-        <td>
-            <span class="cell-content" v-html = "type === 'fiat'? `${depositAddress.name} <br/> ${depositAddress.number} <br/> ${depositAddress.bankName}`: depositAddress"></span>
-        </td>
-        <td>
-            <span class="cell-content"> <input type="checkbox" v-model="currentlySellable"></span>
-        </td>
-        <td>
-            <span class="cell-content"> <input type="checkbox" v-model="currentlyBuyable"></span>
-        </td>
-    </tr>
+  <tr>
+    <td>{{ index + 1 }}</td>
+    <td>{{ type }}</td>
+    <td>{{ name }}</td>
+    <td>{{ code }}</td>
+    <td>
+      <img
+        :src="`${global.apiRootUrl}/${imagePath}`"
+        alt="Image">
+    </td>
+    <td>{{ price_usd }}</td>
+    <td v-html = "type === 'fiat'? `${depositAddress.name} <br/> ${depositAddress.number} <br/> ${depositAddress.bankName}`: depositAddress"/>
+    <td>
+      <div class="checkbox-component">
+        <label>
+          <input
+            v-model="currentlySellable"
+            type="checkbox">
+        </label>
+      </div>
+    </td>
+    <td>
+      <div class="checkbox-component">
+        <label>
+          <input
+            v-model="currentlyBuyable"
+            type="checkbox" >
+        </label>
+      </div>
+    </td>
+    <td>
+        <button class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#newCurrency" @click="edit">
+            <i class="fa fa-pencil"></i>
+        </button>
+    </td>
+  </tr>
 </template>
 
 <script>
 export default {
-    props: ["_id", "price_usd", "type", "code", "imagePath", "name", "index", "sellable", "buyable", "depositAddress"],
-    data() {
-        return {
-            currentlyBuyable: this.buyable,
-            currentlySellable: this.sellable
-        }
+  inject: [
+    'global',
+  ],
+  props: ['_id', 'price_usd', 'type', 'code', 'imagePath', 'name', 'index', 'sellable', 'buyable', 'depositAddress'],
+  data() {
+    return {
+      currentlyBuyable: this.buyable,
+      currentlySellable: this.sellable,
+    };
+  },
+  methods: {
+     edit(){
+         this.$emit('edit');
+     }
+  },
+  watch: {
+    currentlyBuyable(state) {
+      const data = { buyable: state };
+      const url = `/assets/${this._id}/buyable/`;
+      this.global.request('PUT',
+        url,
+        data, (err, response) => {
+          if (err) {
+          } else {
+            this.currentlyBuyable = response;
+          }
+        },
+        );
     },
-    watch: {
-        currentlyBuyable(state) {
-            console.log(state)
-            var request = this.request = new XMLHttpRequest();
-            request.open("PUT", `http://localhost:9000/api/assets/${this._id}/buyable/`)
-            request.setRequestHeader("Content-Type", "application/json");
-            request.onreadystatechange = function(event) {
-                if (request.readyState === 4) {
-                    console.log(request.response)
-                    this.currentlyBuyable = JSON.parse(request.response).result;
-                }
-            }.bind(this);
-            request.send(JSON.stringify({ buyable: state }))
-        }
+    currentlySellable(state){
+      const data = { sellable: state };
+      const url = `/assets/${this._id}/sellable/`;
+      this.global.request('PUT',
+        url,
+        data, (err, response) => {
+          if (err) {
+          } else {
+            this.currentlySellable = response;
+          }
+        },
+        );
     },
-    watch: {
-        currentlySellable(state) {
-            console.log(state)
-            var request = this.request = new XMLHttpRequest();
-            request.open("PUT", `http://localhost:9000/api/assets/${this._id}/sellable/`)
-            request.setRequestHeader("Content-Type", "application/json");
-            request.onreadystatechange = function(event) {
-                if (request.readyState === 4) {
-                    console.log(request.response)
-                    this.currentlySellable = JSON.parse(request.response).result;
-                }
-            }.bind(this);
-            request.send(JSON.stringify({ sellable: state }))
-        }
-    }
-}
+  },
+};
+
 </script>
-
-
-<style scoped>
-.cell-content {
-    vertical-align: -100%;
-}
-
-td {
-    height: 6em;
-}
-
-td img {
-    height: inherit;
-}
-</style>
-
