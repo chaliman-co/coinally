@@ -2,83 +2,89 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Coinaly</title>
-  <meta name="theme-color" content="#003c5e">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=PT+Serif:400,700" rel="stylesheet">
-  <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="../node_modules/bootstrap3/dist/css/bootstrap.min.css">
-  <!-- <link rel="stylesheet" href="node_modules/vue-tel-input/dist/vue-tel-input.css"> -->
-  <link rel="stylesheet" href="css/css-bundle.css">
+    <meta charset="UTF-8">
+    <title>Coinaly</title>
+    <meta name="theme-color" content="#003c5e">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=PT+Serif:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="../node_modules/bootstrap3/dist/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="node_modules/vue-tel-input/dist/vue-tel-input.css"> -->
+    <link rel="stylesheet" href="css/css-bundle.css">
 </head>
 
 <body style="margin-top: 8rem">
-  <div id="app">
-    <nav class="nav">
-      <div class="nav__table">
-        <div class="nav__table-row">
-          <div class="nav__table-cell nav__logo">
-            <!-- ONLY SHOW THIS HAMBURGER WHEN A USER IS LOGGED IN -->
-            <span class="hamburger" v-if="global.user">
+    <style>
+        [v-cloak] {
+            display: none
+        }
+    </style>
+    <div id="app">
+        <nav class="nav">
+            <div class="nav__table">
+                <div class="nav__table-row">
+                    <div class="nav__table-cell nav__logo">
+                        <!-- ONLY SHOW THIS HAMBURGER WHEN A USER IS LOGGED IN -->
+                        <span class="hamburger" v-if="global.user">
                     <img src="img/menu.svg" alt="Menu">
                 </span>
-            <!--  -->
-            <a href="/" class="logo">
-                    <img src="img/logo.svg" alt="Logo">
-                </a>
-          </div>
-          <div v-if="!global.user" class="nav__table-cell nav__links">
-            <a class="nav__link login">
-              <router-link to="/login"> Login </router-link>
-            </a>
-            <a class="nav__link">
-              <router-link to="/signup"> Signup </router-link>
-            </a>
-          </div>
-          <div class="nav__table-cell nav__links" v-else>
-            <router-link to="/dashboard" class="nav__link login"> Dashboard </router-link>
-          </div>
-        </div>
-      </div>
-    </nav>
+                        <!--  -->
+                        <a href="/" class="logo">
+                            <img src="img/logo.svg" alt="Logo">
+                        </a>
+                    </div>
+                    <template v-cloak>
+                    <div v-if="!global.user" class="nav__table-cell nav__links">
+                        <a class="nav__link login">
+                            <router-link to="/login"> Login </router-link>
+                        </a>
+                        <a class="nav__link">
+                            <router-link to="/signup"> Signup </router-link>
+                        </a>
+                    </div>
+                    <div class="nav__table-cell nav__links" v-else>
+                        <router-link to="/dashboard" class="nav__link login"> Dashboard </router-link>
+                    </div>
+                  </template>
+                </div>
+            </div>
+        </nav>
 
-    <router-view></router-view>
+        <router-view></router-view>
 
-    <footer>
-      <div class="footer__table-md">
-        <div class="footer__table-row">
-          <div class="footer__table-cell footer__logo">
-            <a href="" class="logo">
-                    <img src="img/logo-white.svg" alt="Logo">
-                </a>
-          </div>
-          <div class="footer__table-cell footer__links">
-            <div class="links">
-              <a href="" class="link">
+        <footer>
+            <div class="footer__table-md">
+                <div class="footer__table-row">
+                    <div class="footer__table-cell footer__logo">
+                        <a href="" class="logo">
+                            <img src="img/logo-white.svg" alt="Logo">
+                        </a>
+                    </div>
+                    <div class="footer__table-cell footer__links">
+                        <div class="links">
+                            <a href="" class="link">
                         Home
                     </a>
-              <a href="" class="link">
+                            <a href="" class="link">
                         Login
                     </a>
-              <a href="" class="link">
+                            <a href="" class="link">
                         Sign up
                     </a>
-              <a href="" class="link">
+                            <a href="" class="link">
                         Terms and Conditions
                     </a>
+                        </div>
+                        <div class="privacy">
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat fugiat illum ipsam minima, velit atque veritatis nesciunt quas dignissimos quisquam porro, consequuntur maiores dolores dicta temporibus magni explicabo qui tenetur.
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="privacy">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat fugiat illum ipsam minima, velit atque veritatis nesciunt
-              quas dignissimos quisquam porro, consequuntur maiores dolores dicta temporibus magni explicabo qui tenetur.
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer>
-  </div>
+        </footer>
+    </div>
 </body>
 
 </html>

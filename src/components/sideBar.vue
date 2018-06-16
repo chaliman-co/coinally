@@ -14,7 +14,7 @@
       class="avatar">
     <img
       v-else
-      src="~_img/avatar04.png"
+      src="~img/avatar.svg"
       alt="Avatar"
       class="avatar">
     <div class="title">
@@ -74,8 +74,11 @@ export default {
   },
   computed: {
     displayLinks() {
-      const user = this.global.user;
-      return user ? user.role == 'admin' ? this.adminLinks : this.userLinks : null;
+      const { user } = this.global;
+      if (!user) {
+        return null;
+      }
+      return user.role === 'admin' ? this.adminLinks : this.userLinks;
     },
   },
   methods: {

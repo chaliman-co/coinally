@@ -1,33 +1,6 @@
 <template>
     <div class="dashboard-page">
-        <div class="dashboard__sidebar">
-            <span class="hamburger">
-                <img src="~img/close.svg" alt="Close">
-            </span>
-            <img src="~img/avatar.svg" alt="Avatar" class="avatar">
-            <div class="title">
-                Willy Wonka
-            </div>
-
-            <div class="links">
-                <a href="admindashboard.html" class="link active">
-                    Dashboard
-                </a>
-                <a href="userlist.html" class="link">
-                    Users
-                </a>
-                <a href="currency.html" class="link">
-                    Currency Settings
-                </a>
-                <a href="bankaccount.html" class="link">
-                    Transactions
-                </a>
-                <a href="/" class="link logout">
-                    Logout
-                </a>
-            </div>
-        </div>
-
+        <side-bar/>
         <div class="dashboard__content">
             <div class="dashboard__top-bar">
                 <div class="top-bar__table-md">
@@ -91,6 +64,7 @@
 
 <script>
 import singleUser from './components/singleUser';
+import sideBar from '../sideBar';
 export default {
     inject: ['global'],
     data: function() {
@@ -106,6 +80,7 @@ export default {
     },
     components: {
         'single-user': singleUser,
+        sideBar
     }
 }
 </script>
