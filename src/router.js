@@ -21,6 +21,7 @@ import account from './components/accounts/index.vue';
 import jwtDecode from 'jwt-decode';
 import qs from 'qs';
 import utils from './utils';
+import store from './store';
 
 Vue.use(VueRouter);
 
@@ -150,39 +151,47 @@ const router = new VueRouter({
     },
 });
 
-export default router = (store) => {
-    const { token, user } = store.state;
-    router.beforeEach((to, from, next) => {
-        const requiresUser = to.matched.some(record => record.meta.requiresUser);
 
-        if (!requiresUser) return next();
+router.beforeEach((to, from, next) => {
+    store.commit('setAuth');
 
-        if (!token) {
-            return next({
-                path: '/login',
-                query: {
-                    redirect: to.fullPath,
-                },
-            });
-        } else if (!user) {
-            const userId = jwtDecode(token)._id;
+    let token = store.state.token;
+    let currentUser = store.state.user;
 
-            return utils.request('GET', `/users/${userId}`, (err, fetchedUser) => {
-                if (err) {
-                    return next({
-                        path: '/login',
-                        query: {
-                            redirect: to.fullPath,
-                        },
-                    });
-                }
-                store.commit('updateUser', fetchedUser);
-                return next();
-            });
-        } else {
+    console.log(store.state, currentUser);
+    console.log('Here');
+
+    const requiresUser = to.matched.some(record => record.meta.requiresUser);
+
+    if (!requiresUser) return next();
+
+    if (!token) {
+        console.log('No token');
+        return next({
+            path: '/login',
+            query: {
+                redirect: to.fullPath,
+            },
+        });
+    } else if (!currentUser) {
+        console.log('No user');
+        const userId = jwtDecode(token)._id;
+
+        return utils.request('GET', `/users/${userId}`, (err, fetchedUser) => {
+            if (err) {
+                return next({
+                    path: '/login',
+                    query: {
+                        redirect: to.fullPath,
+                    },
+                });
+            }
+            store.commit('updateUser', fetchedUser);
             return next();
-        }
-    });
+        });
+    } else {
+        return next();
+    }
+});
 
-    return router;
-}
+export default router;

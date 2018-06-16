@@ -3,14 +3,14 @@
         <div class="title">
             <p style="font-size: 0.7em;font-family: PT Serif,serif;">A verificatiion code will be sent to &#10; the email address provided.</p>
         </div>
-        <h2 class="text-danger error-summary">{{errorSummary}}</h2>
+        <p class="text-danger error-summary">{{errorSummary}}</p>
         <div class="input-fields">
             <div class="textbox-component custom-form-group">
                 <label for="email">
                     Email
                     <font color="red" class="input-error-message" v-if="validationFailed"> *{{validationError.emailAddress}}</font>
                 </label>
-                <input type="email" :value="emailAddress" required id="email" @input="commit('set_email_address', $event.target.value), delete requestErrors.emailAddress" placeholder="jane@doe.com" />
+                <input type="email" required id="email" v-model="emailAddress" @input="clearErrors" placeholder="jane@doe.com" />
             </div>
         </div>
         <div class="alternative">
@@ -24,18 +24,19 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+// import { mapState } from 'vuex';
 export default {
     inject: ['global'],
     data() {
         return {
+            emailAddress: null,
             errorSummary: null,
             requestErrors: {},
             validationFailed: false,
             isWaiting: false,
         };
     },
-    computed: Object.assign({
+    computed: {
         isValidated() {
             return !(Object.keys(this.validationError).length)
         },
@@ -45,40 +46,72 @@ export default {
             if (this.requestErrors.emailAddress) error.emailAddress = this.requestErrors.emailAddress;
             return error
         },
-    }, mapState(['emailAddress'])),
+    }, 
     methods: {
+        clearErrors() {
+            if(this.requestErrors.emailAddress){
+                delete this.requestErrors.emailAddress;
+            }
+        },
+        
         submit() {
             this.isWaiting = true;
-            this.global.request("POST", "/auth", { emailAddress: this.emailAddress }, function(err, result) {
+            const url = '/auth';
+            const data = { emailAddress: this.emailAddress };
+
+            this.global.request("POST", url, data , (err, result) => {
+
                 this.isWaiting = false;
-                if (err) { this.errorHandler(err); return console.log("error from post: ", this.err = err, err.response); }
-                console.log("success...", result);
-                if (this.$route.query.nextPage) {
-                    return this.$router.push({
-                        path: '/login/verify',
-                        query: {
-                            nextPage: this.$route.query.nextPage,
-                        },
-                    });
-                };
-                return this.$router.push({
+
+                if (err) {
+                     this.handleError(err); 
+                     console.log("error from post: ", this.err = err, err.response); 
+                }else{
+                    console.log("success...", result);
+
+                sessionStorage.emailAddress = this.emailAddress;
+
+                const nextPage = this.$route.query.nextPage;
+
+                const route = {
                     path: '/login/verify',
-                })
-            }.bind(this));
+                };
+
+                if (nextPage) {
+                    route.query ={
+                            nextPage,
+                        };
+                };
+
+                this.$router.push(route);
+                }
+
+                
+            });
         },
+
         commit(mutationName, payload) {
             this.$store.commit(mutationName, payload);
         },
-        errorHandler(err) {
+
+        handleError(err) {
             if (err.message == 'Network Error') {
                 return this.errorSummary = 'Network Error';
             };
-            if (Math.floor(err.response.status / 100) == 4) this.errorSummary = 'email address not found';
-            else this.errorSummary = 'internal server error';
+
+            if (Math.floor(err.response.status / 100) == 4) {
+                this.errorSummary = 'email address not found';
+            }
+            else {
+                this.errorSummary = 'internal server error';
+            }
+
             let serverResponse = err.response.data;
+
             for (let field in serverResponse.errors) {
                 this.requestErrors[field] = serverResponse.errors[field];
             };
+
             this.validationFailed = true;
         },
     },

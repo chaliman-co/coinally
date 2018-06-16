@@ -53,6 +53,7 @@
                   1 {{ transaction.depositAssetCode }} = {{ transaction.rate }} {{ transaction.receiptAssetCode }}
                 </div>
               </div>
+              <template v-if="user.role === 'admin'">
               <div class="select-component custom-form-group">
                 <label for="status">
                   Status
@@ -79,6 +80,7 @@
                   v-if="isSaving"
                   class="fa fa-spinner fa-pulse"/>
               </button>
+              </template>
             </div>
           </div>
         </div>
@@ -89,6 +91,11 @@
 
 <script>
 import jQuery from 'jquery';
+import bootstrap from 'bootstrap3';
+
+import {mapState} from 'vuex';
+
+// const jQuery = window.jQuery;
 
 export default {
   inject: ['global'],
@@ -111,11 +118,10 @@ export default {
       },
       selectedStatus: null,
       statuses: ['initialized', 'payment_received', 'completed', 'failed'],
-      isAdmin: this.global.user.role === 'admin',
       isSaving: false,
     };
   },
-  computed: {
+  computed: Object.assign({
     progress() {
       const index = this.statuses.indexOf(this.transaction.status) + 1;
 
@@ -123,16 +129,20 @@ export default {
 
       return (index / this.statuses.length) * 100;
     },
-  },
+    isAdmin(){
+      console.log( this.user && this.user.role === 'admin')
+      return this.user && this.user.role === 'admin';
+    }
+  }, mapState(['user'])),
   methods: {
     open(transaction) {
       this.transaction = transaction;
       this.selectedStatus = transaction.status;
 
-      jQuery('#view-transaction').modal('show');
+      $('#view-transaction').modal('show');
     },
     close() {
-      jQuery('#view-transaction').modal('hide');
+      $('#view-transaction').modal('hide');
     },
     save() {
       const data = { status: this.selectedStatus };

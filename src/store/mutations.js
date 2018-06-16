@@ -1,24 +1,24 @@
-import * as types from './mutation_types';
-
 const USER = 'user';
 const TOKEN = 'token';
 
 export const mutations = {
-    signIn(state, token, user) {
+    signIn(state, { token, user }) {
         state.token = token;
         state.user = user;
 
         localStorage.setItem(TOKEN, token);
-        localStorage.setItem(USER, user);
+        localStorage.setItem(USER, JSON.stringify(user));
+        sessionStorage.clear();
     },
     updateUser(state, user) {
         state.user = user;
 
-        localStorage.setItem(USER, user);
+        localStorage.setItem(USER, JSON.stringify(user));
     },
     setAuth(state) {
+        // console.log(localStorage.getItem(USER))
         state.token = localStorage.getItem(TOKEN);
-        state.user = localStorage.getItem(USER);
+        state.user = JSON.parse(localStorage.getItem(USER));
     },
     signOut(state) {
         state.user = {};

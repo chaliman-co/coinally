@@ -1,7 +1,12 @@
 import axios from 'axios';
 
-export default utils = {
-    request = (method, url, data, cb, token) => {
+
+const apiRootUrl = 'http://localhost:9000';
+
+const apiUrl = `${apiRootUrl}/api`;
+
+export default {
+    request: (method, url, data, cb, token) => {
         if (!cb) {
             [cb, data] = [data, undefined];
         }

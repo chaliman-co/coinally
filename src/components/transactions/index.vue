@@ -161,6 +161,7 @@ export default {
   inject: ['global'],
   created() {
     this.global.request('GET', '/transactions/', (err, transactions) => {
+      if(!err)
       this.transactions = transactions;
     });
   },

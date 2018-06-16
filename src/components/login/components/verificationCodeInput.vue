@@ -17,8 +17,9 @@
         <input
           id="code"
           type="text"
+          v-model="code"
           required
-          @input="commit('set_verification_code', $event.target.value), delete requestErrors.code" >
+          @input="clearErrors" >
       </div>
     </div>
     <div class="alternative">
@@ -31,12 +32,11 @@
       class="call-to-action btn-custom-astronaut-blue">
       {{ isWaiting? 'Sending...': 'Verify' }}
     </button>
-        </div>
   </form>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+// import { mapState } from 'vuex';
 
 export default {
   inject: ['global'],
@@ -46,9 +46,11 @@ export default {
       requestErrors: {},
       validationFailed: false,
       isWaiting: false,
+      code: null,
+      emailAddress: null
     };
   },
-  computed: Object.assign({
+  computed: {
     isValidated() {
       return !(Object.keys(this.validationError).length);
     },
@@ -59,16 +61,30 @@ export default {
       if (code) error.code = this.requestErrors.code;
       return error;
     },
-  }, mapState(['emailAddress', 'code'])),
+  },
+  //  mapState(['emailAddress', 'code'])),
   methods: {
+        clearErrors() {
+            if(this.requestErrors.code){
+                delete this.requestErrors.code;
+            }
+        },
+        
     verify() {
       this.isWaiting = true;
-      this.global.request('GET', `/auth/?code=${this.code}`, (err, result) => {
+      const url = `/auth/?code=${this.code}`;
+      this.global.request('GET', url, (err, result) => {
         this.isWaiting = false;
-        if (err) { this.errorHandler(err); return console.log('error from post: ', window.err = err, err.response); }
+        if (err) { 
+          this.handleError(err); 
+          return console.log('error from post: ', window.err = err, err.response); 
+          }
+
         console.log('success...', result);
-        localStorage.COINALLY_AUTH_TOKEN = result.token;
-        this.global.setUser(localStorage.COINALLY_AUTH_TOKEN, () => {
+
+        // localStorage.COINALLY_AUTH_TOKEN = result.token;
+        this.global.setUser(result.token, user => {
+          this.$store.commit('signIn', {token: result.token, user});
           const nextPage = this.$route.query.nextPage;
           if (nextPage) {
             return this.$router.push(nextPage);
@@ -89,10 +105,16 @@ export default {
       }
       this.validationFailed = true;
     },
-    commit(mutationName, payload) {
-      this.$store.commit(mutationName, payload);
-    },
+    // commit(mutationName, payload) {
+    //   this.$store.commit(mutationName, payload);
+    // },
   },
+  mounted(){
+    this.emailAddress = sessionStorage.emailAddress;
+
+    if(!this.emailAddress)
+      this.$router.push('/login');
+  }
 };
 </script>
 

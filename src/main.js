@@ -23,221 +23,206 @@ import verify from './components/verify';
 import dashboard from './components/dashboard';
 import account from './components/accounts';
 import './js/js-bundle';
+import './utils';
 
 const apiRootUrl = 'http://localhost:9000';
 
 const apiUrl = `${apiRootUrl}/api`;
-const request = (method, url, data, cb) => {
-    if (!cb) {
-        [cb, data] = [data, undefined];
-    }
-    const headers = {};
-    if (!/^https?:\/\//i.test(url)) {
-        url = apiUrl + url;
-        const bearerToken = localStorage.COINALLY_AUTH_TOKEN;
-        if (bearerToken) headers.Authorization = `Bearer ${bearerToken}`;
-    }
-    axios({
-        method,
-        url,
-        data,
-    }).then((response) => {
-        console.log('response from axios', response);
-        cb(null, response.data.result);
-    }).catch((err) => {
-        console.log('error from axios', err);
-        cb(err);
-    });
-};
+
+const request = utils.request;
 
 let globalUser = null;
 
-Vue.use(VueRouter);
-Vue.use(Vuex);
+import router from './router';
+import store from './store';
+import utils from './utils';
+
+// Vue.use(VueRouter);
+// Vue.use(Vuex);
 
 window.jwtDecode = jwtDecode;
 
 
-const routes = [{
-        path: '/',
-        component: homePage,
-    }, {
-        path: '/signup',
-        component: signup,
-        props: true,
-    }, {
-        path: '/login',
-        component: login,
-        children: [{
-            path: '/',
-            component: loginComponents.emailAddressInput,
-        }, {
-            path: 'verify',
-            component: loginComponents.verificationCodeInput,
-        }],
-    }, {
-        path: '/account',
-        component: account,
-        meta: {
-            requiresUser: true,
-        },
-    }, {
-        path: '/transaction',
-        component: transaction,
-        children: [{
-            path: '/',
-            component: transactionComponents.selectAssets,
-        }, {
-            path: 'account',
-            component: transactionComponents.selectAccount,
-        }, {
-            path: '/status',
-            component: transactionComponents.status,
-        }],
-    }, {
-        path: '/dashboard',
-        component: dashboard,
-        meta: {
-            requiresUser: true,
-        },
-    }, {
-        path: '/profile',
-        component: profile,
-        meta: {
-            requiresUser: true,
-        },
-    }, {
-        path: '/verify',
-        component: verify,
-        meta: {
-            requiresUser: true,
-        },
-    }, {
-        path: '/users',
-        component: users,
-        meta: {
-            requiresUser: true,
-            requiresAdmin: true,
-        },
-    },
-    {
-        path: '/users/:_id',
-        component: user,
-        meta: {
-            requiresUser: true,
-        },
-    },
-    {
-        path: '/settings',
-        component: settings,
-        meta: {
-            requiresUser: true,
-        },
-    },
-    {
-        path: '/assets',
-        component: assets,
-        meta: {
-            requiresUser: true,
-        },
-    },
-    {
-        path: '/transactions',
-        component: transactions,
-        meta: {
-            requiresUser: true,
-        },
-    },
-];
-const router = new VueRouter({
-    mode: 'history',
-    routes,
-    parseQuery: qs.parse.bind(qs),
-    stringifyQuery(obj) {
-        const _queryObject = queryObject(obj);
-        const pairs = [];
-        for (const name in _queryObject) {
-            pairs.push(`${encodeURIComponent(name)}=${encodeURIComponent(_queryObject[name])}`);
-        }
-        return `?${pairs.join('&')}`;
+// const routes = [{
+//         path: '/',
+//         component: homePage,
+//     }, {
+//         path: '/signup',
+//         component: signup,
+//         props: true,
+//     }, {
+//         path: '/login',
+//         component: login,
+//         children: [{
+//             path: '/',
+//             component: loginComponents.emailAddressInput,
+//         }, {
+//             path: 'verify',
+//             component: loginComponents.verificationCodeInput,
+//         }],
+//     }, {
+//         path: '/account',
+//         component: account,
+//         meta: {
+//             requiresUser: true,
+//         },
+//     }, {
+//         path: '/transaction',
+//         component: transaction,
+//         children: [{
+//             path: '/',
+//             component: transactionComponents.selectAssets,
+//         }, {
+//             path: 'account',
+//             component: transactionComponents.selectAccount,
+//         }, {
+//             path: '/status',
+//             component: transactionComponents.status,
+//         }],
+//     }, {
+//         path: '/dashboard',
+//         component: dashboard,
+//         meta: {
+//             requiresUser: true,
+//         },
+//     }, {
+//         path: '/profile',
+//         component: profile,
+//         meta: {
+//             requiresUser: true,
+//         },
+//     }, {
+//         path: '/verify',
+//         component: verify,
+//         meta: {
+//             requiresUser: true,
+//         },
+//     }, {
+//         path: '/users',
+//         component: users,
+//         meta: {
+//             requiresUser: true,
+//             requiresAdmin: true,
+//         },
+//     },
+//     {
+//         path: '/users/:_id',
+//         component: user,
+//         meta: {
+//             requiresUser: true,
+//         },
+//     },
+//     {
+//         path: '/settings',
+//         component: settings,
+//         meta: {
+//             requiresUser: true,
+//         },
+//     },
+//     {
+//         path: '/assets',
+//         component: assets,
+//         meta: {
+//             requiresUser: true,
+//         },
+//     },
+//     {
+//         path: '/transactions',
+//         component: transactions,
+//         meta: {
+//             requiresUser: true,
+//         },
+//     },
+// ];
+// const router = new VueRouter({
+//     mode: 'history',
+//     routes,
+//     parseQuery: qs.parse.bind(qs),
+//     stringifyQuery(obj) {
+//         const _queryObject = queryObject(obj);
+//         const pairs = [];
+//         for (const name in _queryObject) {
+//             pairs.push(`${encodeURIComponent(name)}=${encodeURIComponent(_queryObject[name])}`);
+//         }
+//         return `?${pairs.join('&')}`;
 
-        function queryObject(obj, query, namespace) {
-            query = query || {};
-            let key;
-            for (const property in obj) {
-                if (obj.hasOwnProperty(property)) {
-                    if (namespace) {
-                        key = `${namespace}[${property}]`;
-                    } else {
-                        key = property;
-                    }
-                    if (typeof obj[property] === 'object') {
-                        queryObject(obj[property], query, key);
-                    } else {
-                        query[key] = obj[property];
-                    }
-                }
-            }
-            return query;
-        }
-    },
-});
+//         function queryObject(obj, query, namespace) {
+//             query = query || {};
+//             let key;
+//             for (const property in obj) {
+//                 if (obj.hasOwnProperty(property)) {
+//                     if (namespace) {
+//                         key = `${namespace}[${property}]`;
+//                     } else {
+//                         key = property;
+//                     }
+//                     if (typeof obj[property] === 'object') {
+//                         queryObject(obj[property], query, key);
+//                     } else {
+//                         query[key] = obj[property];
+//                     }
+//                 }
+//             }
+//             return query;
+//         }
+//     },
+// });
 
-router.beforeEach((to, from, next) => {
-    console.log({
-        to,
-        from,
-        next,
-    });
-    const requiresUser = to.matched.some(record => record.meta.requiresUser);
-    if (!app) {
-        const {
-            COINALLY_AUTH_TOKEN,
-        } = localStorage;
-        if (!COINALLY_AUTH_TOKEN) {
-            if (requiresUser) {
-                return next({
-                    path: '/login',
-                    query: {
-                        redirect: to.fullPath,
-                    },
-                });
-            }
-            return next();
-        }
+// router.beforeEach((to, from, next) => {
+//     console.log({
+//         to,
+//         from,
+//         next,
+//     });
+//     const requiresUser = to.matched.some(record => record.meta.requiresUser);
+//     if (!app) {
+//         const {
+//             COINALLY_AUTH_TOKEN,
+//         } = localStorage;
+//         if (!COINALLY_AUTH_TOKEN) {
+//             if (requiresUser) {
+//                 return next({
+//                     path: '/login',
+//                     query: {
+//                         redirect: to.fullPath,
+//                     },
+//                 });
+//             }
+//             return next();
+//         }
 
-        const userId = jwtDecode(COINALLY_AUTH_TOKEN)._id;
-        console.log('from beforeEach: ', userId);
+//         const userId = jwtDecode(COINALLY_AUTH_TOKEN)._id;
+//         console.log('from beforeEach: ', userId);
 
-        return request('GET', `/users/${userId}`, (err, fetchedUser) => {
-            if (err) {
-                if (requiresUser) {
-                    return next({
-                        path: '/login',
-                        query: {
-                            redirect: to.fullPath,
-                        },
-                    });
-                }
-                return next();
-            }
-            app.global.user = globalUser = fetchedUser;
-            return next();
-        });
-    }
-    if (app.global.user == null) {
-        if (requiresUser) {
-            return next({
-                path: '/login',
-                query: {
-                    redirect: to.fullPath,
-                },
-            });
-        }
-        return next();
-    }
-    return next();
-});
+//         return request('GET', `/users/${userId}`, (err, fetchedUser) => {
+//             if (err) {
+//                 if (requiresUser) {
+//                     return next({
+//                         path: '/login',
+//                         query: {
+//                             redirect: to.fullPath,
+//                         },
+//                     });
+//                 }
+//                 return next();
+//             }
+//             app.global.user = globalUser = fetchedUser;
+//             return next();
+//         });
+//     }
+//     if (app.global.user == null) {
+//         if (requiresUser) {
+//             return next({
+//                 path: '/login',
+//                 query: {
+//                     redirect: to.fullPath,
+//                 },
+//             });
+//         }
+//         return next();
+//     }
+//     return next();
+// });
 
 
 var app = new Vue({
@@ -251,7 +236,7 @@ var app = new Vue({
                 const transactions = this._usertransactions;
 
                 const endIndex = skip + limit;
-
+                console.log(this);
                 if ((!transactions[endIndex] && transactions[transactions.length - 1] !== 'end')) {
                     const url = `/transactions?user=${this.user._id}&skip=${transactions.length}&limit=${endIndex - transactions.length - 1}`;
 
@@ -275,11 +260,14 @@ var app = new Vue({
                 const userId = jwtDecode(token)._id;
 
                 this.request('GET', `/users/${userId}`, (err, fetchedUser) => {
-                    if (err) console.log('could not load user: ', err.response);
+                    if (err) {
+                        console.log('could not load user: ', err.response);
+                        cb(err, null)
+                    }
 
                     this.user = globalUser = fetchedUser || null;
 
-                    return cb();
+                    return cb(null, fetchedUser);
                 });
             },
             logOut() {
@@ -294,11 +282,20 @@ var app = new Vue({
             global: this.global,
         };
     },
-    created() {
-        this.global.user = globalUser;
+    mounted() {
+        this.$store.commit('setAuth');
+        this.global.user = this.$store.state.user;
+
+        this.global.setUser(this.$store.state.token, (err, result) => {
+            if (!err) {
+                this.$store.commit('updateUser', result);
+            }
+        });
     },
+    created() {},
     methods: {},
     router,
+    store
 });
 
 

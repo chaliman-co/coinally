@@ -83,8 +83,8 @@ export default {
   },
   methods: {
     logOut() {
-      this.global.logOut();
-      this.$router.push('/login');
+      this.$store.commit('signOut');
+      this.$router.push('/');
     },
   },
 };
