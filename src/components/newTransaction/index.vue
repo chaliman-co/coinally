@@ -120,7 +120,9 @@ export default {
     initializeProps() {
       const sessionData = sessionStorage.getItem('transaction');
 
-      if (!sessionData) return this.$router.push('/');
+      if (!sessionData) {
+        return this.$router.push('/');
+      }
 
       this.transaction = JSON.parse(sessionData);
 
