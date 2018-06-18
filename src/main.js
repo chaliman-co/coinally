@@ -54,7 +54,7 @@ const app = new Vue({
                 // cb(fetchedTransactions.slice(skip, endIndex + 1));
             },
             user: null,
-            request: utils.log,
+            request: utils.request,
             setUser(token, cb) {
                 console.log(token);
                 if (token) {

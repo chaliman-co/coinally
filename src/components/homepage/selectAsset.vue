@@ -131,7 +131,7 @@ export default {
     },
   },
   created() {
-    this.global.request('GET', '/assets/', (err, res) => {
+    this.$request('GET', '/assets/', (err, res) => {
       if (err) console.error("couldn't load assets");
       this.assets = res;
     });
