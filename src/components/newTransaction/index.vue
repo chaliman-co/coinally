@@ -110,9 +110,11 @@ export default {
         socket.on('connect_timeout', (...args) => console.log('timeout: ', ...args));
         socket.on('new_rate', (rate) => {
           this.conversionRate = rate;
-          this.transaction.rate = rate;
 
-          sessionStorage.setItem('transaction', JSON.stringify(this.transaction));
+          // this.transaction = sessionStorage.getItem('transaction');
+          // this.transaction.rate = rate;
+
+          // sessionStorage.setItem('transaction', JSON.stringify(this.transaction));
         });
         this.socket = socket;
       }

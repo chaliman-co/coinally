@@ -58,8 +58,8 @@ export default {
       };
 
       this.$request('POST', url, data, (err, result) => {
+        this.isLoading = false;
         if (!err) {
-          this.isLoading = false;
           sessionStorage.clear();
           this.$router.push(`/transactions/status/${result._id}`);
         }
