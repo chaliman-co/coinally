@@ -4,23 +4,21 @@ import socketIoClient from 'socket.io-client';
 import jwtDecode from 'jwt-decode';
 
 import './js/js-bundle';
-import './utils';
-
-const apiRootUrl = 'http://localhost:9000';
-
-const apiUrl = `${apiRootUrl}/api`;
-
-const request = utils.request;
-
-let globalUser = null;
 
 import router from './router';
 import store from './store';
 import utils from './utils';
 
-Vue.prototype.$request = request;
+const apiRootUrl = 'http://localhost:9000';
 
-var app = new Vue({
+const apiUrl = `${apiRootUrl}/api`;
+
+let globalUser = null;
+
+Vue.prototype.$request = utils.request;
+Vue.prototype.$log = utils.log;
+
+const app = new Vue({
     el: '#app',
     data: {
         global: {
@@ -31,7 +29,7 @@ var app = new Vue({
                 const transactions = this._usertransactions;
 
                 const endIndex = skip + limit;
-                console.log(this);
+                this.$log(this);
                 if ((!transactions[endIndex] && transactions[transactions.length - 1] !== 'end')) {
                     const url = `/transactions?user=${this.user._id}&skip=${transactions.length}&limit=${endIndex - transactions.length - 1}`;
 
@@ -50,14 +48,14 @@ var app = new Vue({
                 // cb(fetchedTransactions.slice(skip, endIndex + 1));
             },
             user: null,
-            request,
+            request: utils.log,
             setUser(token, cb) {
                 const userId = jwtDecode(token)._id;
 
                 this.request('GET', `/users/${userId}`, (err, fetchedUser) => {
                     if (err) {
                         console.log('could not load user: ', err.response);
-                        cb(err, null)
+                        cb(err, null);
                     }
 
                     this.user = globalUser = fetchedUser || null;
@@ -90,11 +88,9 @@ var app = new Vue({
     created() {},
     methods: {},
     router,
-    store
+    store,
 });
 
-
-Vue.prototype.$request = request;
 // router.push(location.pathname.replace('/', ''));
 Vue.component('vue-select', vueSelect);
 
