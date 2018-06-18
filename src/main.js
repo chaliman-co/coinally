@@ -9,7 +9,7 @@ import router from './router';
 import store from './store';
 import utils from './utils';
 
-const apiRootUrl = 'http://localhost:9000';
+const apiRootUrl = utils.apiRootUrl;
 
 const apiUrl = `${apiRootUrl}/api`;
 

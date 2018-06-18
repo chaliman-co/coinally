@@ -6,6 +6,8 @@ const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhos
 const apiUrl = `${apiRootUrl}/api`;
 
 export default {
+    apiRootUrl,
+    apiUrl,
     /**
      *
      * @param {String} method
