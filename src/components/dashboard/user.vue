@@ -123,7 +123,6 @@ export default {
     // },
   ),
   created() {
-    console.log(this.user);
     const url = `/transactions?user=${this.user._id}&skip=0&limit=10`;
     this.global.request('GET', url, null, (err, transactions) => {
       if(!err){

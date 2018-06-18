@@ -159,20 +159,20 @@ export default {
     };
   },
   inject: ['global'],
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+  },
   created() {
-    this.global.request('GET', '/transactions/', (err, transactions) => {
-      if(!err)
-      this.transactions = transactions;
+    const url = `/transactions${this.user.role === 'admin' ? '' : `?user=${this.user._id}`}`;
+    this.$request('GET', url, (err, transactions) => {
+      if (!err) {
+        this.transactions = transactions;
+      }
     });
   },
   methods: {
-    // changeTransactionStatus(trans, status, index) {
-    //   this.global.request('PUT', `/transactions/${trans._id}/status`, { status }, (err, response) => {
-    //     if (!err) {
-    //       trans.status = response;
-    //     }
-    //   });
-    // },
     formatTime(time) {
       return moment().calendar(new Date(time));
     },

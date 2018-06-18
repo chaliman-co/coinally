@@ -1,13 +1,17 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
+
+import jwtDecode from 'jwt-decode';
+import qs from 'qs';
+
 import users from './components/users/index.vue';
-import transactionComponents from './components/transaction/components';
+// import transactionComponents from './components/transaction/components';
 import user from './components/user/index.vue';
 import settings from './components/settings/index.vue';
 import assets from './components/assets/index.vue';
 import transactions from './components/transactions/index.vue';
-import transaction from './components/transaction/index.vue';
+// import transaction from './components/transaction/index.vue';
 import homePage from './components/homepage/index.vue';
 import profile from './components/profile/index.vue';
 import login from './components/login/index.vue';
@@ -17,9 +21,8 @@ import verify from './components/verify/index.vue';
 import dashboard from './components/dashboard/index.vue';
 import account from './components/accounts/index.vue';
 
+import newTransaction from './components/newTransaction/index';
 
-import jwtDecode from 'jwt-decode';
-import qs from 'qs';
 import utils from './utils';
 import store from './store';
 
@@ -49,18 +52,32 @@ const routes = [{
             requiresUser: true,
         },
     }, {
+        //     path: '/transaction',
+        //     component: transaction,
+        //     children: [{
+        //         path: '/',
+        //         component: transactionComponents.selectAssets,
+        //     }, {
+        //         path: 'account',
+        //         component: transactionComponents.selectAccount,
+        //     }, {
+        //         path: '/status',
+        //         component: transactionComponents.status,
+        //     }],
+        // }, {
         path: '/transaction',
-        component: transaction,
+        component: newTransaction.index,
         children: [{
-            path: '/',
-            component: transactionComponents.selectAssets,
+            path: 'refund',
+            component: newTransaction.refund,
         }, {
-            path: 'account',
-            component: transactionComponents.selectAccount,
-        }, {
-            path: '/status',
-            component: transactionComponents.status,
+            path: 'destination',
+            component: newTransaction.destination,
         }],
+    }, {
+        path: '/transactions/status/:id',
+        component: newTransaction.status,
+        props: true,
     }, {
         path: '/dashboard',
         component: dashboard,
@@ -117,56 +134,55 @@ const routes = [{
     },
 ];
 
+function queryObject(obj, query = {}, namespace) {
+    let key;
+    for (const property in obj) {
+        if (obj.hasOwnProperty(property)) {
+            if (namespace) {
+                key = `${namespace}[${property}]`;
+            } else {
+                key = property;
+            }
+            if (typeof obj[property] === 'object') {
+                queryObject(obj[property], query, key);
+            } else {
+                query[key] = obj[property];
+            }
+        }
+    }
+    return query;
+}
+
 const router = new VueRouter({
     mode: 'history',
     routes,
     parseQuery: qs.parse.bind(qs),
     stringifyQuery(obj) {
         const _queryObject = queryObject(obj);
+        const keys = Object.keys(_queryObject);
         const pairs = [];
-        for (const name in _queryObject) {
-            pairs.push(`${encodeURIComponent(name)}=${encodeURIComponent(_queryObject[name])}`);
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            pairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(_queryObject[key])}`);
         }
-        return `?${pairs.join('&')}`;
-
-        function queryObject(obj, query, namespace) {
-            query = query || {};
-            let key;
-            for (const property in obj) {
-                if (obj.hasOwnProperty(property)) {
-                    if (namespace) {
-                        key = `${namespace}[${property}]`;
-                    } else {
-                        key = property;
-                    }
-                    if (typeof obj[property] === 'object') {
-                        queryObject(obj[property], query, key);
-                    } else {
-                        query[key] = obj[property];
-                    }
-                }
-            }
-            return query;
+        if (pairs.length > 0) {
+            return `?${pairs.join('&')}`;
         }
+        return '';
     },
 });
-
 
 router.beforeEach((to, from, next) => {
     store.commit('setAuth');
 
-    let token = store.state.token;
-    let currentUser = store.state.user;
-
-    console.log(store.state, currentUser);
-    console.log('Here');
+    const token = store.state.token;
+    const currentUser = store.state.user;
 
     const requiresUser = to.matched.some(record => record.meta.requiresUser);
 
     if (!requiresUser) return next();
 
     if (!token) {
-        console.log('No token');
         return next({
             path: '/login',
             query: {
@@ -174,7 +190,6 @@ router.beforeEach((to, from, next) => {
             },
         });
     } else if (!currentUser) {
-        console.log('No user');
         const userId = jwtDecode(token)._id;
 
         return utils.request('GET', `/users/${userId}`, (err, fetchedUser) => {
@@ -189,9 +204,8 @@ router.beforeEach((to, from, next) => {
             store.commit('updateUser', fetchedUser);
             return next();
         });
-    } else {
-        return next();
     }
+    return next();
 });
 
 export default router;

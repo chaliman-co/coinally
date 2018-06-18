@@ -27,6 +27,9 @@
                         </div>
 
                     </div>
+                    <button class="call-to-action btn-custom-astronaut-blue toggle-pane">
+                            Start Transaction
+                    </button>
                 </div>
             </div>
         </div>

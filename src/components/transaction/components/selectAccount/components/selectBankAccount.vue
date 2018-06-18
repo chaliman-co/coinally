@@ -8,7 +8,7 @@
         </div>
         <div class="modal-body">
             <div class="modal-body__container">
-                <div class="modal__pane" id="assets-selection">
+                <div class="modal__pane" id="destination">
                     <div class="input-fields">
                         <div class="select-component custom-form-group">
                             <label for="deposit">Receipt Bank account</label>
@@ -23,8 +23,24 @@
                             Add New
                         </button>
                     </div>
+                    <button class="call-to-action btn-custom-astronaut-blue toggle-pane">
+                        Start Transaction
+                    </button>
                 </div>
             </div>
+                <div class="order-details">
+                    <div class="transaction__type">
+                        <img src="https://shapeshift.io/images/coins/bitcoin.png" alt="Bitcoin"> →
+                        <img src="https://shapeshift.io/images/coins/ether.png" alt="Ether">
+                    </div>
+                    <div class="amount">
+                        <span title="Deposit">D:</span> 2.2334BTC,
+                        <span title="Receive">R:</span> 10.22344ETH
+                    </div>
+                    <div class="exchange-rate">
+                        1 BTC = 5 ETH
+                    </div>
+                </div>
         </div>
     </div>
 </template>

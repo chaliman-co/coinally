@@ -2,7 +2,7 @@
     <div>
         <div :is="selectComponent">
         </div>
-        <router-link to="/transaction/account" class="call-to-action btn-custom-astronaut-blue">Convert</router-link>
+        <!-- <router-link to="/transaction/account" class="call-to-action btn-custom-astronaut-blue">Convert</router-link> -->
     </div>
 </template>
 <script>

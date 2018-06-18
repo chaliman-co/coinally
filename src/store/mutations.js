@@ -12,7 +12,6 @@ export const mutations = {
     },
     updateUser(state, user) {
         state.user = user;
-
         localStorage.setItem(USER, JSON.stringify(user));
     },
     setAuth(state) {

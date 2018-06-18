@@ -81,10 +81,16 @@ function handlePostAsset(req, res, next) {
     );
 }
 
+
 function handleGetAssets(req, res, next) {
-    const { skip = 0, limit = 20 } = req.query;
-    Asset.find({})
-        .limit(limit)
+    const { skip = 0, limit = 20, type } = req.query;
+    let query = Asset.find({});
+
+    if (type) {
+        query.where('type').equals(type);
+    }
+
+    query.limit(limit)
         .skip(skip)
         .exec()
         .then(
