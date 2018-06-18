@@ -101,7 +101,7 @@ export default {
         });
       });
     },
-    errorHandler(err) {
+    handleError(err) {
       if (err.message == 'Network Error') {
         return this.errorSummary = 'Network Error';
       }
