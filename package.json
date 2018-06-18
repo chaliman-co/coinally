@@ -9,7 +9,7 @@
         "client-dev-server": "webpack-dev-server --env.mode=development",
         "client-build": "webpack --progress --hide-modules --env.mode=production",
         "client-dev": "webpack --env.mode=development",
-        "deploy": "npm run client-build && git commit -m process.env.message -a && heroku push master"
+        "deploy": "npm run client-build && git commit -m process.env.message -a && git push heroku master"
     },
     "dependencies": {
         "@sendgrid/mail": "~6.2.1",
