@@ -14,7 +14,7 @@ export default {
      * @param {String} cb
      * @param {String} token
      */
-    request(method, url, data, cb, token) {
+    request: (method, url, data, cb, token) => {
         if (!cb) {
             [cb, data] = [data, undefined];
         }
@@ -30,10 +30,10 @@ export default {
             url,
             data,
         }).then((response) => {
-            this.log('response from axios', response);
+            console.log('response from axios', response);
             cb(null, response.data.result);
         }).catch((err) => {
-            this.log('error from axios', err);
+            console.log('error from axios', err);
             cb(err);
         });
     },
@@ -46,5 +46,9 @@ export default {
         if (process.env.NODE_ENV !== 'production') {
             console.debug(message);
         }
+    },
+
+    getStatus() {
+        return ['failed', 'awaiting payment', 'payment received', 'pending', 'completed'];
     },
 };

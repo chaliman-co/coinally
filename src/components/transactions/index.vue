@@ -121,7 +121,7 @@
                             :value="option">{{ option }}</option>
                         </select>
                       </div> -->
-                      {{ transaction.status }}
+                      {{ transaction.status | capitalize }}
                     </td>
 
                     <td>

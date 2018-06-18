@@ -72,7 +72,7 @@
                 </div>
                 <div class="progress__indicator">
                   <div class="indicator__label">
-                    Awaiting Deposit
+                    {{ transaction.status | capitalize }}
                   </div>
                   <div class="indicator__composite">
                     <div class="indicator__bg"/>
@@ -131,6 +131,7 @@
 
 <script>
 import socketIoClient from 'socket.io-client';
+import utils from '../../utils';
 
 export default {
   props: {
@@ -148,6 +149,7 @@ export default {
       depositAsset: {},
       receiptAsset: {},
       amount: 0,
+      statuses: utils.getStatus(),
     };
   },
   computed: {
@@ -156,6 +158,13 @@ export default {
     },
     isFiat() {
       return this.depositAsset.type === 'fiat';
+    },
+    progress() {
+      const index = this.statuses.indexOf(this.transaction.status);
+
+      if (index === 0) return 0;
+
+      return (index / (this.statuses.length - 1)) * 100;
     },
   },
   mounted() {

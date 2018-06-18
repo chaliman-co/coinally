@@ -164,27 +164,27 @@ export default {
     },
     proceed() {
       if (!this.global.user) {
-        return this.$router.push({
-          path: '/login',
-          query: {
-            message: 'Login to continue',
-            nextPage: {
-              path: '/transaction',
-              query: {
-                deposit: this.depositAsset.code,
-                receipt: this.receiptAsset.code,
-                amount: this.amount,
-              },
-            },
-          },
-        });
-      }
       sessionStorage.transaction = JSON.stringify({
         depositAsset: this.depositAsset,
         receiptAsset: this.receiptAsset,
         amount: this.amount,
         rate: this.conversionRate,
       });
+        return this.$router.push({
+          path: '/login',
+          query: {
+            message: 'Login to continue',
+            nextPage: {
+              path: '/transaction/destination',
+              // query: {
+              //   deposit: this.depositAsset.code,
+              //   receipt: this.receiptAsset.code,
+              //   amount: this.amount,
+              // },
+            },
+          },
+        });
+      }
       this.$router.push('transaction/destination');
       // this.$router.push({
       //   path: '/transaction',

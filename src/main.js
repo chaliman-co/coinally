@@ -18,6 +18,12 @@ let globalUser = null;
 Vue.prototype.$request = utils.request;
 Vue.prototype.$log = utils.log;
 
+Vue.filter('capitalize', (value) => {
+    if (!value) return '';
+
+    return value.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+});
+
 const app = new Vue({
     el: '#app',
     data: {
@@ -50,18 +56,23 @@ const app = new Vue({
             user: null,
             request: utils.log,
             setUser(token, cb) {
-                const userId = jwtDecode(token)._id;
+                console.log(token);
+                if (token) {
+                    const userId = jwtDecode(token)._id;
 
-                this.request('GET', `/users/${userId}`, (err, fetchedUser) => {
-                    if (err) {
-                        console.log('could not load user: ', err.response);
-                        cb(err, null);
-                    }
+                    utils.request('GET', `/users/${userId}`, (err, fetchedUser) => {
+                        if (err) {
+                            console.log('could not load user: ', err.response);
+                            cb(err, null);
+                        }
 
-                    this.user = globalUser = fetchedUser || null;
+                        this.user = globalUser = fetchedUser || null;
 
-                    return cb(null, fetchedUser);
-                });
+                        cb(null, fetchedUser);
+                    });
+                } else {
+                    cb(new Error('No token found'), null);
+                }
             },
             logOut() {
                 console.log(this.global, this);
@@ -77,13 +88,18 @@ const app = new Vue({
     },
     mounted() {
         this.$store.commit('setAuth');
-        this.global.user = this.$store.state.user;
 
-        this.global.setUser(this.$store.state.token, (err, result) => {
-            if (!err && result) {
-                this.$store.commit('updateUser', result);
-            }
-        });
+        const token = this.$store.state.token;
+
+        if (token) {
+            this.global.user = this.$store.state.user;
+
+            this.global.setUser(token, (err, result) => {
+                if (!err && result) {
+                    this.$store.commit('updateUser', result);
+                }
+            });
+        }
     },
     created() {},
     methods: {},

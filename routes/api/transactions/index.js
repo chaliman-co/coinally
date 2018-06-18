@@ -116,7 +116,7 @@ function handlePutTransactionStatus(req, res, next) {
     } = req.body, {
         _id
     } = req.params;
-    transaction.status = status;
+    transaction.status = status.toLowerCase();
     transaction.save().then((_transaction) => {
         res._success(status);
         socketIoServer.in(_id).emit("status", status)

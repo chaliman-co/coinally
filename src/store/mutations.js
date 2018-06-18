@@ -24,4 +24,4 @@ export const mutations = {
         state.token = null;
         localStorage.clear();
     },
-}
+};

@@ -24,7 +24,7 @@
                 alt="QR Code">
               <div class="progress__indicator">
                 <div class="indicator__label">
-                  {{ transaction.status }}
+                  {{ transaction.status | capitalize }}
                 </div>
                 <div class="indicator__composite">
                   <div class="indicator__bg"/>
@@ -54,32 +54,32 @@
                 </div>
               </div>
               <template v-if="user.role === 'admin'">
-              <div class="select-component custom-form-group">
-                <label for="status">
-                  Status
-                </label>
-                <select
-                  id="status"
-                  v-model="selectedStatus"
-                  name="status"
-                  class="custom-select-no-title"
-                  title="Status...">
-                  <option
-                    v-for="(option, index) in statuses"
-                    :key="index"
-                    :disabled="statuses.indexOf(transaction.status) >= index"
-                    :value="option">{{ option }}</option>
-                </select>
-              </div>
-              <button
-                :disabled="isSaving"
-                class="call-to-action btn-custom-astronaut-blue"
-                @click="save">
-                Save
-                <i
-                  v-if="isSaving"
-                  class="fa fa-spinner fa-pulse"/>
-              </button>
+                <div class="select-component custom-form-group">
+                  <label for="status">
+                    Status
+                  </label>
+                  <select
+                    id="status"
+                    v-model="selectedStatus"
+                    name="status"
+                    class="custom-select-no-title"
+                    title="Status...">
+                    <option
+                      v-for="(option, index) in statuses"
+                      :key="index"
+                      :disabled="statuses.indexOf(transaction.status) >= index "
+                      :value="option">{{ option | capitalize }}</option>
+                  </select>
+                </div>
+                <button
+                  :disabled="isSaving"
+                  class="call-to-action btn-custom-astronaut-blue"
+                  @click="save">
+                  Save
+                  <i
+                    v-if="isSaving"
+                    class="fa fa-spinner fa-pulse"/>
+                </button>
               </template>
             </div>
           </div>
@@ -90,10 +90,11 @@
 </template>
 
 <script>
+import utils from '../../utils';
 import jQuery from 'jquery';
 import bootstrap from 'bootstrap3';
 
-import {mapState} from 'vuex';
+import { mapState } from 'vuex';
 
 // const jQuery = window.jQuery;
 
@@ -117,22 +118,22 @@ export default {
         rate: 0,
       },
       selectedStatus: null,
-      statuses: ['initialized', 'payment_received', 'completed', 'failed'],
+      statuses: utils.getStatus(),
       isSaving: false,
     };
   },
   computed: Object.assign({
     progress() {
-      const index = this.statuses.indexOf(this.transaction.status) + 1;
+      const index = this.statuses.indexOf(this.transaction.status);
 
       if (index === 0) return 0;
 
-      return (index / this.statuses.length) * 100;
+      return (index / (this.statuses.length - 1)) * 100;
     },
-    isAdmin(){
-      console.log( this.user && this.user.role === 'admin')
+    isAdmin() {
+      this.$request(this.user && this.user.role === 'admin');
       return this.user && this.user.role === 'admin';
-    }
+    },
   }, mapState(['user'])),
   methods: {
     open(transaction) {

@@ -16,8 +16,8 @@
         </label>
         <input
           id="code"
-          type="text"
           v-model="code"
+          type="text"
           required
           @input="clearErrors" >
       </div>
@@ -47,7 +47,7 @@ export default {
       validationFailed: false,
       isWaiting: false,
       code: null,
-      emailAddress: null
+      emailAddress: null,
     };
   },
   computed: {
@@ -62,34 +62,42 @@ export default {
       return error;
     },
   },
+  mounted() {
+    this.emailAddress = sessionStorage.emailAddress;
+
+    if (!this.emailAddress) { this.$router.push('/login'); }
+  },
   //  mapState(['emailAddress', 'code'])),
   methods: {
         clearErrors() {
-            if(this.requestErrors.code){
+            if (this.requestErrors.code) {
                 delete this.requestErrors.code;
             }
         },
-        
+
     verify() {
       this.isWaiting = true;
       const url = `/auth/?code=${this.code}`;
-      this.global.request('GET', url, (err, result) => {
+      this.$request('GET', url, (err, result) => {
         this.isWaiting = false;
-        if (err) { 
-          this.handleError(err); 
-          return console.log('error from post: ', window.err = err, err.response); 
-          }
-
-        console.log('success...', result);
+        if (err) {
+          this.handleError(err);
+          return console.log('error from post: ', window.err = err, err.response);
+        }
 
         // localStorage.COINALLY_AUTH_TOKEN = result.token;
-        this.global.setUser(result.token, user => {
-          this.$store.commit('signIn', {token: result.token, user});
-          const nextPage = this.$route.query.nextPage;
-          if (nextPage) {
-            return this.$router.push(nextPage);
+        this.global.setUser(result.token, (e, user) => {
+  console.log(user, e);
+          if (!e) {
+            this.$store.commit('signIn', { token: result.token, user });
+            const nextPage = this.$route.query.nextPage;
+
+            if (nextPage) {
+              return this.$router.push(nextPage);
+            }
+
+            return this.$router.push('/dashboard');
           }
-          return this.$router.push('/dashboard');
         });
       });
     },
@@ -109,12 +117,6 @@ export default {
     //   this.$store.commit(mutationName, payload);
     // },
   },
-  mounted(){
-    this.emailAddress = sessionStorage.emailAddress;
-
-    if(!this.emailAddress)
-      this.$router.push('/login');
-  }
 };
 </script>
 
