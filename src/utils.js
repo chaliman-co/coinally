@@ -5,6 +5,17 @@ const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhos
 
 const apiUrl = `${apiRootUrl}/api`;
 
+
+/**
+ * Log message to console
+ * @param String{} message - The message to be logged
+ */
+const log = (...message) => {
+    if (process.env.NODE_ENV !== 'production') {
+        console.debug(message);
+    }
+};
+
 export default {
     apiRootUrl,
     apiUrl,
@@ -32,23 +43,15 @@ export default {
             url,
             data,
         }).then((response) => {
-            console.log('response from axios', response);
+            log('response from axios', response);
             cb(null, response.data.result);
         }).catch((err) => {
-            console.log('error from axios', err);
+            log('error from axios', err);
             cb(err);
         });
     },
 
-    /**
-     * Log message to console
-     * @param String{} message - The message to be logged
-     */
-    log(message) {
-        if (process.env.NODE_ENV !== 'production') {
-            console.debug(message);
-        }
-    },
+    log,
 
     getStatus() {
         return ['failed', 'awaiting payment', 'payment received', 'pending', 'completed'];

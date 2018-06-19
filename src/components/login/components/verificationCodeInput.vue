@@ -9,119 +9,121 @@
       <div class="textbox-component custom-form-group">
         <label for="code">
           Verification Code
-          <font
-            v-if="validationFailed"
-            color="red"
-            class="input-error-message"> * {{ validationError.code }}</font>
+          <font v-if="validationFailed" 
+color="red" class="input-error-message"> * {{ validationError.code }}</font>
         </label>
-        <input
-          id="code"
-          v-model="code"
-          type="text"
-          required
-          @input="clearErrors" >
+        <input id="code" 
+v-model="code" type="text" required @input="clearErrors">
       </div>
     </div>
     <div class="alternative">
       Don't have an account?
       <router-link to="/signup">Sign up here</router-link>
     </div>
-    <button
-      :disabled="!isValidated || isWaiting"
-      type="submit"
-      class="call-to-action btn-custom-astronaut-blue">
+    <button :disabled="!isValidated || isWaiting" 
+type="submit" class="call-to-action btn-custom-astronaut-blue">
       {{ isWaiting? 'Sending...': 'Verify' }}
     </button>
   </form>
 </template>
 
 <script>
-// import { mapState } from 'vuex';
+  // import { mapState } from 'vuex';
 
-export default {
-  inject: ['global'],
-  data() {
-    return {
-      errorSummary: null,
-      requestErrors: {},
-      validationFailed: false,
-      isWaiting: false,
-      code: null,
-      emailAddress: null,
-    };
-  },
-  computed: {
-    isValidated() {
-      return !(Object.keys(this.validationError).length);
+  export default {
+    inject: ['global'],
+    data() {
+      return {
+        errorSummary: null,
+        requestErrors: {},
+        validationFailed: false,
+        isWaiting: false,
+        code: null,
+        emailAddress: null,
+      };
     },
-    validationError() {
-      const error = {};
-      if (!this.code) error.code = 'invalid';
-      const code = this.requestErrors.code;
-      if (code) error.code = this.requestErrors.code;
-      return error;
+    computed: {
+      isValidated() {
+        return !(Object.keys(this.validationError).length);
+      },
+      validationError() {
+        const error = {};
+        if (!this.code) error.code = 'invalid';
+        const code = this.requestErrors.code;
+        if (code) error.code = this.requestErrors.code;
+        return error;
+      },
     },
-  },
-  mounted() {
-    this.emailAddress = sessionStorage.emailAddress;
+    mounted() {
+      this.emailAddress = sessionStorage.emailAddress;
 
-    if (!this.emailAddress) { this.$router.push('/login'); }
-  },
-  //  mapState(['emailAddress', 'code'])),
-  methods: {
-        clearErrors() {
-            if (this.requestErrors.code) {
-                delete this.requestErrors.code;
-            }
-        },
-
-    verify() {
-      this.isWaiting = true;
-      const url = `/auth/?code=${this.code}`;
-      this.$request('GET', url, (err, result) => {
-        this.isWaiting = false;
-        if (err) {
-          this.handleError(err);
-          return console.log('error from post: ', window.err = err, err.response);
+      if (!this.emailAddress) {
+        this.$router.push('/login');
+      }
+    },
+    //  mapState(['emailAddress', 'code'])),
+    methods: {
+      clearErrors() {
+        if (this.requestErrors.code) {
+          delete this.requestErrors.code;
         }
+      },
 
-        // localStorage.COINALLY_AUTH_TOKEN = result.token;
-        this.global.setUser(result.token, (e, user) => {
-  console.log(user, e);
-          if (!e) {
-            this.$store.commit('signIn', { token: result.token, user });
-            const nextPage = this.$route.query.nextPage;
-
-            if (nextPage) {
-              return this.$router.push(nextPage);
-            }
-
-            return this.$router.push('/dashboard');
+      verify() {
+        this.isWaiting = true;
+        const url = `/auth/?code=${this.code}`;
+        this.$request('GET', url, (err, result) => {
+          this.isWaiting = false;
+          if (err) {
+            this.handleError(err);
+            window.err = err;
+            return this.$log('error from post: ', err, err.response);
           }
+
+          // localStorage.COINALLY_AUTH_TOKEN = result.token;
+          this.global.setUser(result.token, (e, user) => {
+            this.$log(user, e);
+            if (!e) {
+              this.$store.commit('signIn', {
+                token: result.token,
+                user,
+              });
+              const {
+                nextPage,
+              } = this.$route.query;
+
+              if (nextPage) {
+                return this.$router.push(nextPage);
+              }
+
+              return this.$router.push('/dashboard');
+            }
+          });
         });
-      });
+      },
+      handleError(err) {
+        if (err.message == 'Network Error') {
+          return this.errorSummary = 'Network Error';
+        }
+        if (Math.floor(err.response.status / 100) == 4) this.errorSummary = 'validation failed';
+        else this.errorSummary = 'internal server error';
+        const serverResponse = err.response.data;
+        for (const field in serverResponse.errors.errorDetails) {
+          this.requestErrors = Object.assign({
+            [field]: serverResponse.errors.errorDetails[field],
+          }, this.requestErrors);
+        }
+        this.validationFailed = true;
+      },
+      // commit(mutationName, payload) {
+      //   this.$store.commit(mutationName, payload);
+      // },
     },
-    handleError(err) {
-      if (err.message == 'Network Error') {
-        return this.errorSummary = 'Network Error';
-      }
-      if (Math.floor(err.response.status / 100) == 4) this.errorSummary = 'validation failed';
-      else this.errorSummary = 'internal server error';
-      const serverResponse = err.response.data;
-      for (const field in serverResponse.errors.errorDetails) {
-        this.requestErrors = Object.assign({ [field]: serverResponse.errors.errorDetails[field] }, this.requestErrors);
-      }
-      this.validationFailed = true;
-    },
-    // commit(mutationName, payload) {
-    //   this.$store.commit(mutationName, payload);
-    // },
-  },
-};
+  };
 </script>
 
 <style>
-.error-summary {
+  .error-summary {
     text-align: center;
-}
+  }
 </style>

@@ -1,14 +1,14 @@
 const USER = 'user';
 const TOKEN = 'token';
 
-export const mutations = {
+export default {
     signIn(state, { token, user }) {
         state.token = token;
         state.user = user;
 
         localStorage.setItem(TOKEN, token);
         localStorage.setItem(USER, JSON.stringify(user));
-        sessionStorage.clear();
+        sessionStorage.removeItem('emailAddress');
     },
     updateUser(state, user) {
         state.user = user;

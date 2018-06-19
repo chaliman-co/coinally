@@ -3,7 +3,7 @@
     id="destination"
     class="modal__pane">
     <div class="modal__title">
-      {{ capitalize(type) }} Address
+      {{ type | capitalize }} {{ isFiat ? 'Account' : 'Address' }}
     </div>
     <div class="input-fields">
 
@@ -188,11 +188,20 @@ export default {
       return this.selectedAccount != null;
     },
     isFiat() {
-      return this.asset.type === 'fiat';
+      const isFiat = this.asset.type === 'fiat';
+      if (isFiat && this.assets.length === 0) {
+          this.fetchAssets();
+      }
+      return isFiat;
     },
   },
   mounted() {
     if (this.isFiat) {
+      this.fetchAssets();
+    }
+  },
+  methods: {
+    fetchAssets() {
       const url = '/assets?type=fiat';
 
       this.$request('GET', url, null, (err, assets) => {
@@ -203,9 +212,7 @@ export default {
           }
         }
       });
-    }
-  },
-  methods: {
+    },
     capitalize(word) {
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
     },
@@ -230,7 +237,7 @@ export default {
         asset: this.newAccount.asset,
         address: this.newAccount,
       };
-      this.$request('POST', url, data, (err, result) => {
+      this.$request('POST', url, data, (err, newAccount) => {
         this.isSaving = false;
 
         if (err) {
@@ -238,11 +245,12 @@ export default {
           return;
         }
 
-        console.log(result);
-        this.selectedAccount = result;
+        this.$log(newAccount);
+        this.selectedAccount = newAccount;
 
-        const user = this.user;
-        user.assetAccounts.push(result);
+        const { user } = this;
+
+        user.assetAccounts.push(newAccount);
         this.$store.commit('updateUser', user);
         this.goToNext();
       });

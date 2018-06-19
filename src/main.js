@@ -9,7 +9,7 @@ import router from './router';
 import store from './store';
 import utils from './utils';
 
-const apiRootUrl = utils.apiRootUrl;
+const { apiRootUrl } = utils;
 
 const apiUrl = `${apiRootUrl}/api`;
 
@@ -35,20 +35,23 @@ const app = new Vue({
                 const transactions = this._usertransactions;
 
                 const endIndex = skip + limit;
-                this.$log(this);
+
                 if ((!transactions[endIndex] && transactions[transactions.length - 1] !== 'end')) {
                     const url = `/transactions?user=${this.user._id}&skip=${transactions.length}&limit=${endIndex - transactions.length - 1}`;
 
-                    return this.request('GET', url, (err, fetchedTransactions) => {
-                        console.log('done with get from transactions: ', err, fetchedTransactions);
+                    utils.request('GET', url, (err, fetchedTransactions) => {
+                        utils.log('done with get from transactions: ', err, fetchedTransactions);
 
-                        if (err) return console.log('could not load transactions: ', err.response);
+                        if (err) {
+                            utils.log('could not load transactions: ', err.response);
+                            cb(err, null);
+                        } else {
+                            if (fetchedTransactions.length < endIndex - transactions.length - 1) {
+                                fetchedTransactions.push('end');
+                            }
 
-                        if (fetchedTransactions.length < endIndex - transactions.length - 1) {
-                            fetchedTransactions.push('end');
+                            cb(fetchedTransactions.slice(skip, endIndex + 1));
                         }
-
-                        return cb(fetchedTransactions.slice(skip, endIndex + 1));
                     });
                 }
                 // cb(fetchedTransactions.slice(skip, endIndex + 1));
@@ -56,27 +59,28 @@ const app = new Vue({
             user: null,
             request: utils.request,
             setUser(token, cb) {
-                console.log(token);
                 if (token) {
                     const userId = jwtDecode(token)._id;
 
                     utils.request('GET', `/users/${userId}`, (err, fetchedUser) => {
                         if (err) {
-                            console.log('could not load user: ', err.response);
+                            utils.log('could not load user: ', err.response);
                             cb(err, null);
+                        } else {
+                            this.user = fetchedUser;
+                            globalUser = this.user;
+
+                            cb(null, fetchedUser);
                         }
-
-                        this.user = globalUser = fetchedUser || null;
-
-                        cb(null, fetchedUser);
                     });
                 } else {
                     cb(new Error('No token found'), null);
                 }
             },
             logOut() {
-                console.log(this.global, this);
-                this.global.user = globalUser = null;
+                utils.log(this.global, this);
+                globalUser = null;
+                this.global.user = globalUser;
                 localStorage.remove('COINALLY_AUTH_TOKEN');
             },
         },
@@ -89,7 +93,7 @@ const app = new Vue({
     mounted() {
         this.$store.commit('setAuth');
 
-        const token = this.$store.state.token;
+        const { token } = this.$store.state;
 
         if (token) {
             this.global.user = this.$store.state.user;

@@ -36,16 +36,16 @@
                         </a>
                     </div>
                     <template v-cloak>
-                    <div v-if="!global.user" class="nav__table-cell nav__links">
+                    <div class="nav__table-cell nav__links" v-if="$store.getters.isAuth">
+                        <router-link to="/dashboard" class="nav__link login"> Dashboard </router-link>
+                    </div>
+                    <div v-else class="nav__table-cell nav__links">
                         <a class="nav__link login">
                             <router-link to="/login"> Login </router-link>
                         </a>
                         <a class="nav__link">
                             <router-link to="/signup"> Signup </router-link>
                         </a>
-                    </div>
-                    <div class="nav__table-cell nav__links" v-else>
-                        <router-link to="/dashboard" class="nav__link login"> Dashboard </router-link>
                     </div>
                   </template>
                 </div>

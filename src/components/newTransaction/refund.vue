@@ -60,7 +60,7 @@ export default {
       this.$request('POST', url, data, (err, result) => {
         this.isLoading = false;
         if (!err) {
-          sessionStorage.clear();
+          sessionStorage.removeItem('transaction');
           this.$router.push(`/transactions/status/${result._id}`);
         }
       });

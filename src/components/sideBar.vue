@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="global.user"
+    v-if="user"
     class="dashboard__sidebar">
     <span class="hamburger">
       <img
@@ -8,7 +8,7 @@
         alt="Close">
     </span>
     <img
-      v-if="global.user.imagePath"
+      v-if="user.imagePath"
       :src="`${global.apiRootUrl}${global.user.imagePath}`"
       alt="Avatar"
       class="avatar">
@@ -18,7 +18,7 @@
       alt="Avatar"
       class="avatar">
     <div class="title">
-      {{ global.user.firstName }} {{ global.user.lastName }}
+      {{ user.firstName }} {{ user.lastName }}
     </div>
     <div class="links">
       <router-link
@@ -73,12 +73,14 @@ export default {
     };
   },
   computed: {
+    user() {
+      return this.$store.state.user;
+    },
     displayLinks() {
-      const { user } = this.global;
-      if (!user) {
+      if (!this.user) {
         return null;
       }
-      return user.role === 'admin' ? this.adminLinks : this.userLinks;
+      return this.user.role === 'admin' ? this.adminLinks : this.userLinks;
     },
   },
   methods: {

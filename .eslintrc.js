@@ -5,6 +5,7 @@ module.exports = {
         'no-underscore-dangle': 0,
         'indent': 0,
         'no-plusplus': 0,
-        'no-restricted-syntax': 1
+        'no-restricted-syntax': 1,
+        'no-param-reassign': 0
     }
 }
