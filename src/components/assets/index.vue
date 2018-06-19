@@ -15,7 +15,7 @@
                 class="btn-custom-japanese-laurel small"
                 data-toggle="modal"
                 data-target="#newCurrency">
-                <i class="fa fa-plus"/> Add New Currency
+                <i class="fa fa-plus" /> Add New Currency
               </button>
 
               <!-- <a href="verify.html" class="btn-custom-transparent-astronaut-blue small">
@@ -51,7 +51,7 @@
                     :key="index"
                     v-bind="asset"
                     :index="index"
-                    @edit="selectAsset(asset)"/>
+                    @edit="selectAsset(asset)" />
                 </tbody>
               </table>
             </div>
@@ -68,7 +68,7 @@
                 </span>
                 <button
                   type="button"
-                  data-dismiss="modal"/>
+                  data-dismiss="modal" />
               </div>
               <div class="modal-body">
                 <div class="modal-body__container">
@@ -84,7 +84,7 @@
                             v-model="selectedAsset.name"
                             type="text"
                             placeholder="Name"
-                            disabled >
+                            disabled>
                         </div>
                         <div class="select-component">
                           <label for="currency-type">
@@ -131,7 +131,7 @@
                     </div>
                     <div
                       v-if="selectedAsset.type === 'digital'"
-                      class="input-fields" >
+                      class="input-fields">
                       <div class="select-component custom-form-group">
                         <label for="bank-name">
                           Wallet Address
@@ -140,7 +140,7 @@
                           id="account-number"
                           v-model="selectedAsset.address"
                           type="text"
-                          placeholder="0x00..." >
+                          placeholder="0x00...">
                       </div>
                     </div>
                     <div
@@ -182,7 +182,7 @@
                           id="account-name"
                           v-model="selectedAsset.depositAccount.name"
                           type="text"
-                          placeholder="Coinlly Admin" >
+                          placeholder="Coinlly Admin">
                       </div>
                       <div class="textbox-component custom-form-group">
                         <label for="account-number">
@@ -193,7 +193,7 @@
                           v-model="selectedAsset.depositAccount.number"
                           type="number"
                           max="10"
-                          placeholder="0..." >
+                          placeholder="0...">
                       </div>
                     </div>
                   </div>
@@ -204,7 +204,7 @@
                     Save
                     <i
                       v-if="isSaving"
-                      class="fa fa-spinner fa-pulse"/>
+                      class="fa fa-spinner fa-pulse" />
                   </button>
                 </div>
               </div>
@@ -214,8 +214,7 @@
       </div>
     </div>
   </div>
-  </div>
-<!-- <div>
+  <!-- <div>
 
         <div class="box box-default collapsed-box">
             <div class="box-header with-border">
@@ -352,95 +351,94 @@
 </template>
 
 <script>
-import jQuery from 'jquery';
-import singleAsset from './asset/index.vue';
-import sidebar from '../sideBar.vue';
+  import jQuery from 'jquery';
+  import singleAsset from './asset/index.vue';
+  import sidebar from '../sideBar.vue';
 
-export default {
-  inject: ['global'],
-  components: {
-    'single-asset': singleAsset,
-    sidebar,
-  },
-  data() {
-    return {
-      assets: [],
-      isSaving: false,
-      selectedAsset: {
-        id: null,
-        name: null,
-        type: null,
-        address: null,
-        buyingProfit: 0,
-        sellingProfit: 0,
-        depositAccount: {
-          bankName: null,
+  export default {
+    inject: ['global'],
+    components: {
+      'single-asset': singleAsset,
+      sidebar,
+    },
+    data() {
+      return {
+        assets: [],
+        isSaving: false,
+        selectedAsset: {
+          id: null,
           name: null,
           type: null,
-          number: null,
+          address: null,
+          buyingProfit: 0,
+          sellingProfit: 0,
+          depositAccount: {
+            bankName: null,
+            name: null,
+            type: null,
+            number: null,
+          },
         },
-      },
-      availableTypes: ['fiat', 'digital', 'card'],
-    };
-  },
-  computed: {
-    isValid() {
-      if (this.selectedAsset.buyingProfit == null || this.selectedAsset.sellingProfit == null) {
-        return false;
-      }
-      if (this.selectedAsset.type === 'digital' && this.selectedAsset.address == null) {
-        return false;
-      }
-      if (this.selectedAsset.type === 'fiat') {
-        if (Object.values(this.selectedAsset.depositAccount).includes(null)) {
+        availableTypes: ['fiat', 'digital', 'card'],
+      };
+    },
+    computed: {
+      isValid() {
+        if (this.selectedAsset.buyingProfit == null || this.selectedAsset.sellingProfit == null) {
           return false;
         }
-      }
-      return true;
-    },
-  },
-  created() {
-    const url = '/assets';
-    this.global.request('GET', url, null, (err, response) => {
-      if (!err) {
-        this.assets = response;
-      }
-    });
-  },
-  methods: {
-    selectAsset(asset) {
-      this.selectedAsset = {
-        id: asset._id,
-        name: asset.name,
-        type: asset.type,
-        buyingProfit: asset.buyingProfit,
-        sellingProfit: asset.sellingProfit,
-        address: asset.type === 'digital' ? asset.depositAddress : null,
-        depositAccount: asset.type === 'fiat' ? asset.depositAddress : {},
-      };
-    },
-    save() {
-      const data = {
-        buyingProfit: Number(this.selectedAsset.buyingProfit),
-        sellingProfit: Number(this.selectedAsset.sellingProfit),
-        depositAddress: this.selectedAsset.type === 'digital' ? this.selectedAsset.address : this.selectedAsset.depositAccount,
-      };
-
-      const url = `/assets/${this.selectedAsset.id}`;
-
-      this.isSaving = true;
-      this.global.request('PUT', url, data, (err, response) => {
-        this.isSaving = false;
-        if (!err) {
-          let asset = this.assets.find(a => a._id == response._id);
-          if (asset != null) {
-            asset = response;
+        if (this.selectedAsset.type === 'digital' && this.selectedAsset.address == null) {
+          return false;
+        }
+        if (this.selectedAsset.type === 'fiat') {
+          if (Object.values(this.selectedAsset.depositAccount).includes(null)) {
+            return false;
           }
-          jQuery('#newCurrency').modal('hide');
+        }
+        return true;
+      },
+    },
+    created() {
+      const url = '/assets';
+      this.global.request('GET', url, null, (err, response) => {
+        if (!err) {
+          this.assets = response;
         }
       });
     },
-  },
-};
-</script>
+    methods: {
+      selectAsset(asset) {
+        this.selectedAsset = {
+          id: asset._id,
+          name: asset.name,
+          type: asset.type,
+          buyingProfit: asset.buyingProfit,
+          sellingProfit: asset.sellingProfit,
+          address: asset.type === 'digital' ? asset.depositAddress : null,
+          depositAccount: asset.type === 'fiat' ? asset.depositAddress : {},
+        };
+      },
+      save() {
+        const data = {
+          buyingProfit: Number(this.selectedAsset.buyingProfit),
+          sellingProfit: Number(this.selectedAsset.sellingProfit),
+          depositAddress: this.selectedAsset.type === 'digital' ? this.selectedAsset.address : this.selectedAsset.depositAccount,
+        };
 
+        const url = `/assets/${this.selectedAsset.id}`;
+
+        this.isSaving = true;
+        this.global.request('PUT', url, data, (err, response) => {
+          this.isSaving = false;
+          if (!err) {
+            let asset = this.assets.find(a => a._id == response._id);
+            if (asset != null) {
+              asset = response;
+            }
+            jQuery('#newCurrency').modal('hide');
+          }
+        });
+      },
+    },
+  };
+</script>
