@@ -17,7 +17,7 @@ export default {
       transaction: {},
     };
   },
-  mounted() {
+  created() {
     this.transaction = JSON.parse(sessionStorage.getItem('transaction'));
     this.asset = this.transaction.receiptAsset;
   },

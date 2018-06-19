@@ -85,7 +85,7 @@ export default {
       return this.amount * this.conversionRate;
     },
   },
-  mounted() {
+  created() {
     this.initializeProps();
     this.initializeSocket();
   },

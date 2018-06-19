@@ -26,7 +26,7 @@ export default {
       return this.$store.state.user;
     },
   },
-  mounted() {
+  created() {
     this.updateTransaction();
     if (this.transaction.destinationAccount) {
       this.asset = this.transaction.depositAsset;

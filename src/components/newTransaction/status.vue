@@ -167,7 +167,7 @@ export default {
       return (index / (this.statuses.length - 1)) * 100;
     },
   },
-  mounted() {
+  created() {
     const url = `/transactions/${this.id}`;
     this.$request('GET', url, null, (err, result) => {
       if (!err) {

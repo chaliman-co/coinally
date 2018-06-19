@@ -189,13 +189,13 @@ export default {
     },
     isFiat() {
       const isFiat = this.asset.type === 'fiat';
-      if (isFiat && this.assets.length === 0) {
-          this.fetchAssets();
-      }
+      // if (isFiat && this.assets.length === 0) {
+      //     this.fetchAssets();
+      // }
       return isFiat;
     },
   },
-  mounted() {
+  created() {
     if (this.isFiat) {
       this.fetchAssets();
     }
