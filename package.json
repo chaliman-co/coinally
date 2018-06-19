@@ -9,6 +9,7 @@
         "client-dev-server": "webpack-dev-server --env.mode=development",
         "client-build": "webpack --progress --hide-modules --env.mode=production",
         "client-dev": "webpack --env.mode=development",
+        "commit": "git commit -a",
         "deploy": "npm run client-build && git commit -m process.env.message -a && git push heroku master"
     },
     "dependencies": {
