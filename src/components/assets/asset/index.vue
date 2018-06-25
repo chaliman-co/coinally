@@ -52,7 +52,7 @@ export default {
   methods: {
      edit(){
          this.$emit('edit');
-     }
+     },
   },
   watch: {
     currentlyBuyable(state) {
