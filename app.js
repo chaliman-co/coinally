@@ -3,14 +3,15 @@ const
     express = require('express'),
     path = require('path'),
     util = require("util"),
+    logger = require('morgan'),
+    bodyParser = require("body-parser"),
     db = require("./lib/db"),
     socketIoServer = require("./socketIoServer"),
     serverUtils = require("./lib/utils"),
-    logger = require('morgan'),
-    bodyParser = require("body-parser"),
     indexRoute = require('./routes/index'),
     apiRoute = require('./routes/api'),
-    app = express();
+    app = express()
+;
 
 app
     .use(logger('dev'))

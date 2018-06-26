@@ -2,12 +2,13 @@ const
     router = require("express").Router({ mergeParams: true }),
     path = require("path"),
     serverUtils = require("../../../../lib/utils"),
+    auth =  
     { User } = require(path.join(serverUtils.getRootDirectory(), "lib/db"))
 ;
 module.exports = router;
 
 router
-    .put("/", handlePutStatus)
+    .put("/", auth.bounceUnauthorised({ admin: true }), handlePutStatus)
 ;
 
 function handlePutStatus(req, res, next) {

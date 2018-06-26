@@ -4,6 +4,7 @@ const
     }),
     path = require("path"),
     serverUtils = require("../../../../lib/utils"),
+    auth = require(path.join(serverUtils.getRootDirectory(), "lib/auth")),
     {
         Approval,
         User
@@ -11,10 +12,11 @@ const
 module.exports = router;
 
 router
-    .post("/", handlePostAssetAccount)
+    .post("/", auth.bounceUnauthorised({ owner: true, }), handlePostAssetAccount)
     .param("index", resolveIndex)
-    .delete("/:index", handleDeleteAssetAccount)
-    .post("/:index/is_Verified", handlePutAssetAccountIsVerified);
+    .delete("/:index",  auth.bounceUnauthorised({ owner: true, }), handleDeleteAssetAccount)
+    .post("/:index/is_Verified", auth.bounceUnauthorised({ admin: true, }), handlePutAssetAccountIsVerified)
+;
 
 function resolveIndex(req, res, next, index) {
     const {

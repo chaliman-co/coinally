@@ -3,6 +3,7 @@ const
     router = require("express").Router({ mergeParams: true }),
     path = require("path"),
     serverUtils = require("../../../../lib/utils"),
+    auth = require('./../../../../lib/auth'),
     { User, Approval } = require(path.join(serverUtils.getRootDirectory(), "lib/db")),
     verificationDetailsStoragePath = path.join(serverUtils.getPublicDirectory(), "images/verification_details")
 ;
@@ -10,10 +11,10 @@ const
 module.exports = router;
 
 router
-    .post("/", multer({dest: verificationDetailsStoragePath}).single("image"), handlePostVerificationDetail)
+    .post("/", auth.bounceUnauthorised({owner: true}), multer({dest: verificationDetailsStoragePath}).single("image"), handlePostVerificationDetail)
     .param("index", resolveIndex)
-    .post("/:index/is_approved", handlePutVerificationDetailIsApproved)
-    .delete("/:index", handleDeleteVerificationDetail)
+    .post("/:index/is_approved", auth.bounceUnauthorised({ admin: true, }), handlePutVerificationDetailIsApproved)
+    .delete("/:index", auth.bounceUnauthorised({owner: true}), handleDeleteVerificationDetail)
 ;
 
 function resolveIndex(req, res, next, index) {

@@ -3,5 +3,6 @@
     "EMAIL_ADDRESS" : "chaliman.co@gmail.com",
     "EMAIL_PASSWORD": "0058612690gA.",
     "EMAIL_SERVICE": "gmail",
-    "HOSTNAME": "localhost:8000"
+    "HOSTNAME": "localhost:8000",
+    "TOKEN_VALIDITY": 3600
 }
