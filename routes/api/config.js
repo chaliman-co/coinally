@@ -1,18 +1,21 @@
 const
     router = require('express').Router({ mergeParams: true }),
-    serverUtils = require("../../lib/utils"),
     path = require("path"),
+    serverUtils = require("../../lib/utils"),
+    auth = require(path.join(serverUtils.getRootDirectory(), 'lib/auth')),
     { Config } = require(path.join(serverUtils.getRootDirectory(), "lib/db"))
 ;
 
 module.exports = router;
 
 router
+    .use(auth.bounceUnauthenticated)
+    .use(auth.bounceUnauthorised({admin: true}))
     .post("/", handlePostConfig)
     .get("/", handleGetConfigs)
 
     .param("_id", resolveConfig)
-    
+
     .get("/:_id", handleGetConfig)
     .put("/:_id/value", handlePutConfigValue)
     .delete("/:_id", handleDeleteConfig)

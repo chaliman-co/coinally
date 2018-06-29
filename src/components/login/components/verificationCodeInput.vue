@@ -85,6 +85,8 @@ export default {
           return console.log('error from post: ', window.err = err, err.response);
         }
 
+        this.$store.commit('updateToken', result.token);
+
         // localStorage.COINALLY_AUTH_TOKEN = result.token;
         this.global.setUser(result.token, (e, user) => {
   console.log(user, e);

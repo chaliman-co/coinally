@@ -2,7 +2,10 @@ const USER = 'user';
 const TOKEN = 'token';
 
 export const mutations = {
-    signIn(state, { token, user }) {
+    signIn(state, {
+        token,
+        user
+    }) {
         state.token = token;
         state.user = user;
 
@@ -13,6 +16,10 @@ export const mutations = {
     updateUser(state, user) {
         state.user = user;
         localStorage.setItem(USER, JSON.stringify(user));
+    },
+    updateToken(state, token) {
+        state.token = token;
+        localStorage.setItem(TOKEN, token);
     },
     setAuth(state) {
         // console.log(localStorage.getItem(USER))

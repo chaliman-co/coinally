@@ -1,4 +1,5 @@
 import axios from 'axios';
+import store from './store'
 
 
 const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:9000';
@@ -16,14 +17,14 @@ export default {
      * @param {String} cb
      * @param {String} token
      */
-    request: (method, url, data, cb, token) => {
+    request: (method, url, data, cb, ) => {
         if (!cb) {
             [cb, data] = [data, undefined];
         }
         const headers = {};
         if (!/^https?:\/\//i.test(url)) {
             url = apiUrl + url;
-            const bearerToken = token || localStorage.getItem('token');
+            const bearerToken = store.state.token;
 
             if (bearerToken) headers.Authorization = `Bearer ${bearerToken}`;
         }
@@ -31,6 +32,7 @@ export default {
             method,
             url,
             data,
+            headers,
         }).then((response) => {
             console.log('response from axios', response);
             cb(null, response.data.result);
