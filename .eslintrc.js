@@ -6,6 +6,9 @@ module.exports = {
         'indent': 0,
         'no-plusplus': 0,
         'no-restricted-syntax': 1,
-        'no-param-reassign': 0
+        'no-param-reassign': 0,
+        "parserOptions": {
+            "ecmaVersion": 2017
+        }
     }
 }

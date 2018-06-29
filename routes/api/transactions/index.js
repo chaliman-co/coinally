@@ -1,17 +1,16 @@
-const 
+const
     path = require('path'),
     router = require('express').Router(),
     serverUtils = require('../../../lib/utils'),
     auth = path.join(serverUtils.getRootDirectory(), 'lib/auth'),
     socketIoServer = require(path.join(serverUtils.getRootDirectory(), 'socketIoServer')),
-    { Transaction, Asset, Config } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'))
-;
+    { Transaction, Asset, Config } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
 
 
 module.exports = router;
 
 router
-    .use(auth.bounceunauthenticated)
+    .use(auth.bounceUnauthenticated)
     .post('/', handlePostTransaction)
     .get('/', auth.bounceUnauthorised({ admin: true, }), handleGetTransactions)
     .param('_id', resolveTransaction)

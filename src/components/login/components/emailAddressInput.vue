@@ -84,7 +84,7 @@ export default {
 
                     sessionStorage.emailAddress = this.emailAddress;
 
-                    const nextPage = this.$route.query.nextPage;
+                    const { nextPage } = this.$route.query;
 
                     const route = {
                         path: '/login/verify',

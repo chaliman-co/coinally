@@ -12,7 +12,7 @@ const apiUrl = `${apiRootUrl}/api`;
  */
 const log = (...message) => {
     if (process.env.NODE_ENV !== 'production') {
-        console.debug(message);
+        console.log(...message);
     }
 };
 
