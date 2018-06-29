@@ -1,33 +1,32 @@
 const
-    router = require("express").Router({
-        mergeParams: true
+    router = require('express').Router({
+        mergeParams: true,
     }),
-    path = require("path"),
-    serverUtils = require("../../../../lib/utils"),
-    auth = require(path.join(serverUtils.getRootDirectory(), "lib/auth")),
+    path = require('path'),
+    serverUtils = require('../../../../lib/utils'),
+    auth = require(path.join(serverUtils.getRootDirectory(), 'lib/auth')),
     {
         Approval,
-        User
-    } = require(path.join(serverUtils.getRootDirectory(), "lib/db"));
+        User,
+    } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
+
 module.exports = router;
 
 router
-    .post("/", auth.bounceUnauthorised({ owner: true, }), handlePostAssetAccount)
-    .param("index", resolveIndex)
-    .delete("/:index",  auth.bounceUnauthorised({ owner: true, }), handleDeleteAssetAccount)
-    .post("/:index/is_Verified", auth.bounceUnauthorised({ admin: true, }), handlePutAssetAccountIsVerified)
-;
-
+    .post('/', auth.bounceUnauthorised({ owner: true }), handlePostAssetAccount)
+    .param('index', resolveIndex)
+    .delete('/:index', auth.bounceUnauthorised({ owner: true }), handleDeleteAssetAccount)
+    .post('/:index/is_Verified', auth.bounceUnauthorised({ admin: true }), handlePutAssetAccountIsVerified);
 function resolveIndex(req, res, next, index) {
     const {
-        user
+        user,
     } = req._params;
     assetAccount = user.assetAccounts[index];
-    if (!assetAccount) return res._sendError("item not found", serverUtils.ErrorReport(404, {
+    if (!assetAccount) {return res._sendError("item not found", serverUtils.ErrorReport(404, {
         index: "index not found"
-    }));
+    }));}
     req._params.assetAccount = assetAccount;
-    return next()
+    return next();
 }
 
 function handlePostAssetAccount(req, res, next) {
@@ -35,18 +34,18 @@ function handlePostAssetAccount(req, res, next) {
         rawInput = req.body,
         details = new User.assetAccounts.Fields(),
         {
-            user
+            user,
         } = req._params;
     try {
         serverUtils.deepAssign(details, rawInput);
     } catch (err) {
-        let unknownField = err.message.match(/property (.+),/)[1];
-        return res._sendError("unknown field", new serverUtils.ErrorReport(400, {
-            [unknownField]: `${unknownField} not recognized`
-        }))
+        const unknownField = err.message.match(/property (.+),/)[1];
+        return res._sendError('unknown field', new serverUtils.ErrorReport(400, {
+            [unknownField]: `${unknownField} not recognized`,
+        }));
     }
-    let assetAccountIndex = user.assetAccounts.push(details) - 1;
-    user.save().then(function updatedUser(user) {
+    const assetAccountIndex = user.assetAccounts.push(details) - 1;
+    user.save().then((user) => {
         let
             approvalDetails = new Approval.Fields();
         Object.assign(approvalDetails, {
@@ -59,26 +58,29 @@ function handlePostAssetAccount(req, res, next) {
         }, function failedToSave(err) {
             next(err)
         })
-    }, function failedToUpdate(err) {
+    }, (err) => {
         return next(err)
-    })
+    });
 }
 
 function handlePutAssetAccountIsVerified(req, res, next) {
-    if (!(req.body && req.body.hasOwnProperty("isVerified"))) return res._sendError("missing or invalid parameters", {
+    if (!(req.body && req.body.hasOwnProperty('isVerified'))) {return res._sendError("missing or invalid parameters", {
         isVerified: "isVerified not provided"
-    });
+    });}
     const {
-        isVerified
-    } = req.body, {
-        index
-    } = req.params, {
-        user
-    } = req._params, {
-        assetAccount
+        isVerified,
+    } = req.body, 
+{
+        index,
+    } = req.params, 
+{
+        user,
+    } = req._params, 
+{
+        assetAccount,
     } = req._params;
     assetAccount.isVerified = isVerified;
-    user.save().then(function updatedUser(user) {
+    user.save().then((user) => {
         Approval.findOneAndUpdate({
             userId: user._id,
             userProperty: `AssetAccounts[${index}]`
@@ -89,21 +91,23 @@ function handlePutAssetAccountIsVerified(req, res, next) {
         }, function failedToUpdate(err) {
             return next(err)
         })
-    }, function failedToUpdate(err) {
+    }, (err) => {
         return next(err)
-    })
+    });
 }
 
 function handleDeleteAssetAccount(req, res, next) {
     const {
-        index
-    } = req.params, {
-        user
-    } = req._params, {
-        assetAccount
+        index,
+    } = req.params, 
+{
+        user,
+    } = req._params, 
+{
+        assetAccount,
     } = req._params;
     user.assetAccounts.splice(index, 1, null);
-    user.save().then(function updatedUser(user) {
+    user.save().then((user) => {
         if (!assetAccount.isVerified) {
             return Approval.findOneAndUpdate({
                 userId: user._id,
@@ -117,7 +121,7 @@ function handleDeleteAssetAccount(req, res, next) {
             })
         }
         return res._success(assetAccount)
-    }, function failedToUpdate(err) {
+    }, (err) => {
         return next(err)
-    })
+    });
 }

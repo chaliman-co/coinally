@@ -9,19 +9,27 @@
       <div class="textbox-component custom-form-group">
         <label for="code">
           Verification Code
-          <font v-if="validationFailed" 
-color="red" class="input-error-message"> * {{ validationError.code }}</font>
+          <font
+            v-if="validationFailed"
+            color="red"
+            class="input-error-message"> * {{ validationError.code }}</font>
         </label>
-        <input id="code" 
-v-model="code" type="text" required @input="clearErrors">
+        <input
+          id="code"
+          v-model="code"
+          type="text"
+          required
+          @input="clearErrors">
       </div>
     </div>
     <div class="alternative">
       Don't have an account?
       <router-link to="/signup">Sign up here</router-link>
     </div>
-    <button :disabled="!isValidated || isWaiting" 
-type="submit" class="call-to-action btn-custom-astronaut-blue">
+    <button
+      :disabled="!isValidated || isWaiting"
+      type="submit"
+      class="call-to-action btn-custom-astronaut-blue">
       {{ isWaiting? 'Sending...': 'Verify' }}
     </button>
   </form>
@@ -77,8 +85,10 @@ type="submit" class="call-to-action btn-custom-astronaut-blue">
           if (err) {
             this.handleError(err);
             window.err = err;
-            return this.$log('error from post: ', err, err.response);
+            this.$log('error from post: ', err, err.response);
           }
+
+          this.$store.commit('updateToken', result.token);
 
           // localStorage.COINALLY_AUTH_TOKEN = result.token;
           this.global.setUser(result.token, (e, user) => {
@@ -88,36 +98,42 @@ type="submit" class="call-to-action btn-custom-astronaut-blue">
                 token: result.token,
                 user,
               });
+
               const {
                 nextPage,
               } = this.$route.query;
 
               if (nextPage) {
-                return this.$router.push(nextPage);
+                this.$router.push(nextPage);
+              } else {
+                this.$router.push('/dashboard');
               }
-
-              return this.$router.push('/dashboard');
             }
           });
         });
       },
       handleError(err) {
-        if (err.message == 'Network Error') {
-          return this.errorSummary = 'Network Error';
+        if (err.message === 'Network Error') {
+           this.errorSummary = 'Network Error';
         }
-        if (Math.floor(err.response.status / 100) == 4) this.errorSummary = 'validation failed';
-        else this.errorSummary = 'internal server error';
+
+        if (Math.floor(err.response.status / 100) === 4) {
+          this.errorSummary = 'validation failed';
+        } else {
+          this.errorSummary = 'internal server error';
+        }
+
         const serverResponse = err.response.data;
-        for (const field in serverResponse.errors.errorDetails) {
+
+        Object.entries(serverResponse.errors.errorDetails)
+        .forEach(([field, value]) => {
           this.requestErrors = Object.assign({
-            [field]: serverResponse.errors.errorDetails[field],
+            [field]: value,
           }, this.requestErrors);
-        }
+        });
+
         this.validationFailed = true;
       },
-      // commit(mutationName, payload) {
-      //   this.$store.commit(mutationName, payload);
-      // },
     },
   };
 </script>

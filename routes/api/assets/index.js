@@ -2,6 +2,7 @@ const router = require('express').Router({ mergeParams: true }),
     path = require('path'),
     multer = require('multer'),
     serverUtils = require('../../../lib/utils'),
+    auth = require(path.join(serverUtils.getRootDirectory(), 'lib/auth')),
     { Asset } = require(path.join(serverUtils.getRootDirectory(), 'lib/db')),
     assetsStoragePath = path.join(
         serverUtils.getPublicDirectory(),
@@ -12,14 +13,14 @@ const db = require('../../../lib/db');
 module.exports = router;
 
 router
-    .post(
-        '/',
-        multer({ dest: assetsStoragePath }).single('image'),
-        handlePostAsset,
-    )
     .get('/', handleGetAssets)
+    .post('/', auth.bounceUnauthenticated, auth.bounceUnauthorised({ admin: true }), multer({ dest: assetsStoragePath }).single('image'), handlePostAsset, )
+    
     .param('_id', resolveAsset)
+
     .get('/:_id', handleGetAsset)
+    .use(auth.bounceUnauthenticated)
+    .use(auth.bounceUnauthorised({ admin: true }))
     .put('/:_id', handlePutAsset)
     .delete('/:_id', handleDeleteAsset)
     .post('/:_id/deposit_address', handlePostDepositAddress)

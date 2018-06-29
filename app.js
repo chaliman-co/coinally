@@ -10,15 +10,17 @@ const
     serverUtils = require("./lib/utils"),
     indexRoute = require('./routes/index'),
     apiRoute = require('./routes/api'),
+    cors = require('cors'),
     app = express()
 ;
 
 app
     .use(logger('dev'))
-    .use(function (req, res, next) {
+    .use(function (req, res, next) {console.log(req.headers)
         res.setHeader("Access-Control-Allow-Origin", "*");
         next()
     })
+    .use(cors())
     .options(/.*/, function (req, res, next) {
         res.setHeader("Access-Control-Allow-Origin", req.headers["origin"]);
         res.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");

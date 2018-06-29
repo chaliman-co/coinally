@@ -21,6 +21,7 @@
         "bcrypt": "*",
         "body-parser": "~1.18.2",
         "bootstrap3": "^3.3.5",
+        "cors": "^2.8.4",
         "cross-env": "^5.0.5",
         "css-loader": "^0.28.7",
         "express": "~5.0.0-alpha.6",
