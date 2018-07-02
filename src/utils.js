@@ -1,5 +1,5 @@
 import axios from 'axios';
-import store from './store'
+import store from './store';
 
 
 const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:9000';
@@ -28,7 +28,7 @@ export default {
      * @param {String} cb
      * @param {String} token
      */
-    request: (method, url, data, cb, ) => {
+    request: (method, url, data, cb) => {
         if (!cb) {
             [cb, data] = [data, undefined];
         }

@@ -7,7 +7,7 @@ const
     {
         Transaction,
         Asset,
-        Config
+        Config,
     } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
 
 
@@ -23,15 +23,17 @@ router
 
 .param('_id', resolveTransaction)
 
-//.get('/:_id', auth.bounceUnauthorised({ admin: true, owner: true }),  handleGetTransaction)
+// .get('/:_id', auth.bounceUnauthorised({ admin: true, owner: true }),  handleGetTransaction)
 .put('/:_id/status', auth.bounceUnauthorised({ admin: true }), handlePutTransactionStatus);
 
 function resolveTransaction(req, res, next, _id) {
     req._params = req._params || {};
     Transaction.findById(_id).then((transaction) => {
-        if (!transaction) return res._sendError("item not found", new serverUtils.ErrorReport({
-            _id: "_id not found"
-        }));
+        if (!transaction) {
+            return res._sendError('item not found', new serverUtils.ErrorReport({
+                _id: '_id not found',
+            }));
+        }
         req._params.transaction = transaction;
         next();
     });
@@ -47,8 +49,8 @@ function resolveUser(req, res, next, _id) {
         _id,
     }).populate('assetAccounts.asset', 'addressType').then((user) => {
         if (!user) {
-            return res._sendError("item not found", new serverUtils.ErrorReport(404, {
-                _id: "user not found"
+            return res._sendError('item not found', new serverUtils.ErrorReport(404, {
+                _id: 'user not found',
             }));
         }
         req._params.user = user;
@@ -61,17 +63,17 @@ function handleGetTransaction(req, res, next) {
         .populate('receiptAsset')
         .populate('depositAsset')
         .exec()
-        .then(transaction => {
+        .then((transaction) => {
             if (!transaction) {
-                return res._sendError("item not found", new serverUtils.ErrorReport({
-                    _id: "_id not found"
+                return res._sendError('item not found', new serverUtils.ErrorReport({
+                    _id: '_id not found',
                 }));
             }
 
             res._success(transaction);
         })
-        .catch(err => {
-            res._sendError("An unexpected error occured", err);
+        .catch((err) => {
+            res._sendError('An unexpected error occured', err);
         });
 }
 
@@ -94,13 +96,9 @@ function handlePostTransaction(req, res, next) {
     transaction.save().then(
         (transaction) => {
             transaction.user.transactionCount++;
-            transaction.user.save().then(
-                user => res._success(transaction), err => next(err)
-            )
+            transaction.user.save().then(user => res._success(transaction), err => next(err));
         },
-        (err) => {
-            return next(err);
-        },
+        err => next(err),
     );
 }
 
@@ -118,18 +116,17 @@ function handleGetTransactions(req, res, next) {
         .exec()
         .then(
             (transactions) => {
-                if (!transactions.length)
+                if (!transactions.length) {
                     return res._sendError(
-                        "No matching documents",
+                        'No matching documents',
                         new serverUtils.ErrorReport(404, {
-                            transactions: "no transactions found"
-                        })
+                            transactions: 'no transactions found',
+                        }),
                     );
+                }
                 return res._success(transactions);
             },
-            (err) => {
-                return next(err);
-            },
+            err => next(err),
         );
 }
 
@@ -147,37 +144,36 @@ function handleGetUserTransactions(req, res, next) {
         .exec()
         .then(
             (transactions) => {
-                if (!transactions.length)
+                if (!transactions.length) {
                     return res._sendError(
-                        "No matching documents",
+                        'No matching documents',
                         new serverUtils.ErrorReport(404, {
-                            transactions: "no transactions found"
+                            transactions: 'no transactions found',
                         })
                     );
+                }
                 return res._success(transactions);
             },
-            (err) => {
-                return next(err);
-            },
+            err => next(err),
         );
 }
 
 function handlePutTransactionStatus(req, res, next) {
-    if (!(req.body && req.body.hasOwnProperty('status'))) return res._sendError('missing or invalid parameters', new serverUtils.ErrorReport({
-        status: 'status not provided'
-    }));
+    if (!(req.body && req.body.hasOwnProperty('status'))) {
+        return res._sendError('missing or invalid parameters', new serverUtils.ErrorReport({
+            status: 'status not provided',
+        }));
+    }
     const {
-        transaction
+        transaction,
     } = req._params, {
-        status
+        status,
     } = req.body, {
-        _id
+        _id,
     } = req.params;
     transaction.status = status.toLowerCase();
     transaction.save().then((_transaction) => {
         res._success(status);
-        socketIoServer.in(_id).emit("status", status)
-    }, (err) => {
-        return next(err)
-    });
+        socketIoServer.in(_id).emit('status', status);
+    }, err => next(err));
 }
