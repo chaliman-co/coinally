@@ -2,29 +2,44 @@ const router = require('express').Router();
 const path = require('path');
 const serverUtils = require('../../../lib/utils');
 
-const { User } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
+const {
+    User
+} = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
 
 async function handlePostUser(req, res, next) {
     const rawInput = req.body;
     const userDetails = new User.Fields();
 
-    const referrerId = req.body.referrer;
+    const refCode = rawInput.referrer;
 
-    if (referrerId) {
-        const user = await User.findById(referrerId);
-        if (!user) {
-            return res._sendError('Referrer does not exist',
-                new serverUtils.ErrorReport(400, {
-                    referrer: 'This referrer does not exist',
-                }))
+    if (refCode) {
+        try {
+            const user = await User.findOne({
+                refCode
+            });
+            if (!user) {
+                return res._sendError('Referrer does not exist',
+                    new serverUtils.ErrorReport(400, {
+                        referrer: 'This referrer does not exist',
+                    }))
+            }
+            rawInput.referrer = String(user._id);
+        } catch (err) {
+            console.log(err)
         }
-        rawInput.referrer = user._id;
-        rawInput.refCode = generateRefCode(`${userDetails.firstName} ${userDetails.lastName}`);
+    }
+    try {
+        rawInput.refCode = await generateRefCode(`${rawInput.firstName} ${rawInput.lastName}`);
+    } catch (err) {
+        console.log(err)
     }
 
     try {
         serverUtils.deepAssign(userDetails, rawInput);
     } catch (err) {
+        console.log({
+            err
+        })
         const unknownField = err.message.match(/property (.+),/)[1];
         return res._sendError('unknown parameters',
             new serverUtils.ErrorReport(400, {
@@ -49,7 +64,7 @@ async function handlePostUser(req, res, next) {
 
     try {
         await user.save();
-        return res.redirect('/auth/new');
+        return res._success();
     } catch (err) {
         return next(err);
     }
@@ -62,17 +77,19 @@ async function generateRefCode(name) {
     let names = name.split(' ');
     let digits = Math.floor(100000 + Math.random() * 900000)
         .toString().split('');
-
     let codeArray = [];
-
     codeArray.push(...names.map(n => getLast(n)));
     codeArray.push(...digits);
-
     codeArray = shuffle(codeArray);
-
     const refCode = codeArray.join('');
-
-    const user = await User.find({ refCode });
+    let user = null
+    try {
+        user = await User.findOne({
+            refCode
+        });
+    } catch (err) {
+        console.log(err);
+    }
 
     if (user) {
         return generateRefCode(name);
@@ -103,7 +120,7 @@ function shuffle(array) {
 
 function getLast(word) {
     if (word) {
-        return word.toLowerCase().charAt(word.lenght - 1);
+        return word.toLowerCase().charAt(word.length - 1);
     } else {
         return '';
     }

@@ -9,7 +9,9 @@ import router from './router';
 import store from './store';
 import utils from './utils';
 
-const { apiRootUrl } = utils;
+const {
+    apiRootUrl,
+} = utils;
 
 const apiUrl = `${apiRootUrl}/api`;
 
@@ -93,34 +95,9 @@ const app = new Vue({
     mounted() {
         this.$store.commit('setAuth');
 
-        const { token } = this.$store.state;
-
-        this.user = globalUser = fetchedUser || null;
-
-        cb(null, fetchedUser);
-    }
-});
-}
-else {
-    cb(new Error('No token found'), null);
-}
-},
-logOut() {
-    console.log(this.global, this);
-    this.global.user = globalUser = null;
-    localStorage.remove('COINALLY_AUTH_TOKEN');
-},
-},
-},
-provide() {
-        return {
-            global: this.global,
-        };
-    },
-    mounted() {
-        this.$store.commit('setAuth');
-
-        const token = this.$store.state.token;
+        const {
+            token,
+        } = this.$store.state;
 
         if (token) {
             this.global.user = this.$store.state.user;

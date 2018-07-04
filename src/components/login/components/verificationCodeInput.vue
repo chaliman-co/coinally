@@ -127,9 +127,9 @@
 
         Object.entries(serverResponse.errors.errorDetails)
         .forEach(([field, value]) => {
-          this.requestErrors = Object.assign({
+          this.requestErrors = Object.assign({}, this.requestErrors, {
             [field]: value,
-          }, this.requestErrors);
+          });
         });
 
         this.validationFailed = true;

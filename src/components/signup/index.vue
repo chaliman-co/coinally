@@ -13,14 +13,14 @@
               First name
               <font color="red" class="input-error-message" v-if="validationFailed"> *{{validationError.firstName}}</font>
             </label>
-            <input type="text" v-model="firstName" id="firstname" placeholder="first name" required/>
+            <input type="text" v-model="form.firstName.value" id="firstname" placeholder="first name" required/>
           </div>
-          <div class="textbox-component password">
+          <div class="textbox-component">
             <label for="lastname">
               Last name
               <font color="red" class="input-error-message" v-if="validationFailed"> *{{validationError.lastName}}</font>
             </label>
-            <input type="text" v-model="lastName" id="lastname" placeholder="Last name" required/>
+            <input type="text" v-model="form.lastName.value" id="lastname" placeholder="Last name" required/>
           </div>
         </div>
         <div class="form-row custom-form-group">
@@ -29,21 +29,32 @@
               Email
               <font color="red" class="input-error-message" v-if="validationFailed"> *{{validationError.emailAddress}}</font>
             </label>
-            <input type="email" v-model="emailAddress" @change="delete requestErrors.emailAddress" id="email" placeholder="jane@doe.com" required/>
+            <input type="email" v-model="form.emailAddress.value" @input="requestErrors.emailAddress = undefined" id="email" placeholder="jane@doe.com" required/>
           </div>
           <div class="textbox-component">
             <label for="image">
               Picture
             </label>
-            <input type="file" id="image" v-on:change="image=$event.target.files[0]" accept="image/*" />
+            <input type="file" id="image" v-on:change="form.image.value=$event.target.files[0]" accept="image/*" />
           </div>
         </div>
+
+        <div class="custom-form-group">
+          <div class="textbox-component">
+            <label for="referrer">
+              Referrer code
+              <font color="red" class="input-error-message" v-if="validationFailed"> *{{validationError.referrer}}</font>
+            </label>
+            <input type="text" v-model="form.referrer.value" id="referrer" @input="requestErrors.referrer = undefined" placeholder="ref code..." />
+          </div>
+        </div>
+
         <div class="custom-form-group">
           <label for="phone-number">
             Phone number
             <font color="red" class="input-error-message" v-if="validationFailed"> *{{validationError.phoneNumber}}</font>
           </label>
-          <tel-input v-model="phoneNumber" errorMessage="please enter a valid phone number" required> </tel-input>
+          <tel-input @input="setPhoneNumber" errorMessage="please enter a valid phone number" required> </tel-input>
         </div>
         <div class="select-component custom-form-group">
           <label for="country">
@@ -77,18 +88,41 @@ export default {
   props: ['nextPage'],
   data() {
     return {
+      console,
+      form: {
+        country: {
+          required: true,
+          value: undefined,
+        },
+        phoneNumber: {
+          required: true,
+          value: undefined,
+        },
+        firstName: {
+          required: true,
+          value: undefined,
+        },
+        lastName: {
+          required: true,
+          value: undefined,
+        },
+        emailAddress: {
+          required: true,
+          value: undefined,
+        },
+        image: {
+          value: undefined,
+        },
+        referrer: {
+          value: undefined,
+        },
+      },
+
       countryData: countryNames.map(function(name) {
         return { name }
       }),
-      country: null,
-      phoneNumber: null,
-      firstName: null,
-      lastName: null,
-      emailAddress: null,
-      errorSummary: null,
+      errorSummary: '',
       requestErrors: {},
-      image: null,
-      console,
       isWaiting: false,
       validationFailed: false,  //don't show error messages on initial render
     };
@@ -99,35 +133,36 @@ export default {
     },
     validationError() {
       const errors = {};
-      for (let field of ['emailAddress', 'firstName', 'lastName', 'phoneNumber', 'country']) {
-        if (!this[field] || this[field].isValid === false) errors[field] = 'invalid';
+      for (let field in this.form) {
+        if (this.form[field].isValid === false) errors[field] = 'invalid';
+        if (this.form[field].required && !this.form[field].value) errors[field] = 'required';
         if (this.requestErrors[field]) errors[field] = this.requestErrors[field];
       }; console.log('errors:', errors)
       return errors
     },
   },
   methods: {
+    setPhoneNumber({isValid, digits, region}) {
+      console.log({isValid, digits, region});
+      Object.assign(this.form.phoneNumber, {isValid, value: {digits, region}});
+      // this.form.phoneNumber.value = {digits, region};
+      // this.form.phoneNumber.isValid = isValid
+    },
     updateCountry(val) {
       let countryInput = document.getElementById('country');
       console.log(val);
       if (!val) countryInput.setCustomValidity('please select one');
       else countryInput.setCustomValidity('');
-      this.country = val.name;
+      this.form.country.value = val.name;
     },
     submit() {
       if (!this.isValidated) {
         return this.validationFailed = true;
       };
       this.isWaiting = true;
-      let postBody = {
-        firstName: this.firstName,
-        lastName: this.lastName,
-        country: this.country,
-        emailAddress: this.emailAddress,
-        phoneNumber: this.phoneNumber
-      };
-      if (this.image) {
-        postBody.image = this.image
+      let postBody = {};
+      for (const field in this.form) postBody[field] = this.form[field].value; console.log({postBody})
+      if (postBody.image) {
         postBody = objectToFormData(postBody)
       };
       this.global.request("POST", "/users", postBody, function(err, result) {
@@ -138,7 +173,7 @@ export default {
           return
         };
         console.log("success...", result);
-         this.errorSummary = '';
+        this.errorSummary = '';
         this.requestErrors = {};
         if (this.$route.query.nextPage) {
           return this.$router.push({
@@ -163,12 +198,12 @@ export default {
       };
       if (Math.floor(err.response.status / 100) == 4) this.errorSummary = 'validation failed';
       else this.errorSummary = 'internal server error';
-      let serverResponse = err.response.data;
-      for (let field in serverResponse.errors.errorDetails) {
-        this.requestErrors[field] = serverResponse.errors.errorDetails[field];
-      };
-      /* remove later */
-      if (err.response.status == 409) this.requestErrors.emailAddress = 'Email already taken';
+      const serverResponse = err.response.data;
+      Object.entries(serverResponse.errors.errorDetails)
+        .forEach(([field, value]) => {
+          this.requestErrors = Object.assign({}, this.requestErrors, {
+            [field]: value});
+        });
       this.validationFailed = true;
     },
   },

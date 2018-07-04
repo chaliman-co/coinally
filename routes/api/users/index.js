@@ -1,30 +1,30 @@
 const
-    multer = require('multer'),
-    router = require('express').Router({
+    multer = require('multer');
+    const router = require('express').Router({
         mergeParams: true,
-    }),
-    path = require('path'),
-    serverUtils = require('../../../lib/utils'),
-    {
+    });
+    const path = require('path');
+    const serverUtils = require('../../../lib/utils');
+    const {
         User,
-    } = require(path.join(serverUtils.getRootDirectory(), 'lib/db')),
-    auth = require(path.join(serverUtils.getRootDirectory(), 'lib/auth')),
-    {
+    } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
+    const auth = require(path.join(serverUtils.getRootDirectory(), 'lib/auth'));
+    const {
         handleGetUsers,
-    } = require('./get'),
-    {
+    } = require('./get');
+    const {
         handleGetUser,
-    } = require('./get'),
-    {
+    } = require('./get');
+    const {
         handlePostUser,
-    } = require('./post'),
-    {
+    } = require('./post');
+    const {
         handlePatchUser,
-    } = require('./patch'),
-    assetAccountsRoute = require('./assetAccounts'),
-    verificationDetailsRoute = require('./verificationDetails'),
-    statusRoute = require('./status'),
-    imageStoragePath = path.join(serverUtils.getPublicDirectory(), 'images/profile_pictures');
+    } = require('./patch');
+    const assetAccountsRoute = require('./assetAccounts');
+    const verificationDetailsRoute = require('./verificationDetails');
+    const statusRoute = require('./status');
+    const imageStoragePath = path.join(serverUtils.getPublicDirectory(), 'images/profile_pictures');
 
 module.exports = router;
 

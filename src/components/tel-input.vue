@@ -63,7 +63,7 @@ export default {
     methods: {
         oninput(event) {
             let input = event.target.value.replace(/ /g, ''), number, isValid;
-            if (!input) return console.log("undefined input: ", input);
+            if (!input) return;
             this.formatter.clear();
             for (let digit of input) this.formatter.inputDigit(digit);
             try {

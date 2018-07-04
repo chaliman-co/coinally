@@ -6,8 +6,7 @@ const router = require('express').Router({ mergeParams: true }),
     { Asset } = require(path.join(serverUtils.getRootDirectory(), 'lib/db')),
     assetsStoragePath = path.join(
         serverUtils.getPublicDirectory(),
-        'images/assets',
-    );
+        'images/assets');
 const db = require('../../../lib/db');
 
 module.exports = router;
