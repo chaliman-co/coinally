@@ -31,7 +31,7 @@
         </div>
       </div>
       <div class="dashboard__body">
-
+        <!-- {{ transactions }} -->
         <div class="admin-dashboard__transactions">
           <div class="transactions__table">
 
@@ -80,7 +80,7 @@
                                 </tbody>
                             </table>
                         </div> -->
-
+            <spinner v-if="loading"></spinner>
             <div class="table-responsive">
               <table class="table table-striped table-hover">
                 <thead>
@@ -101,7 +101,7 @@
                   <tr
                     v-for="(transaction, index) in transactions"
                     :key="index">
-                    <td>{{ index + 1 }}</td>
+                    <td>{{ index + 1 + pageNo }}</td>
                     <td>{{ transaction.user.firstName }} {{ transaction.user.lastName }}</td>
                     <td>{{ transaction.depositAssetCode }}</td>
                     <td>{{ transaction.receiptAssetCode }}</td>
@@ -137,6 +137,14 @@
             </div>
           </div>
         </div>
+
+        <pagination
+        :active-page="page"
+        :total-items-count="transactionsCount"
+        :items-count-per-page="pageSize"
+        @changePage="updatePage"
+        ></pagination>
+
       </div>
     </div>
   </div>
@@ -147,15 +155,26 @@ import moment from 'moment';
 import transaction from './transaction.vue';
 import sideBar from './../sideBar.vue';
 
+import pagination from './../pagination';
+import spinner from './../spinner';
+
 export default {
   components: {
     'side-bar': sideBar,
     transaction,
+    pagination,
+    spinner
   },
   data() {
     return {
+      loading: false,
       transactions: [],
       transactionStatuses: ['initialized', 'payment_received', 'completed', 'failed'],
+      status : 'awaiting payment',
+      page: 1,
+      pageSize: 5,
+      transactionsCount: 0,
+      pageNo: 0,
     };
   },
   inject: ['global'],
@@ -165,12 +184,7 @@ export default {
     },
   },
   created() {
-    const url = `/transactions${this.user.role === 'admin' ? '' : `?user=${this.user._id}`}`;
-    this.$request('GET', url, (err, transactions) => {
-      if (!err) {
-        this.transactions = transactions;
-      }
-    });
+    this.getTransactions();
   },
   methods: {
     formatTime(time) {
@@ -188,6 +202,28 @@ export default {
         this.$set(tx, 'status', status);
       }
     },
+    getTransactions(){
+      this.loading = true;
+      const url = `/transactions?page=${this.page}&pageSize=${this.pageSize}&status=${this.status}`;
+      // const url = `/transactions?page=${this.page}&pageSize=${this.pageSize}`;
+      
+      this.$request('GET', url, (err, response) => {
+        if (!err) {
+          this.transactions = response.items;
+          this.transactionsCount = response.totalCount;
+
+          this.loading = false;
+        }
+      });
+    },
+    updatePage(page) {
+      // this.pageNo = this.pageNo + pageSize;
+      this.page = page;
+      this.loading = true;
+      this.transactions = [];
+      this.getTransactions();
+    },
+
   },
 };
 </script>

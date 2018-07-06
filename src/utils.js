@@ -3,7 +3,7 @@ import store from './store';
 
 
 // const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:9000';
-const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://coinally.herokuapp.com/';
+const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://coinally.herokuapp.com';
 
 
 const apiUrl = `${apiRootUrl}/api`;
