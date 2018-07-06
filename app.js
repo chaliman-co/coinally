@@ -1,26 +1,28 @@
-const
-    http = require('http'),
-    express = require('express'),
-    path = require('path'),
-    util = require('util'),
-    logger = require('morgan'),
-    bodyParser = require('body-parser'),
-    db = require('./lib/db'),
-    socketIoServer = require('./socketIoServer'),
-    serverUtils = require('./lib/utils'),
-    indexRoute = require('./routes/index'),
-    apiRoute = require('./routes/api'),
-    cors = require('cors'),
-    app = express();
+const http = require('http');
+const express = require('express');
+const path = require('path');
+const util = require('util');
+const logger = require('morgan');
+const bodyParser = require('body-parser');
+const db = require('./lib/db');
+const socketIoServer = require('./socketIoServer');
+const serverUtils = require('./lib/utils');
+const indexRoute = require('./routes/index');
+const apiRoute = require('./routes/api');
+const cors = require('cors');
+
+const app = express();
+
+require('dotenv').config();
 
 app
     .use(logger('dev'))
-    .use((req, res, next) => { 
+    .use((req, res, next) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         next();
     })
     .use(cors())
-    .options(/.*/, (req, res, next) => {
+    .options(/.*/, (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -40,9 +42,8 @@ socketIoServer.attach(server, {
 
 db.Config.getLive(() => {
     db.Asset.getLive(() => {
-        server.listen(process.env.PORT || Number(process.argv[2]) || 8000, function () {
-            console.log(`server listening on ${util.inspect(server.address(), { colors: true, depth: null })}`)
-        })
-
+        server.listen(process.env.PORT || Number(process.argv[2]) || 8000, () => {
+            console.log(`server listening on ${util.inspect(server.address(), { colors: true, depth: null })}`);
+        });
     });
 });

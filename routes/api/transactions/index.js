@@ -10,6 +10,9 @@ const
         Config,
     } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
 
+const paystack = require('paystack')(process.env.PAYSTACK_API_KEY);
+const enums = require('../../../lib/enum');
+
 
 module.exports = router;
 router
@@ -24,19 +27,23 @@ router
 .param('_id', resolveTransaction)
 
 // .get('/:_id', auth.bounceUnauthorised({ admin: true, owner: true }),  handleGetTransaction)
-.put('/:_id/status', auth.bounceUnauthorised({ admin: true }), handlePutTransactionStatus);
+.put('/:_id/status', auth.bounceUnauthorised({ admin: true }), handlePutTransactionStatus)
+    .put('/:_id/payment/verify', handleVerifyPaystack);
 
 function resolveTransaction(req, res, next, _id) {
     req._params = req._params || {};
-    Transaction.findById(_id).then((transaction) => {
-        if (!transaction) {
-            return res._sendError('item not found', new serverUtils.ErrorReport({
-                _id: '_id not found',
-            }));
-        }
-        req._params.transaction = transaction;
-        next();
-    });
+    Transaction.findById(_id)
+        .populate('depositAsset')
+        .populate('receiptAsset')
+        .then((transaction) => {
+            if (!transaction) {
+                return res._sendError('item not found', new serverUtils.ErrorReport({
+                    _id: '_id not found',
+                }));
+            }
+            req._params.transaction = transaction;
+            next();
+        });
 }
 
 function resolveUser(req, res, next, _id) {
@@ -91,71 +98,76 @@ function handlePostTransaction(req, res, next) {
             }),
         );
     }
+
     transactionDetails.user = req.user._id;
     const transaction = new Transaction(transactionDetails);
-    transaction.save().then(
-        (transaction) => {
+    transaction.save()
+        .then((transaction) => {
             transaction.user.transactionCount++;
-            transaction.user.save().then(user => res._success(transaction), err => next(err));
-        },
-        err => next(err),
-    );
+            return transaction.user.save();
+        })
+        .then(user => res._success(transaction), err => next(err))
+        .catch(err => next(err));
 }
 
 function handleGetTransactions(req, res, next) {
     const {
-        skip = 0, limit = 20,
+        page = 0, pageSize = 20, status = null
     } = req.query;
-    Transaction.find(req.user.role == 'admin' ? {} : { user: req.user._id })
+
+    const query = req.user.role === 'admin' ? {} : { user: req.user._id };
+
+    if (status) {
+        query.status = status.toLowerCase();
+    }
+
+    const getTransactions = Transaction.find(query)
         .sort('-createdAt')
-        .limit(Number(limit))
-        .skip(Number(skip))
+        .limit(Number(pageSize))
+        .skip(Number((page - 1) * pageSize))
         .populate('receiptAsset', 'type')
         .populate('depositAsset', 'type')
         .populate('user', ['assetAccounts', 'firstName', 'lastName'])
-        .exec()
-        .then(
-            (transactions) => {
-                if (!transactions.length) {
-                    return res._sendError(
-                        'No matching documents',
-                        new serverUtils.ErrorReport(404, {
-                            transactions: 'no transactions found',
-                        }),
-                    );
-                }
-                return res._success(transactions);
-            },
-            err => next(err),
-        );
+        .exec();
+
+    const countTransactions = Transaction.find(query);
+
+    Promise.all([getTransactions, countTransactions])
+        .then(([transactions, transactionCount]) => res._success({
+            items: transactions,
+            totalCount: transactionCount,
+        }))
+        .catch(err => next(err));
 }
 
 function handleGetUserTransactions(req, res, next) {
     const {
-        skip = 0, limit = 20,
+        page = 0, pageSize = 20, status = null
     } = req.query;
-    Transaction.find({ user: req._params.user._id })
+
+    const query = { user: req.user._id };
+
+    if (status) {
+        query.status = status.toLowerCase();
+    }
+
+    const getTransactions = Transaction.find(query)
         .sort('-createdAt')
-        .limit(Number(limit))
-        .skip(Number(skip))
+        .limit(Number(pageSize))
+        .skip(Number((page - 1) * pageSize))
         .populate('receiptAsset', 'type')
         .populate('depositAsset', 'type')
         .populate('user', ['assetAccounts', 'firstName', 'lastName'])
-        .exec()
-        .then(
-            (transactions) => {
-                if (!transactions.length) {
-                    return res._sendError(
-                        'No matching documents',
-                        new serverUtils.ErrorReport(404, {
-                            transactions: 'no transactions found',
-                        })
-                    );
-                }
-                return res._success(transactions);
-            },
-            err => next(err),
-        );
+        .exec();
+
+    const countTransactions = Transaction.count(query);
+
+    Promise.all(getTransactions, countTransactions)
+        .then(([transactions, transactionCount]) => res._success({
+            items: transactions,
+            totalCount: transactionCount,
+        }))
+        .catch(err => next(err));
 }
 
 function handlePutTransactionStatus(req, res, next) {
@@ -176,4 +188,33 @@ function handlePutTransactionStatus(req, res, next) {
         res._success(status);
         socketIoServer.in(_id).emit('status', status);
     }, err => next(err));
+}
+
+async function handleVerifyPaystack(req, res, next) {
+    try {
+        const { transaction } = req._params;
+        paystack.transactions
+            .verify(transaction._id, async function(error, body) {
+                if (error) {
+                    throw error;
+                }
+
+                if (body.status &&
+                    body.data.status === 'successful' &&
+                    transaction.depositAmount <= body.data.amount / 100) {
+
+                    transaction.status = enums.txStatus.PAYMENT_RECEIVED;
+                    await transaction.save();
+
+                    res._success({});
+                } else {
+                    res._sendError('Payment not verified',
+                        new serverUtils.ErrorReport({
+                            status: 'Payment not verified',
+                        }));
+                }
+            });
+    } catch (error) {
+        console.log(error);
+    }
 }
