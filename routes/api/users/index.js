@@ -1,41 +1,30 @@
 const
     multer = require('multer');
-    const router = require('express').Router({
-        mergeParams: true,
-    });
-    const path = require('path');
-    const serverUtils = require('../../../lib/utils');
-    const {
-        User,
-    } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
-    const auth = require(path.join(serverUtils.getRootDirectory(), 'lib/auth'));
-    const {
-        handleGetUsers,
-    } = require('./get');
-    const {
-        handleGetUser,
-    } = require('./get');
-    const {
-        handlePostUser,
-<<<<<<< HEAD
-    } = require('./post');
-    const {
-        handlePatchUser,
-    } = require('./patch');
-    const assetAccountsRoute = require('./assetAccounts');
-    const verificationDetailsRoute = require('./verificationDetails');
-    const statusRoute = require('./status');
-    const imageStoragePath = path.join(serverUtils.getPublicDirectory(), 'images/profile_pictures');
-=======
-    } = require('./post'),
-    {
-        handlePatchUser,
-    } = require('./patch'),
-    assetAccountsRoute = require('./assetAccounts'),
-    verificationDetailsRoute = require('./verificationDetails'),
-    statusRoute = require('./status'),
-    imageStoragePath = path.join(serverUtils.getPublicDirectory(), 'images/profile_pictures');
->>>>>>> 8508b38225f22f50211ffd431cc7f52b1f062fc2
+const router = require('express').Router({
+    mergeParams: true,
+});
+const path = require('path');
+const serverUtils = require('../../../lib/utils');
+const {
+    User,
+} = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
+const auth = require(path.join(serverUtils.getRootDirectory(), 'lib/auth'));
+const {
+    handleGetUsers,
+} = require('./get');
+const {
+    handleGetUser,
+} = require('./get');
+const {
+    handlePostUser,
+} = require('./post');
+const {
+    handlePatchUser,
+} = require('./patch');
+const assetAccountsRoute = require('./assetAccounts');
+const verificationDetailsRoute = require('./verificationDetails');
+const statusRoute = require('./status');
+const imageStoragePath = path.join(serverUtils.getPublicDirectory(), 'images/profile_pictures');
 
 module.exports = router;
 
@@ -48,9 +37,9 @@ router
         admin: true,
     }), handleGetUsers)
 
-    .param('_id', resolveUser)
+.param('_id', resolveUser)
 
-    .get('/:_id', auth.bounceUnauthorised({
+.get('/:_id', auth.bounceUnauthorised({
         owner: true,
         admin: true,
     }), handleGetUser) // admin and owner can access this route
