@@ -38,7 +38,7 @@ export default {
     },
     computed: {
         validity() {
-            return this.value && this.value.isValid ? 'is-valid' : 'is-invalid'
+            return this.currentValue && this.currentValue.isValid ? 'is-valid' : 'is-invalid'
         }
     },
     watch: {
@@ -47,6 +47,12 @@ export default {
         }
     },
     created() {
+        if (this.value) {
+            console.log(this.value)
+            this.countryCode = this.value.region;
+            this.formatter = new Libphonenumber.AsYouTypeFormatter(this.value.region)
+            this.oninput({ target: { value: this.value.digits } });
+        }
         const request = new XMLHttpRequest();
         request.open("GET", "https://ipinfo.io/json");
         request.onreadystatechange = () => {
@@ -72,16 +78,16 @@ export default {
             } catch (err) {
             }
             if (isValid) {
-                event.target.setCustomValidity('')
+                if (event.target.setCustomValidity) event.target.setCustomValidity('');
                 this.rawInput = input = phoneUtil.format(number, 1).trim();
                 this.$emit("input", this.currentValue = { region: this.countryCode, digits: input, isValid: true });
                 return
             }
             this.rawInput = input = this.formatter.currentOutput_.trim();
-            event.target.setCustomValidity(this.errorMessage)
+            if (event.target.setCustomValidity) event.target.setCustomValidity(this.errorMessage);
             this.$emit("input", this.currentValue = { region: this.countryCode, digits: input, isValid: false });
-        }
-    }
+        },
+    },
 
 }
 </script>
