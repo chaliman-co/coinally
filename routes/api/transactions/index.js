@@ -22,12 +22,14 @@ router
 .param('userid', resolveUser)
 
 .get('/users/:_userid', auth.bounceUnauthorised({ admin: true }), handleGetUserTransactions)
+    .get('/recent', handleGetRecentTransactions)
 
 .param('_id', resolveTransaction)
 
-// .get('/:_id', auth.bounceUnauthorised({ admin: true, owner: true }),  handleGetTransaction)
-.put('/:_id/status', auth.bounceUnauthorised({ admin: true }), handlePutTransactionStatus)
-    .put('/:_id/payment/verify', handleVerifyPaystack);
+.get('/:_id', auth.bounceUnauthorised({ admin: true, owner: true }), handleGetTransaction)
+    .put('/:_id/status', auth.bounceUnauthorised({ admin: true }), handlePutTransactionStatus)
+    .put('/:_id/payment/verify', handleVerifyPaystack)
+    .put('/:_id/receiptAddress', handleAddReceiptAddress);
 
 function resolveTransaction(req, res, next, _id) {
     req._params = req._params || {};
@@ -179,7 +181,7 @@ function handleGetUserTransactions(req, res, next) {
 
     const countTransactions = Transaction.count(query);
 
-    Promise.all(getTransactions, countTransactions)
+    Promise.all([getTransactions, countTransactions])
         .then(([transactions, transactionCount]) => res._success({
             items: transactions,
             totalCount: transactionCount,
@@ -187,37 +189,71 @@ function handleGetUserTransactions(req, res, next) {
         .catch(err => next(err));
 }
 
-function handlePutTransactionStatus(req, res, next) {
-    if (!(req.body && req.body.hasOwnProperty('status'))) {
-        return res._sendError('missing or invalid parameters', new serverUtils.ErrorReport({
-            status: 'status not provided',
-        }));
+function handleGetRecentTransactions(req, res, next) {
+
+    const getTransactions = Transaction.find({})
+        .sort('-createdAt')
+        .limit(5)
+        .populate('receiptAsset', 'type')
+        .populate('depositAsset', 'type')
+        .exec();
+
+    getTransactions
+        .then((transactions) => res._success(transactions))
+        .catch(err => next(err));
+}
+
+function handleAddReceiptAddress(req, res, next) {
+    if (!(req.body &&
+            req.body.hasOwnProperty('receiptAddress'))) {
+        return res._sendError('missing or invalid parameters',
+            new serverUtils.ErrorReport({
+                receiptAddress: 'receiptAddress not provided',
+            }));
     }
-    const {
-        transaction,
-    } = req._params, {
-        status,
-    } = req.body, {
-        _id,
-    } = req.params;
+    const { transaction } = req._params;
+    const { receiptAddress } = req.body;
+
+    transaction.receiptAddress = receiptAddress
+    transaction.save()
+        .then((_transaction) => {
+            res._success({});
+        })
+        .catch(err => next(err));
+}
+
+function handlePutTransactionStatus(req, res, next) {
+    if (!(req.body &&
+            req.body.hasOwnProperty('status'))) {
+        return res._sendError('missing or invalid parameters',
+            new serverUtils.ErrorReport({
+                status: 'status not provided',
+            }));
+    }
+    const { transaction } = req._params;
+    const { status } = req.body;
+    const { _id } = req.params;
+
     transaction.status = status.toLowerCase();
-    transaction.save().then((_transaction) => {
-        res._success(status);
-        socketIoServer.in(_id).emit('status', status);
-    }, err => next(err));
+    transaction.save()
+        .then((_transaction) => {
+            res._success(status);
+            socketIoServer.in(_id).emit('status', status);
+        })
+        .catch(err => next(err));
 }
 
 async function handleVerifyPaystack(req, res, next) {
     try {
         const { transaction } = req._params;
-        paystack.transactions
+
+        paystack.transaction
             .verify(transaction._id, async function(error, body) {
                 if (error) {
                     throw error;
                 }
-
                 if (body.status &&
-                    body.data.status === 'successful' &&
+                    body.data.status === 'success' &&
                     transaction.depositAmount <= body.data.amount / 100) {
 
                     transaction.status = enums.txStatus.PAYMENT_RECEIVED;
