@@ -13,7 +13,6 @@ const
 const paystack = require('paystack')(process.env.PAYSTACK_API_KEY);
 const enums = require('../../../lib/enum');
 
-
 module.exports = router;
 router
     .use(auth.bounceUnauthenticated)
@@ -65,6 +64,25 @@ function resolveUser(req, res, next, _id) {
     }).catch(err => next(err));
 }
 
+function resolveUser(req, res, next, _id) {
+    req._params = req._params || {};
+    if (req.user._id == _id) {
+        req._params.user = req.user;
+        return next();
+    } // In case it's the admin or another user
+    User.findOne({
+        _id,
+    }).populate('assetAccounts.asset', 'addressType').then((user) => {
+        if (!user) {
+            return res._sendError("item not found", new serverUtils.ErrorReport(404, {
+                _id: "user not found"
+            }));
+        }
+        req._params.user = user;
+        return next();
+    }).catch(err => next(err));
+}
+
 function handleGetTransaction(req, res, next) {
     Transaction.findById(req.params._id)
         .populate('receiptAsset')
@@ -98,7 +116,6 @@ function handlePostTransaction(req, res, next) {
             }),
         );
     }
-
     transactionDetails.user = req.user._id;
     const transaction = new Transaction(transactionDetails);
     transaction.save()

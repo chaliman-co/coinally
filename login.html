@@ -1,0 +1,122 @@
+<!-- layout.njk -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Coinaly</title>
+  <meta name="theme-color" content="#003c5e">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=PT+Serif:400,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/css-bundle.css">
+</head>
+
+<body>
+  <!-- Navigation Partial -->
+
+<nav class="nav">
+    <div class="nav__table">
+        <div class="nav__table-row">
+            <div class="nav__table-cell nav__logo">
+                <!-- ONLY SHOW THIS HAMBURGER WHEN A USER IS LOGGED IN -->
+                <span class="hamburger">
+                    <img src="./img/menu.svg" alt="Menu">
+                </span>
+                <!--  -->
+                <a href="/" class="logo">
+                    <img src="./img/logo.svg" alt="Logo">
+                </a>
+            </div>
+            <div class="nav__table-cell nav__links">
+                <a href="login.html" class="nav__link login">
+                    Login
+                </a>
+                <a href="signup.html" class="nav__link">
+                    Signup
+                </a>
+            </div>
+        </div>
+    </div>
+</nav> 
+<div class="account-page login">
+    <div class="account__form">
+        <img src="./img/account.svg" alt="Account" class="account__form-icon">
+        <div class="title">
+            Login to continue
+        </div>
+        <div class="input-fields">
+            <div class="textbox-component custom-form-group">
+                <label for="email">
+                    Email
+                </label>
+                <input type="email" id="email" placeholder="jane@doe.com" />
+            </div>
+            <div class="textbox-component password">
+                <label for="password">
+                    Password
+                </label>
+                <input type="password" id="password" placeholder="Password" />
+                <div class="footnote">
+                    <a href="" class="forgot-password">
+                        Forgot password?
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="alternative">
+            Don't have an account?
+            <a href="signup.html">Sign up here</a>
+        </div>
+        <a class="call-to-action btn-custom-astronaut-blue" href="dashboard.html">
+            Login
+        </a>
+    </div>
+</div>
+ <!-- Footer Partial -->
+
+<footer>
+    <div class="footer__table-md">
+        <div class="footer__table-row">
+            <div class="footer__table-cell footer__logo">
+                <a href="" class="logo">
+                    <img src="./img/logo-white.svg" alt="Logo">
+                </a>
+            </div>
+            <div class="footer__table-cell footer__links">
+                <div class="links">
+                    <a href="" class="link">
+                        Home
+                    </a>
+                    <a href="" class="link">
+                        Login
+                    </a>
+                    <a href="" class="link">
+                        Sign up
+                    </a>
+                    <a href="" class="link">
+                        Terms and Conditions
+                    </a>
+                </div>
+                <div class="privacy">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat fugiat illum ipsam minima, velit atque veritatis nesciunt
+                    quas dignissimos quisquam porro, consequuntur maiores dolores dicta temporibus magni explicabo qui tenetur.
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-migrate/3.0.1/jquery-migrate.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+  <script src="js/js-bundle.js"></script>
+</body>
+
+</html>

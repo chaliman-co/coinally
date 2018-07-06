@@ -17,6 +17,7 @@ const
     } = require('./get');
     const {
         handlePostUser,
+<<<<<<< HEAD
     } = require('./post');
     const {
         handlePatchUser,
@@ -25,6 +26,16 @@ const
     const verificationDetailsRoute = require('./verificationDetails');
     const statusRoute = require('./status');
     const imageStoragePath = path.join(serverUtils.getPublicDirectory(), 'images/profile_pictures');
+=======
+    } = require('./post'),
+    {
+        handlePatchUser,
+    } = require('./patch'),
+    assetAccountsRoute = require('./assetAccounts'),
+    verificationDetailsRoute = require('./verificationDetails'),
+    statusRoute = require('./status'),
+    imageStoragePath = path.join(serverUtils.getPublicDirectory(), 'images/profile_pictures');
+>>>>>>> 8508b38225f22f50211ffd431cc7f52b1f062fc2
 
 module.exports = router;
 

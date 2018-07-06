@@ -1,48 +1,47 @@
 <template>
+  
   <div id="asset-select" 
 class="header__table-cell header__cta-form">
     <div class="cta-form">
+      <!-- <p v-for="asset in assets">{{asset}} <hr></p> -->
+      
       <div class="cta-form__assets-selection">
         <div class="title">
           Choose which assets to trade
         </div>
-        <form class="input-fields" 
-@submit.prevent="proceed">
+        <form class="input-fields" @submit.prevent="proceed">
           <div class="select-component custom-form-group">
             <label for="deposit">Deposit</label>
-            <vue-select :options="assets" 
-:on-change="val => setSelect('deposit', 'depositAsset', val)" input-id="deposit" label="name">
-              <template slot="option" 
-slot-scope="option">
+            <!-- {{depositAsset}} -->
+            <vue-select :options="depositAssets" v-model="depositAsset" input-id="deposit" label="name">
+              <template slot="option" slot-scope="option">
                 <img :src="`${global.apiRootUrl}/${option.imagePath}`" 
-style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
+                  style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
               </template>
             </vue-select>
           </div>
           <div class="select-component custom-form-group">
             <label for="receipt">Receive</label>
-            <vue-select :options="assets" 
-:on-change="val => setSelect('receipt', 'receiptAsset', val)" input-id="receipt" label="name">
-              <template slot="option" 
-slot-scope="option">
+            <vue-select :options="receiptAssets" v-model="receiptAsset" input-id="receipt" label="name">
+              <template slot="option" slot-scope="option">
                 <img :src="`${global.apiRootUrl}/${option.imagePath}`" 
-style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
+                  style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
               </template>
             </vue-select>
           </div>
           <div class="textbox-component">
             <label for="amount">
-              Amount (Min: 0, Max: 100)
+              Amount (Min: {{ checkMinValue.toString() | numberFormat }} Max: {{ checkMaxValue.toString() | numberFormat}})
             </label>
             <input id="amount" 
-v-model="amount" type="number" placeholder="0" step="0.0000001">
+              v-model="amount" type="number" placeholder="0" step="0.0000001" :min="checkMinValue" :max="checkMaxValue">
+              <p v-if="inputError" class="text-danger">{{ inputError }}</p>
           </div>
-          <button id="submitbutton" 
-type="submit" class="hidden" />
+          <button id="submitbutton" type="submit" class="hidden" />
         </form>
-        <div v-if="depositAsset && receiptAsset && conversionRate" 
-class="expected-amount">
+        <div v-if="depositAsset && receiptAsset && conversionRate" class="expected-amount">
           <div class="amount">
+            
             {{ `${amount} ${depositAsset.code.toUpperCase()} (${receiptAmount}${receiptAsset.code.toUpperCase()})` }}
           </div>
           <div class="exchange-rate">
@@ -51,7 +50,7 @@ class="expected-amount">
           </div>
         </div>
         <label :disabled="!isValidated" 
-for="submitbutton" tabindex="0" class="convert btn-custom-astronaut-blue">
+            for="submitbutton" tabindex="0" class="convert btn-custom-astronaut-blue">
           Convert
         </label>
       </div>
@@ -77,6 +76,7 @@ for="submitbutton" tabindex="0" class="convert btn-custom-astronaut-blue">
         socket: null,
         request: null,
         conversionRate: null,
+        inputError: false
       };
     },
     computed: {
@@ -87,6 +87,48 @@ for="submitbutton" tabindex="0" class="convert btn-custom-astronaut-blue">
       isValidated() {
         return !!(this.depositAsset && this.receiptAsset);
       },
+      receiptAssets(){
+        return this.assets.filter(asset => this.depositAsset === null || asset._id !== this.depositAsset._id)
+        // return this.assets.filter((asset) => { 
+        //   return this.depositAsset != null && asset._id != this.depositAsset._id
+        //   })
+      },
+      depositAssets(){
+        let depositAsset = this.assets.filter(asset => this.receiptAsset === null || asset._id !== this.receiptAsset._id);
+        return depositAsset;
+      },
+      checkMinValue(){
+        if(this.depositAsset === null){
+          return '';
+        } else {
+          return this.depositAsset.minDepositAmount;
+        }
+      },
+      checkMaxValue(){
+        if(this.depositAsset === null){
+          return '';
+        } else {
+          return this.depositAsset.maxDepositAmount;
+        }
+      },
+      
+      // preventExceedMinAndMax(newAmount, previousAmount){
+      //     if(parseInt(this.amount) > this.checkMaxValue){
+      //         if(this.checkMaxValue == ''){
+      //           this.inputError = 'Please choose a deposit currency';
+      //         }else {
+      //           this.inputError = 'value cannot be greater than '+Number(this.checkMaxValue).toLocaleString();
+      //         }
+      //         this.amount = Math.max(Math.min(this.amount,this.checkMaxValue));
+      //         console.log(this.amount);
+      //     } else if(parseInt(this.amount) < 0){
+      //         this.inputError = 'value cannot be lower than 0';
+      //         this.amount = '';
+      //     } else {
+      //         this.inputError = '';
+      //     }
+      // }
+      
 
     },
     watch: {
@@ -108,11 +150,33 @@ for="submitbutton" tabindex="0" class="convert btn-custom-astronaut-blue">
           to: this.receiptAsset.code,
         });
       },
+      amount(newAmount, previousAmount){
+          
+          if(parseInt(newAmount) > this.checkMaxValue){
+              if(this.checkMaxValue == ''){
+                this.inputError = 'Please choose a deposit currency';
+              }else {
+                this.inputError = 'value cannot be greater than '+Number(this.checkMaxValue).toLocaleString();
+              }
+              // this.amount = Math.max(Math.min(newAmount,this.checkMaxValue));
+              this.amount = previousAmount;
+              console.log(newAmount, previousAmount);
+              
+          } else if(parseInt(newAmount) < 0){
+              this.inputError = 'value cannot be lower than 0';
+              this.amount = '';
+          } else if(this.amount == '') {
+              this.inputError = '';
+          }
+      }
     },
     created() {
       this.$request('GET', '/assets/', (err, res) => {
         if (err) console.error("couldn't load assets");
         this.assets = res;
+        let resLength = res.length;
+        // this.depositAsset = res[0];
+        this.receiptAsset = res[resLength - 1];
       });
     },
     methods: {
@@ -135,9 +199,11 @@ for="submitbutton" tabindex="0" class="convert btn-custom-astronaut-blue">
         } else this.socket.emit('parameter_change', query);
       },
       setSelect(inputId, modelProp, value) {
+        
         const input = document.getElementById(inputId);
         if (!input) return;
         this[modelProp] = value;
+        
         if (!value) return input.setCustomValidity('please select one');
         return input.setCustomValidity('');
       },
@@ -174,6 +240,8 @@ for="submitbutton" tabindex="0" class="convert btn-custom-astronaut-blue">
         //   }
         // });
       },
+      
+      
     },
   };
 </script>
