@@ -3,8 +3,8 @@ import store from './store';
 import router from './router';
 
 
-// const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:9000';
-const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://coinally.herokuapp.com';
+const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:9000';
+// const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://coinally.herokuapp.com';
 
 
 const apiUrl = `${apiRootUrl}/api`;
