@@ -129,7 +129,7 @@ function handlePostTransaction(req, res, next) {
 
 function handleGetTransactions(req, res, next) {
     const {
-        page = 0, pageSize = 20, status = null
+        page = 1, pageSize = 20, status = null
     } = req.query;
 
     const query = req.user.role === 'admin' ? {} : { user: req.user._id };
@@ -147,7 +147,7 @@ function handleGetTransactions(req, res, next) {
         .populate('user', ['assetAccounts', 'firstName', 'lastName'])
         .exec();
 
-    const countTransactions = Transaction.find(query);
+    const countTransactions = Transaction.count(query);
 
     Promise.all([getTransactions, countTransactions])
         .then(([transactions, transactionCount]) => res._success({
@@ -159,7 +159,7 @@ function handleGetTransactions(req, res, next) {
 
 function handleGetUserTransactions(req, res, next) {
     const {
-        page = 0, pageSize = 20, status = null
+        page = 1, pageSize = 20, status = null
     } = req.query;
 
     const query = { user: req.user._id };
