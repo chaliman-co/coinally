@@ -19,8 +19,8 @@ const
         handlePostUser,
     } = require('./post'),
     {
-        handlePatchUser = require('./patch'),
-    }
+        handlePatchUser,
+    } = require('./patch'),
     assetAccountsRoute = require('./assetAccounts'),
     verificationDetailsRoute = require('./verificationDetails'),
     statusRoute = require('./status'),

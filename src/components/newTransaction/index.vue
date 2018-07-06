@@ -31,7 +31,7 @@
                 v-if="depositAsset && receiptAsset && conversionRate"
                 class="expected-amount">
                 <div class="amount">
-                  {{ `${amount} ${depositAsset.code.toUpperCase()} (${receiptAmount}${receiptAsset.code.toUpperCase()})` }}
+                  {{amount}} {{depositAsset.code.toUpperCase()}} ({{receiptAmount}}{{receiptAsset.code.toUpperCase()}})
                 </div>
                 <div class="exchange-rate">
                   {{ `1 ${depositAsset.code.toUpperCase()} = ${conversionRate.toFixed(8).replace(/(?:\.)?0+$/, "")}${receiptAsset.code.toUpperCase()}` }}

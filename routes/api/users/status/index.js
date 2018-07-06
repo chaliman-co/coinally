@@ -2,7 +2,7 @@ const
     router = require("express").Router({ mergeParams: true }),
     path = require("path"),
     serverUtils = require("../../../../lib/utils"),
-    auth =  
+    auth =  require(path.join(serverUtils.getRootDirectory(), 'lib/auth')),
     { User } = require(path.join(serverUtils.getRootDirectory(), "lib/db"))
 ;
 module.exports = router;
