@@ -51,7 +51,7 @@ export default {
             log('response from axios', response);
             cb(null, response.data.result);
         }).catch((err) => {
-            if (err.response.status === 401) {
+            if (err.response && err.response.status === 401) {
                 store.commit('signOut');
                 router.push('/login');
             } else {
@@ -66,4 +66,6 @@ export default {
     getStatus() {
         return ['failed', 'awaiting payment', 'payment received', 'pending', 'completed'];
     },
+
+    paystackKey: 'pk_test_44137d56a537d63819b944e70c444e8c36f3d76f',
 };

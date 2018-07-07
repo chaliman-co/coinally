@@ -1,5 +1,9 @@
 <template>
     <div class="dashboard__content">
+
+        <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
+            <i class="fa fa-plus"></i> New Transaction
+        </a>
     <transaction
       ref="transaction"
       @statusChanged="changeStatus"/>
@@ -12,14 +16,7 @@
               </div>
             </div>
             <div class="top-bar__table-cell top-bar__controls">
-              <a
-                href=""
-                class="btn-custom-astronaut-blue small"
-                data-toggle="modal" 
-                data-target="#exchange-modal">
-                <i class="fa fa-plus"/> New Transaction
-              </a>
-
+              <transaction-modal/>
               <a
                 href="verify.html"
                 class="btn-custom-transparent-astronaut-blue small">
@@ -93,6 +90,7 @@
 import moment from 'moment';
 import transaction from '../transactions/transaction.vue';
 import sideBar from './../sideBar';
+import transactionModal from '../transactionModal.vue';
 import {mapState, mapGetters} from 'vuex';
 
 window.moment = moment;
@@ -100,7 +98,8 @@ export default {
   inject: ['global'],
   components: {
     'side-bar': sideBar,
-    transaction
+    transaction,
+    transactionModal
   },
   data() {
     return {

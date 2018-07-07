@@ -1,5 +1,6 @@
 <template>
     <div class="dashboard__content">
+              <transaction-modal/>
             <div class="dashboard__top-bar">
                 <div class="top-bar__table-md">
                     <div class="top-bar__table-row">
@@ -9,6 +10,10 @@
                             </div>
                         </div>
                         <div class="top-bar__table-cell top-bar__controls">
+
+        <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
+            <i class="fa fa-plus"></i> New Transaction
+        </a>
                         </div>
                     </div>
                 </div>
@@ -183,3 +188,12 @@
             </div>
         </div>
 </template>
+
+<script>
+import transactionModal from '../transactionModal.vue';
+export default {
+    components: {
+    transactionModal
+    }
+}
+</script>

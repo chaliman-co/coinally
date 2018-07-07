@@ -26,16 +26,20 @@ Vue.filter('capitalize', (value) => {
 });
 
 Vue.filter('numberFormat', (value) => {
+    if (value) {
+        value = String(value);
+        if (value.indexOf(".") !== -1) {
+            let stringAfterPoint = value.substr(value.indexOf(".") + 1);
+            let formatStringAfterPoint = stringAfterPoint.replace(/(...)/g, "$1,");
+            let stringBeforePoint = value.slice(0, value.indexOf("."));
+            let numberBeforePoint = Number(stringBeforePoint).toLocaleString();
 
-    if (value.indexOf(".") !== -1) {
-        let stringAfterPoint = value.substr(value.indexOf(".") + 1);
-        let formatStringAfterPoint = stringAfterPoint.replace(/(...)/g, "$1,");
-        let stringBeforePoint = value.slice(0, value.indexOf("."));
-        let numberBeforePoint = Number(stringBeforePoint).toLocaleString();
-
-        return numberBeforePoint.toString() + '.' + formatStringAfterPoint;
+            return numberBeforePoint.toString() + '.' + formatStringAfterPoint;
+        } else {
+            return Number(value).toLocaleString();
+        }
     } else {
-        return Number(value).toLocaleString();
+        return 0;
     }
 
 });

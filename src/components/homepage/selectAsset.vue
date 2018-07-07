@@ -89,12 +89,9 @@ class="header__table-cell header__cta-form">
       },
       receiptAssets(){
         return this.assets.filter(asset => this.depositAsset === null || asset._id !== this.depositAsset._id)
-        // return this.assets.filter((asset) => { 
-        //   return this.depositAsset != null && asset._id != this.depositAsset._id
-        //   })
       },
       depositAssets(){
-        let depositAsset = this.assets.filter(asset => this.receiptAsset === null || asset._id !== this.receiptAsset._id);
+        let depositAsset = this.assets;
         return depositAsset;
       },
       checkMinValue(){
@@ -111,25 +108,6 @@ class="header__table-cell header__cta-form">
           return this.depositAsset.maxDepositAmount;
         }
       },
-      
-      // preventExceedMinAndMax(newAmount, previousAmount){
-      //     if(parseInt(this.amount) > this.checkMaxValue){
-      //         if(this.checkMaxValue == ''){
-      //           this.inputError = 'Please choose a deposit currency';
-      //         }else {
-      //           this.inputError = 'value cannot be greater than '+Number(this.checkMaxValue).toLocaleString();
-      //         }
-      //         this.amount = Math.max(Math.min(this.amount,this.checkMaxValue));
-      //         console.log(this.amount);
-      //     } else if(parseInt(this.amount) < 0){
-      //         this.inputError = 'value cannot be lower than 0';
-      //         this.amount = '';
-      //     } else {
-      //         this.inputError = '';
-      //     }
-      // }
-      
-
     },
     watch: {
       receiptAsset(newAsset, previousAsset) {
@@ -221,24 +199,11 @@ class="header__table-cell header__cta-form">
               message: 'Login to continue',
               nextPage: {
                 path: '/transaction/destination',
-                // query: {
-                //   deposit: this.depositAsset.code,
-                //   receipt: this.receiptAsset.code,
-                //   amount: this.amount,
-                // },
               },
             },
           });
         }
-        this.$router.push('transaction/destination');
-        // this.$router.push({
-        //   path: '/transaction',
-        //   query: {
-        //     deposit: this.depositAsset.code,
-        //     receipt: this.receiptAsset.code,
-        //     amount: this.amount,
-        //   }
-        // });
+        this.$router.push('transaction/payment');
       },
       
       

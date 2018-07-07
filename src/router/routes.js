@@ -57,6 +57,9 @@ export default [{
         path: '/transaction',
         component: newTransaction.index,
         children: [{
+            path: 'payment',
+            component: newTransaction.payment,
+        }, {
             path: 'refund',
             component: newTransaction.refund,
         }, {

@@ -3,7 +3,6 @@
     :asset="asset"
     :is-loading="isLoading"
     type="refund"
-    next-url="/transaction/status"
     @done="onDone"/>
 </template>
 
