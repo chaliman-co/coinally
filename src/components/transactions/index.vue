@@ -35,7 +35,6 @@
         <!-- {{ transactions }} -->
         <div class="admin-dashboard__transactions">
           <div class="transactions__table">
-            <spinner v-if="loading"></spinner>
             <div class="table-responsive">
               <table class="table table-striped table-hover">
                 <thead>
