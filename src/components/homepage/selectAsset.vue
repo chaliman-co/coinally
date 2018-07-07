@@ -155,6 +155,7 @@ export default {
         let resLength = res.length;
         this.depositAsset = res[0];
         this.receiptAsset = res[resLength - 1];
+        this.amount = this.depositAsset.minDepositAmount;
       }
     });
   },
