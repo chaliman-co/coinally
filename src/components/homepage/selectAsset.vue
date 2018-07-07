@@ -200,7 +200,7 @@ export default {
           query: {
             message: 'Login to continue',
             nextPage: {
-              path: '/transaction/destination',
+              path: '/transaction/payment',
             },
           },
         });
