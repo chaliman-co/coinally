@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import mutations from './mutations';
+import adminStats from './modules/adminStats';
+import userStats from './modules/userStats';
 
 Vue.use(Vuex);
 
@@ -17,4 +19,8 @@ export default new Vuex.Store({
             return stateObj.token !== null;
         },
     },
+    modules: {
+        adminStats,
+        userStats
+    }
 });

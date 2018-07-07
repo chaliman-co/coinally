@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const ObjectId = require('mongoose').Types.ObjectId;
+const { txStatus } = require('../../lib/enum');
 const {
     Asset,
     User,
@@ -8,47 +10,109 @@ const {
 module.exports = router;
 
 router
-    .get('/', handleGetStats);
+    .get('/', handleGetStats)
+    .get('/users/:userId', handleGetStatsByUser);
 
-async function handleGetStats(req, res, next) {
-    let userRegistrations = User.count({}).exec();
-    let newOrders = Transaction.count({
+function handleGetStats(req, res, next) {
+    let getRegistrationCount = User.count({ role: 'user' }).exec();
+
+    let getNewOrdersCount = Transaction.count({
         status: {
-            $in: ['awaiting payment', 'payment received'],
+            $in: [txStatus.AWAITING_PAYMENT, txStatus.PAYMENT_RECEIVED],
         },
         createdAt: {
             $gte: Date.now() - (60 * 60 * 24 * 30),
         },
     }).exec();
-    let transactionsCount = Transaction.count({}).exec();
-    let completedTransactionCount = Transaction.count({
-        status: 'completed',
-    }).exec();
-    let newestOrders = Transaction.find({}).sort('-createdAt').limit(5).exec();
-    let assets = await Asset.find({}).exec();
-    Promise.all([Promise.all([
-        userRegistrations, newOrders, newestOrders, transactionsCount, completedTransactionCount,
-    ]), Promise.all(assets.map(asset =>
-        Transaction.aggregate([{
-            $match: {
-                depositAssetCode: asset.code,
-            },
-        }, {
+
+    let getTransactionsCount = Transaction.count({}).exec();
+
+    let getCompletedTransactionCount = Transaction.count({ status: txStatus.COMPLETED }).exec();
+
+    let getRecentOrders = Transaction.find({})
+        .populate('user', ['firstName', 'lastName'])
+        .populate('depositAsset')
+        .populate('receiptAsset')
+        .sort('-createdAt')
+        .limit(5)
+        .exec();
+
+    let getTransactionSumByAsset = Transaction.aggregate([{
             $group: {
-                _id: asset.code,
-                count: {
-                    $sum: '$depositAmount',
-                }
+                _id: "$depositAssetCode",
+                count: { $sum: '$depositAmount' }
+            },
+        },
+        {
+            $project: {
+                code: '$_id',
+                totalDeposit: '$count',
+                _id: 0
             }
-        }]).exec()
-    ))]).then(result => {
-        console.log(require('util').inspect(result, {
-            depth: null,
-            colors: true
-        }));
-        [userRegistrations, newOrders, newestOrders, transactionsCount, completedTransactionCount] = result[0];
-        assetStats = result[1];
-        let saleStats = (completedTransactionCount / transactionsCount ) * 100;
-        res._success({userRegistrations, newOrders, newestOrders, saleStats})
-    })
+        }
+        // {
+        //     $lookup: {
+        //         from: 'assets',
+        //         localField: '_id',
+        //         foreignField: '_id',
+        //         as: 'asset'
+        //     }
+        // }
+    ]).exec();
+
+    Promise.all([
+            getRegistrationCount,
+            getTransactionsCount,
+            getCompletedTransactionCount,
+            getNewOrdersCount,
+            getRecentOrders,
+            getTransactionSumByAsset
+        ])
+        .then(([regCount, txCount, completedTxCount, newOrderCount, recentOrders, transactionStats]) => {
+            res._success({
+                regCount,
+                txCount,
+                completedTxCount,
+                newOrderCount,
+                recentOrders,
+                transactionStats
+            })
+        })
 };
+
+function handleGetStatsByUser(req, res) {
+    let getTransactionSumByAsset = Transaction.aggregate([{
+            $match: { user: ObjectId(req.params.userId) }
+        },
+        {
+            $group: {
+                _id: "$depositAssetCode",
+                count: { $sum: '$depositAmount' }
+            },
+        },
+        {
+            $project: {
+                code: '$_id',
+                totalDeposit: '$count',
+                _id: 0
+            }
+        }
+    ]).exec();
+
+    let getRecentOrders = Transaction.find({ user: req.params.userId })
+        .populate(['depositAsset', 'receiptAsset'])
+        .sort('-createdAt')
+        .limit(5)
+        .exec();
+
+    Promise.all([
+            getRecentOrders,
+            getTransactionSumByAsset
+        ])
+        .then(([recentOrders, transactionStats]) => {
+            res._success({
+                recentOrders,
+                transactionStats
+            })
+        })
+}

@@ -165,11 +165,14 @@ export default {
     },
     created() {
       this.$request('GET', '/assets/', (err, res) => {
-        if (err) console.error("couldn't load assets");
+        if (err) {
+          console.error("couldn't load assets");
+        }else{
         this.assets = res;
         let resLength = res.length;
-        // this.depositAsset = res[0];
+        this.depositAsset = res[0];
         this.receiptAsset = res[resLength - 1];
+        }
       });
     },
     methods: {

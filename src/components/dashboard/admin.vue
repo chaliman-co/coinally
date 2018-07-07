@@ -1,6 +1,5 @@
 <template>
     <div class="dashboard__content">
-              <transaction-modal/>
             <div class="dashboard__top-bar">
                 <div class="top-bar__table-md">
                     <div class="top-bar__table-row">
@@ -10,10 +9,6 @@
                             </div>
                         </div>
                         <div class="top-bar__table-cell top-bar__controls">
-
-        <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
-            <i class="fa fa-plus"></i> New Transaction
-        </a>
                         </div>
                     </div>
                 </div>
@@ -26,56 +21,24 @@
                             <div class="dashboard-pane dashboard-pane--lg newest-orders">
                                 <div class="dashboard-pane__header">
                                     <div class="header__title">
-                                        Newest Orders
+                                        Latest Orders
                                     </div>
-                                    <div class="header__subtitle">
+                                    <div class="header__subtitle hidden">
                                         23
                                     </div>
                                 </div>
                                 <div class="dashboard-pane__body">
-                                    <div class="order-item new">
+                                    <div class="order-item new" v-for="(tx, i) in stats.recentOrders" :key="i">
                                         <div class="order-item__title">
-                                            0.34 ETH to BTC
+                                            {{tx.depositAmount | numberFormat}} {{tx.depositAsset.code.toUpperCase() }} to {{tx.receiptAsset.code.toUpperCase()}}
                                         </div>
                                         <div class="order-item__subtitle">
-                                            2 minutes ago - Jane Doe
-                                        </div>
-                                    </div>
-                                    <div class="order-item new">
-                                        <div class="order-item__title">
-                                            0.34 ETH to BTC
-                                        </div>
-                                        <div class="order-item__subtitle">
-                                            2 minutes ago - Jane Doe
-                                        </div>
-                                    </div>
-                                    <div class="order-item">
-                                        <div class="order-item__title">
-                                            0.34 ETH to BTC
-                                        </div>
-                                        <div class="order-item__subtitle">
-                                            2 minutes ago - Jane Doe
-                                        </div>
-                                    </div>
-                                    <div class="order-item">
-                                        <div class="order-item__title">
-                                            0.34 ETH to BTC
-                                        </div>
-                                        <div class="order-item__subtitle">
-                                            2 minutes ago - Jane Doe
-                                        </div>
-                                    </div>
-                                    <div class="order-item">
-                                        <div class="order-item__title">
-                                            0.34 ETH to BTC
-                                        </div>
-                                        <div class="order-item__subtitle">
-                                            2 minutes ago - Jane Doe
+                                            {{formatTime(tx.createdAt)}} - {{`${tx.user.firstName} ${tx.user.lastName}` | capitalize}}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="dashboard-pane dashboard-pane--lg order-charts">
+                            <div class="dashboard-pane dashboard-pane--lg order-charts hidden">
                                 <div class="dashboard-pane__header">
                                     <div class="header__title">
                                         Order Charts
@@ -97,7 +60,7 @@
                                 <img src="~img/cart.svg" class="dashboard-pane__icon" alt="Cart" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        900
+                                        {{stats.newOrderCount | countFormat}}
                                     </div>
                                     <div class="body__subtitle">
                                         New orders
@@ -108,7 +71,7 @@
                                 <img src="~img/chart.svg" class="dashboard-pane__icon" alt="" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        53%
+                                        {{saleStats * 100}}%
                                     </div>
                                     <div class="body__subtitle">
                                         Sale Stats
@@ -119,7 +82,7 @@
                                 <img src="~img/new-user.svg" class="dashboard-pane__icon" alt="" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        44
+                                        {{stats.regCount | countFormat}}
                                     </div>
                                     <div class="body__subtitle">
                                         User registrations
@@ -130,7 +93,7 @@
                                 <img src="~img/money.svg" class="dashboard-pane__icon" alt="" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        $5,000
+                                        ${{getAssetTotal('usd') | countFormat}}
                                     </div>
                                     <div class="body__subtitle">
                                         Processed
@@ -141,7 +104,7 @@
                                 <img src="https://shapeshift.io/images/coins/ether.png" class="dashboard-pane__icon" alt="" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        ETH 12
+                                        ETH {{getAssetTotal('eth') | countFormat}}
                                     </div>
                                     <div class="body__subtitle">
                                         Processed
@@ -152,7 +115,7 @@
                                 <img src="https://shapeshift.io/images/coins/bitcoin.png" class="dashboard-pane__icon" alt="" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        BTC 20.778
+                                        BTC {{getAssetTotal('btc') | countFormat}}
                                     </div>
                                     <div class="body__subtitle">
                                         Processed
@@ -163,7 +126,7 @@
                                 <img src="~img/money.svg" class="dashboard-pane__icon" alt="" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        NGN 1.1M
+                                        NGN {{getAssetTotal('ngn') | countFormat}}
                                     </div>
                                     <div class="body__subtitle">
                                         Processed
@@ -174,7 +137,7 @@
                                 <img src="https://shapeshift.io/images/coins/bitcoincash.png" class="dashboard-pane__icon" alt="" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        BCH 4000
+                                        BCH {{getAssetTotal('bch') | countFormat}}
                                     </div>
                                     <div class="body__subtitle">
                                         Processed
@@ -191,9 +154,41 @@
 
 <script>
 import transactionModal from '../transactionModal.vue';
+import {mapState, mapActions} from 'vuex';
+import {txStatus} from '../../enums';
+import moment from 'moment';
 export default {
     components: {
     transactionModal
+    },
+    computed: Object.assign({
+        saleStats(){
+            const stats = this.stats.completedTxCount/this.stats.txCount;
+
+            if(isNaN(stats)) return 0;
+            else return stats;
+        }
+    },
+    mapState('adminStats', ['stats'])),
+    methods: Object.assign({
+        isNew(tx){
+            return tx.status === txStatus.AWAITING_PAYMENT;
+        },
+        getAssetTotal(asset){
+            const stat = this.stats.transactionStats.find(x => x.code === asset);
+            if(stat){
+                return stat.totalDeposit;
+            }else{
+                return 0;
+            }
+        },
+    formatTime(time) {
+      return moment(new Date(time)).fromNow();
+    },
+    },
+    mapActions('adminStats', ['loadStats'])),
+    created(){
+        this.loadStats();
     }
 }
 </script>
