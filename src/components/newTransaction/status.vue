@@ -14,74 +14,113 @@
               @click="goBack"/>
           </div>
           <div class="modal-body">
-            <div class="modal-body__container">
+            <div class="modal-body__container" v-if="transaction">
               <div
                 id="payment"
                 class="modal__pane">
                 <div class="modal__title">
                   <span>Order ID</span>: {{ id }}
                 </div>
-                <div class="payment-address__table-md">
-                  <div class="payment-address__table-row">
-                    <div class="payment-address__table-cell payment-address__qr-code">
-                      <img
-                        src="~img/qr-code.png"
-                        alt="QR Code">
-                    </div>
-                    <div class="payment-address__table-cell payment-address__description">
-
-                      <!-- IF FIAT, REMOVE hidden FROM THE FOLLOWING DIV -->
-                      <div
-                        v-if="isFiat"
-                        class="description__fiat">
+                <div class="payment-address__table-md" v-if="!hasPaid">
+            <div class="payment-address__table-row" v-if="isFiat">
+                <div class="payment-address__table-cell payment-address__description">
+                    <div class="description__fiat">
                         <div class="title">
-                          Click to pay online
+                            Click to pay online
                         </div>
                         <div class="body">
-                          <p>
-                            <span>Amount:</span>
-                            <i class="naira"/>{{ amount }}
-                          </p>
+                            <p>
+                                <span>Amount:</span>
+                                <i class="naira" />{{ amount | numberFormat }}
+                            </p>
                         </div>
-                        <button class="btn-custom-astronaut-blue small description__call-to-action">
-                          Pay now
+                        <button 
+                        :disabled="isLoading"
+                        @click="payWithPaystack" 
+                        class="btn-custom-astronaut-blue small description__call-to-action">
+                            Pay now
+                            <i
+                                v-if="isLoading"
+                                class="fa fa-spinner fa-pulse"/>
                         </button>
-                      </div>
-                      <!--  -->
-
-                      <!-- IF CRYPTOCURRENCY, REMOVE hidden FROM THE FOLLOWING DIV -->
-                      <div
-                        v-else
-                        class="description__cryptocurrency">
+                    </div>
+                </div>
+                <div class="payment-address__table-cell">
+                    <div class="description__fiat">
                         <div class="title">
-                          Send to this address:
+                            OR
                         </div>
                         <div class="body">
-                          <p>
-                            {{ depositAsset.depositAddress }}
-                          </p>
-                          <p>
-                            <span>Amount:</span> {{ amount }}
-                          </p>
+                            <p>
+                                <strong>Pay to</strong>
+                                <br> {{depositAsset.depositAddress.name}}
+                                <br> {{depositAsset.depositAddress.number}}
+                                <br> {{depositAsset.depositAddress.bankName}}
+                            </p>
                         </div>
-                      </div>
-                      <!--  -->
-
                     </div>
-                  </div>
+                </div>
+            </div>
+            <div class="payment-address__table-row" v-else-if="isDigital">
+                <div class="payment-address__table-cell payment-address__qr-code">
+                    <img :src="`https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${depositAsset.depositAddress}`" alt="QR Code">
+                </div>
+                <div class="payment-address__table-cell payment-address__description">
+                    <div class="description__cryptocurrency">
+                        <div class="title">
+                            Send to this address:
+                        </div>
+                        <div class="body">
+                            <p>
+                                {{ depositAsset.depositAddress }}
+                            </p>
+                            <p>
+                                <span>Amount:</span> {{ amount | numberFormat }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-address__table-row" v-else>
+                <div class="payment-address__table-cell payment-address__description text-center">
+                    <div class="description__fiat">
+                        <div class="title">
+                            Upload Card Details:
+                        </div>
+                        <div class="body">
+                            <p>
+                                <span>Amount:</span> {{ amount | numberFormat }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="description__fiat ">
+                        <div class="body">
+                            <p>Card Details</p>
+                            <button class="btn-custom-astronaut-blue small">
+                                Upload
+                            </button>
+                            <p>Card receipt (optional)</p>
+                            <button class="btn-custom-astronaut-blue small">
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
                 </div>
                 <div class="progress__indicator">
                   <div class="indicator__label">
-                    {{ transaction.status | capitalize }}
+                    {{ status | capitalize }}
                   </div>
                   <div class="indicator__composite">
                     <div class="indicator__bg"/>
                     <div
                       class="indicator__progress"
-                      style="width:20%"/>
+                      :style="{width: `${progress}%`}"/>
                   </div>
                   <div class="indicator__progress-value">
-                    20%
+                    {{progress}}%
                   </div>
                 </div>
               </div>
@@ -101,10 +140,11 @@
                 v-if="depositAsset && receiptAsset && conversionRate"
                 class="expected-amount">
                 <div class="amount">
-                  {{ `${amount} ${depositAsset.code.toUpperCase()} (${receiptAmount}${receiptAsset.code.toUpperCase()})` }}
+                  {{amount | numberFormat}}
+                  {{depositAsset.code.toUpperCase()}} ({{receiptAmount.toFixed(8) | numberFormat}} {{receiptAsset.code.toUpperCase()}})
                 </div>
                 <div class="exchange-rate">
-                  {{ `1 ${depositAsset.code.toUpperCase()} = ${conversionRate.toFixed(8).replace(/(?:\.)?0+$/, "")}${receiptAsset.code.toUpperCase()}` }}
+                  {{ `1 ${depositAsset.code.toUpperCase()} = ${conversionRate.toFixed(8)}${receiptAsset.code.toUpperCase()}` }}
                 </div>
               </div>
 
@@ -132,6 +172,7 @@
 <script>
 import socketIoClient from 'socket.io-client';
 import utils from '../../utils';
+import { txStatus } from '../../enums';
 
 export default {
   props: {
@@ -149,7 +190,9 @@ export default {
       depositAsset: {},
       receiptAsset: {},
       amount: 0,
+      status: null,
       statuses: utils.getStatus(),
+      isLoading: false,
     };
   },
   computed: {
@@ -159,13 +202,21 @@ export default {
     isFiat() {
       return this.depositAsset.type === 'fiat';
     },
+    isDigital() {
+      return this.depositAsset.type === 'digital';
+    },
     progress() {
-      const index = this.statuses.indexOf(this.transaction.status);
+      if(!this.status) return 0;
+
+      const index = this.statuses.indexOf(this.status);
 
       if (index === 0) return 0;
 
       return (index / (this.statuses.length - 1)) * 100;
     },
+    hasPaid(){
+      return this.status !== txStatus.AWAITING_PAYMENT;
+    }
   },
   created() {
     const url = `/transactions/${this.id}`;
@@ -176,6 +227,7 @@ export default {
         this.receiptAsset = result.receiptAsset;
         this.conversionRate = result.rate;
         this.amount = result.depositAmount;
+        this.status = result.status;
       }
     });
   },
@@ -200,6 +252,35 @@ export default {
         });
         this.socket = socket;
       }
+    },
+    payWithPaystack(){
+        this.isLoading = true;
+        const options = {
+            key: utils.paystackKey,
+            email: this.transaction.user.emailAddress,
+            amount: this.transaction.depositAmount * 100,
+            ref: this.transaction._id,
+            currency: this.transaction.depositAsset.code,
+            callback: (response) => {
+                this.verifyPayment(response);
+            },
+            onClose: () => {
+                this.isLoading = false;
+            }
+        };
+
+        const handler = window.PaystackPop.setup(options);
+        handler.openIframe();
+    },
+    verifyPayment(response){
+        const url = `/transactions/${this.transaction._id}/payment/verify`;
+
+        this.$request('PUT', url, null, (err, result) => {
+            this.isLoading = false;
+            if (!err) {
+                this.status = txStatus.PAYMENT_RECEIVED;
+            }
+        });
     },
   },
   inject: ['global'],

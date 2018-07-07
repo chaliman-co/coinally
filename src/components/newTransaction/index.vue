@@ -31,7 +31,8 @@
                 v-if="depositAsset && receiptAsset && conversionRate"
                 class="expected-amount">
                 <div class="amount">
-                  {{ `${amount} ${depositAsset.code.toUpperCase()} (${receiptAmount}${receiptAsset.code.toUpperCase()})` }}
+                  <span title="Deposit">D:</span>{{amount | numberFormat}} {{depositAsset.code.toUpperCase()}},
+                  <span title="Receive">R:</span>{{receiptAmount.toFixed(8) | numberFormat}} {{receiptAsset.code.toUpperCase()}}
                 </div>
                 <div class="exchange-rate">
                   {{ `1 ${depositAsset.code.toUpperCase()} = ${conversionRate.toFixed(8).replace(/(?:\.)?0+$/, "")}${receiptAsset.code.toUpperCase()}` }}
@@ -111,10 +112,15 @@ export default {
         socket.on('new_rate', (rate) => {
           this.conversionRate = rate;
 
-          // this.transaction = sessionStorage.getItem('transaction');
-          // this.transaction.rate = rate;
+          const transaction = sessionStorage.getItem('transaction');
 
-          // sessionStorage.setItem('transaction', JSON.stringify(this.transaction));
+          if(transaction){
+            this.transaction = JSON.parse(transaction);
+            this.transaction.rate = rate;
+            sessionStorage.setItem('transaction', JSON.stringify(this.transaction));
+          }else{
+            this.$router.push('/');
+          }
         });
         this.socket = socket;
       }

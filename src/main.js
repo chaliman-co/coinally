@@ -22,8 +22,26 @@ Vue.prototype.$log = utils.log;
 
 Vue.filter('capitalize', (value) => {
     if (!value) return '';
-
     return value.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+});
+
+Vue.filter('numberFormat', (value) => {
+    if (value) {
+        value = String(value);
+        if (value.indexOf(".") !== -1) {
+            let stringAfterPoint = value.substr(value.indexOf(".") + 1);
+            let formatStringAfterPoint = stringAfterPoint.replace(/(...)/g, "$1,");
+            let stringBeforePoint = value.slice(0, value.indexOf("."));
+            let numberBeforePoint = Number(stringBeforePoint).toLocaleString();
+
+            return numberBeforePoint.toString() + '.' + formatStringAfterPoint;
+        } else {
+            return Number(value).toLocaleString();
+        }
+    } else {
+        return 0;
+    }
+
 });
 
 const app = new Vue({

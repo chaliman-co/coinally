@@ -1,6 +1,8 @@
 <template lang="html">
       <div class="home-page" data-controller="HomeController">
     <header>
+      
+      
       <div class="header__table-md">
         <div class="header__table-row">
           <div class="header__table-cell header__caption">
@@ -24,7 +26,7 @@
           BTC
         </div>
         <div class="rate__price">
-          $8988.2000
+          ${{'8988.2000' | numberFormat}}
         </div>
         <div class="rate__change loss">
           -3.86%
@@ -37,6 +39,7 @@
         </div>
         <div class="rate__price">
           $8988.2000
+          
         </div>
         <div class="rate__change gain">
           3.86%

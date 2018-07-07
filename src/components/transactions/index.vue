@@ -145,6 +145,7 @@
 <script>
 import moment from 'moment';
 import transaction from './transaction.vue';
+import transactionModal from '../transactionModal.vue';
 import sideBar from './../sideBar.vue';
 
 export default {

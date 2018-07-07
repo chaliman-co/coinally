@@ -1,4 +1,5 @@
 const http = require('http');
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const util = require('util');
@@ -13,7 +14,6 @@ const cors = require('cors');
 
 const app = express();
 
-require('dotenv').config();
 
 app
     .use(logger('dev'))

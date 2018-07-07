@@ -129,7 +129,7 @@
       :disabled="!isValid || isLoading || isSaving"
       class="call-to-action btn-custom-astronaut-blue"
       @click="start">
-      Start Transaction
+      Finish
       <i
         v-if="isSaving || isLoading"
         class="fa fa-spinner fa-pulse"/>
