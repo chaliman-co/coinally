@@ -7,63 +7,26 @@
           <div class="top-bar__table-row">
             <div class="top-bar__table-cell top-bar__title">
               <div class="title">
-                Users ({{ users.length }})
+                Users ({{ total }})
               </div>
             </div>
             <div class="top-bar__table-cell top-bar__controls">
-              <!-- <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
-                                            <i class="fa fa-plus"></i> New Transaction
-                                        </a> -->
 
               <div class="select-component sort-by is--minified">
-                <div
-                  class="dropdown bootstrap-select show-tick custom-select-no-title"
-                  style="width: 100%;">
                   <select
                     id="sort-by"
                     name="sort-by"
-                    class="custom-select-no-title" 
-title="Sort by" tabindex="-98">
-                    <option
-                      class="bs-title-option"
-                      value=""/>
-                    <option value="Name">Name</option>
-                    <option value="Email">Email</option>
-                    <option value="Most Recent">Most Recent</option>
-                    <option value="Status">Status</option>
+                    class="custom-select-no-title pull-right" 
+                    title="Sort by" tabindex="-98"
+                    style="width: 50%"
+                    v-model="sortBy">
+                    <option value="date">Sort By</option>
+                    <option value="name">Name</option>
+                    <option value="email">Email</option>
+                    <option value="date">Most Recent</option>
+                    <option value="status">Status</option>
                   </select>
-                  <button
-                    type="button"
-                    class="btn dropdown-toggle bs-placeholder btn-default"
-                    data-toggle="dropdown"
-                    role="button" 
-data-id="sort-by" title="Sort by">
-                    <div class="filter-option">
-                      <div class="filter-option-inner">
-                        <div class="filter-option-inner-inner">Sort by</div>
-                      </div>
-                    </div>
-                    <span class="bs-caret">
-                      <span class="caret"/>
-                    </span>
-                  </button>
-                  <div
-                    class="dropdown-menu open"
-                    role="combobox">
-                    <div
-                      class="inner open"
-                      role="listbox"
-                      aria-expanded="false"
-                      tabindex="-1">
-                      <ul class="dropdown-menu inner "/>
-                    </div>
-                  </div>
-                </div>
               </div>
-
-              <!-- <a href="verify.html" class="btn-custom-transparent-astronaut-blue small">
-                                            Verify Details
-                                        </a> -->
             </div>
           </div>
         </div>
@@ -79,6 +42,13 @@ data-id="sort-by" title="Sort by">
             v-bind="user"/>
         </div>
 
+        <pagination
+        :active-page="page"
+        :total-items-count="total"
+        :items-count-per-page="pageSize"
+        v-if="!loading && total > 0"
+        @changePage="updatePage"
+        />
       </div>
     </div>
 
@@ -88,24 +58,53 @@ data-id="sort-by" title="Sort by">
 <script>
 import singleUser from './components/singleUser.vue';
 import sideBar from '../sideBar.vue';
+import pagination from './../pagination';
 
 export default {
     inject: ['global'],
     components: {
         'single-user': singleUser,
         sideBar,
+        pagination,
     },
     data() {
         return {
             request: null,
             users: [],
+            page: 1,
+            pageSize: 16,
+            total: 0,
+            sortBy: 'date',
+            loading: false,
         };
     },
-    created() {
-        this.$request('GET', '/users', (err, res) => {
-            this.users = res;
+    methods: {
+      updatePage(){
+        this.fetchUsers();
+      },
+      fetchUsers(){
+        this.users = [];
+        this.loading = true;
+        this.$request('GET', `/users?page=${this.page}&pageSize=${this.pageSize}&sortBy=${this.sortBy}`, (err, result) => {
+            if(!err){
+              this.users = result.items;
+              this.total = result.total;
+              this.loading = false;
+            }
         });
+      }
     },
+    created() {
+      this.fetchUsers();
+    },
+    watch:{
+      sortBy(oldValue, newValue){
+        if(oldValue !== newValue){
+          this.page = 1;
+          this.updatePage();
+        }
+      }
+    }
 };
 </script>
 

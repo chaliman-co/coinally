@@ -20,7 +20,7 @@
                 <select
                   id="sort-by"
                   name="sort-by"
-                  class="custom-select-no-title"
+                  class="custom-select-no-title pull-right"
                   v-model="status">
                   <option v-for="(transactionStatus, index) in transactionsStatus" :key="index" :value="transactionStatus" >{{transactionStatus | capitalize}}</option>
                   <!-- <option value="pending">Pending Transactions</option> -->
@@ -87,6 +87,7 @@
         :total-items-count="transactionsCount"
         :items-count-per-page="pageSize"
         @changePage="updatePage"
+        v-if="!loading && transactionsCount > 0"
         ></pagination>
 
       </div>
@@ -119,7 +120,7 @@ export default {
       transactionsStatus: ['all', 'failed', 'awaiting payment', 'payment received', 'pending', 'completed'],
       status : 'all',
       page: 1,
-      pageSize: 5,
+      pageSize: 10,
       transactionsCount: 0,
       pageNo: 0,
       st: this.$getStatus

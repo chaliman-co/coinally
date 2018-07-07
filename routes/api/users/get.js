@@ -11,18 +11,52 @@ module.exports = {
 };
 
 function handleGetUsers(req, res, next) {
-    const {
-        skip = 0, limit = 20,
+    let {
+        page = 1,
+            pageSize = 20,
+            sortBy = 'date'
     } = req.query;
-    User.find({}).limit(limit).skip(skip).exec()
-        .then((users) => {
-            if (!users.length) {
-                return res._sendError('No matching documents', new serverUtils.ErrorReport(404, {
-                    users: 'no users found found',
-                }));
-            }
-            return res._success(users);
+
+    sortBy = handleSort(sortBy);
+
+    const getUsers = User.find({ role: 'user' })
+        .limit(Number(pageSize))
+        .skip(Number((page - 1) * pageSize))
+        .sort(sortBy)
+        .exec();
+
+    const getUserCount = User.count({ role: 'user' });
+
+    Promise.all([getUsers, getUserCount])
+        .then(([users, total]) => {
+            return res._success({
+                items: users,
+                total
+            });
         }, err => next(err));
+}
+
+function handleSort(sortBy) {
+    switch (sortBy) {
+        case 'date':
+            sortBy = { createdAt: -1 };
+            break;
+        case 'name':
+            sortBy = {
+                firstName: 1,
+                lastName: 1
+            };
+            break;
+        case 'email':
+            sortBy = { emailAddress: 1 };
+            break;
+        case 'status':
+            sortBy = { status: 1 };
+            break;
+        default:
+            sortBy = {};
+    }
+    return sortBy;
 }
 
 function handleGetUser(req, res, next) {
