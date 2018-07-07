@@ -13,7 +13,6 @@ const
 const paystack = require('paystack')(process.env.PAYSTACK_API_KEY);
 const enums = require('../../../lib/enum');
 
-
 module.exports = router;
 router
     .use(auth.bounceUnauthenticated)
@@ -23,18 +22,21 @@ router
 .param('userid', resolveUser)
 
 .get('/users/:_userid', auth.bounceUnauthorised({ admin: true }), handleGetUserTransactions)
+    .get('/recent', handleGetRecentTransactions)
 
 .param('_id', resolveTransaction)
 
-// .get('/:_id', auth.bounceUnauthorised({ admin: true, owner: true }),  handleGetTransaction)
-.put('/:_id/status', auth.bounceUnauthorised({ admin: true }), handlePutTransactionStatus)
-    .put('/:_id/payment/verify', handleVerifyPaystack);
+.get('/:_id', auth.bounceUnauthorised({ admin: true, owner: true }), handleGetTransaction)
+    .put('/:_id/status', auth.bounceUnauthorised({ admin: true }), handlePutTransactionStatus)
+    .put('/:_id/payment/verify', handleVerifyPaystack)
+    .put('/:_id/receiptAddress', handleAddReceiptAddress);
 
 function resolveTransaction(req, res, next, _id) {
     req._params = req._params || {};
     Transaction.findById(_id)
         .populate('depositAsset')
         .populate('receiptAsset')
+        .populate('user', ['firstName', 'lastName', 'emailAddress'])
         .then((transaction) => {
             if (!transaction) {
                 return res._sendError('item not found', new serverUtils.ErrorReport({
@@ -65,23 +67,27 @@ function resolveUser(req, res, next, _id) {
     }).catch(err => next(err));
 }
 
-function handleGetTransaction(req, res, next) {
-    Transaction.findById(req.params._id)
-        .populate('receiptAsset')
-        .populate('depositAsset')
-        .exec()
-        .then((transaction) => {
-            if (!transaction) {
-                return res._sendError('item not found', new serverUtils.ErrorReport({
-                    _id: '_id not found',
-                }));
-            }
+function resolveUser(req, res, next, _id) {
+    req._params = req._params || {};
+    if (req.user._id == _id) {
+        req._params.user = req.user;
+        return next();
+    } // In case it's the admin or another user
+    User.findOne({
+        _id,
+    }).populate('assetAccounts.asset', 'addressType').then((user) => {
+        if (!user) {
+            return res._sendError("item not found", new serverUtils.ErrorReport(404, {
+                _id: "user not found"
+            }));
+        }
+        req._params.user = user;
+        return next();
+    }).catch(err => next(err));
+}
 
-            res._success(transaction);
-        })
-        .catch((err) => {
-            res._sendError('An unexpected error occured', err);
-        });
+function handleGetTransaction(req, res) {
+    res._success(req._params.transaction);
 }
 
 function handlePostTransaction(req, res, next) {
@@ -98,7 +104,6 @@ function handlePostTransaction(req, res, next) {
             }),
         );
     }
-
     transactionDetails.user = req.user._id;
     const transaction = new Transaction(transactionDetails);
     transaction.save()
@@ -106,13 +111,13 @@ function handlePostTransaction(req, res, next) {
             transaction.user.transactionCount++;
             return transaction.user.save();
         })
-        .then(user => res._success(transaction), err => next(err))
+        .then(user => res._success(transaction))
         .catch(err => next(err));
 }
 
 function handleGetTransactions(req, res, next) {
     const {
-        page = 0, pageSize = 20, status = null
+        page = 1, pageSize = 20, status = null
     } = req.query;
 
     const query = req.user.role === 'admin' ? {} : { user: req.user._id };
@@ -130,7 +135,7 @@ function handleGetTransactions(req, res, next) {
         .populate('user', ['assetAccounts', 'firstName', 'lastName'])
         .exec();
 
-    const countTransactions = Transaction.find(query);
+    const countTransactions = Transaction.count(query);
 
     Promise.all([getTransactions, countTransactions])
         .then(([transactions, transactionCount]) => res._success({
@@ -142,7 +147,7 @@ function handleGetTransactions(req, res, next) {
 
 function handleGetUserTransactions(req, res, next) {
     const {
-        page = 0, pageSize = 20, status = null
+        page = 1, pageSize = 20, status = null
     } = req.query;
 
     const query = { user: req.user._id };
@@ -162,7 +167,7 @@ function handleGetUserTransactions(req, res, next) {
 
     const countTransactions = Transaction.count(query);
 
-    Promise.all(getTransactions, countTransactions)
+    Promise.all([getTransactions, countTransactions])
         .then(([transactions, transactionCount]) => res._success({
             items: transactions,
             totalCount: transactionCount,
@@ -170,37 +175,71 @@ function handleGetUserTransactions(req, res, next) {
         .catch(err => next(err));
 }
 
-function handlePutTransactionStatus(req, res, next) {
-    if (!(req.body && req.body.hasOwnProperty('status'))) {
-        return res._sendError('missing or invalid parameters', new serverUtils.ErrorReport({
-            status: 'status not provided',
-        }));
+function handleGetRecentTransactions(req, res, next) {
+
+    const getTransactions = Transaction.find({})
+        .sort('-createdAt')
+        .limit(5)
+        .populate('receiptAsset', 'type')
+        .populate('depositAsset', 'type')
+        .exec();
+
+    getTransactions
+        .then((transactions) => res._success(transactions))
+        .catch(err => next(err));
+}
+
+function handleAddReceiptAddress(req, res, next) {
+    if (!(req.body &&
+            req.body.hasOwnProperty('receiptAddress'))) {
+        return res._sendError('missing or invalid parameters',
+            new serverUtils.ErrorReport({
+                receiptAddress: 'receiptAddress not provided',
+            }));
     }
-    const {
-        transaction,
-    } = req._params, {
-        status,
-    } = req.body, {
-        _id,
-    } = req.params;
+    const { transaction } = req._params;
+    const { receiptAddress } = req.body;
+
+    transaction.receiptAddress = receiptAddress
+    transaction.save()
+        .then((_transaction) => {
+            res._success({});
+        })
+        .catch(err => next(err));
+}
+
+function handlePutTransactionStatus(req, res, next) {
+    if (!(req.body &&
+            req.body.hasOwnProperty('status'))) {
+        return res._sendError('missing or invalid parameters',
+            new serverUtils.ErrorReport({
+                status: 'status not provided',
+            }));
+    }
+    const { transaction } = req._params;
+    const { status } = req.body;
+    const { _id } = req.params;
+
     transaction.status = status.toLowerCase();
-    transaction.save().then((_transaction) => {
-        res._success(status);
-        socketIoServer.in(_id).emit('status', status);
-    }, err => next(err));
+    transaction.save()
+        .then((_transaction) => {
+            res._success(status);
+            socketIoServer.in(_id).emit('status', status);
+        })
+        .catch(err => next(err));
 }
 
 async function handleVerifyPaystack(req, res, next) {
     try {
         const { transaction } = req._params;
-        paystack.transactions
+
+        paystack.transaction
             .verify(transaction._id, async function(error, body) {
                 if (error) {
                     throw error;
                 }
-
                 if (body.status &&
-                    body.data.status === 'successful' &&
+                    body.data.status === 'success' &&
                     transaction.depositAmount <= body.data.amount / 100) {
 
                     transaction.status = enums.txStatus.PAYMENT_RECEIVED;

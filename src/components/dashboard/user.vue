@@ -1,5 +1,6 @@
 <template>
     <div class="dashboard__content">
+              <transaction-modal/>
     <transaction
       ref="transaction"
       @statusChanged="changeStatus"/>
@@ -12,19 +13,15 @@
               </div>
             </div>
             <div class="top-bar__table-cell top-bar__controls">
-              <a
-                href=""
-                class="btn-custom-astronaut-blue small"
-                data-toggle="modal" 
-                data-target="#exchange-modal">
-                <i class="fa fa-plus"/> New Transaction
-              </a>
 
-              <a
-                href="verify.html"
+        <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
+            <i class="fa fa-plus"></i> New Transaction
+        </a>
+              <router-link
+                              to="/verify"
                 class="btn-custom-transparent-astronaut-blue small">
                 Verify Details
-              </a>
+              </router-link>
             </div>
           </div>
         </div>
@@ -34,12 +31,14 @@
         <div class="dashboard__transactions">
           <div class="transactions__summary">
             <div class="title">
-              <!-- Total Transactions {{Date(global.user.createdAt) >   from}} {{January 01, 2017 - May 15, 2018}} -->
+              Total Transactions from {{formatDate(user.createdAt)}} to {{formatDate(new Date())}}
             </div>
             <div class="body">
-              25
-              <span>ETH</span>, 10
-              <span>BTC</span>
+              <template v-for="(stat, i) in stats.transactionStats" v-if="stat.totalDeposit > 0">
+                {{stat.totalDeposit | countFormat}} 
+                <span :key="i">{{stat.code.toUpperCase()}}</span>
+                <template v-if="i !== stats.transactionStats.length - 1">,</template>
+              </template>
             </div>
           </div>
           <div class="transactions__table">
@@ -59,16 +58,22 @@
                 </thead>
                 <tbody>
                   <tr
-                    v-for="(transaction, index) in userTransactions"
+                    v-for="(transaction, index) in stats.recentOrders"
                     :key="index">
                     <td>{{ index + 1 }}</td>
                     <td>{{ formatTime(transaction.createdAt) }}</td>
-                    <td>{{ transaction.depositAssetCode }}</td>
-                    <td>{{ transaction.receiptAssetCode }}</td>
+                    <td>{{ transaction.depositAssetCode.toUpperCase() }}</td>
+                    <td>{{ transaction.receiptAssetCode.toUpperCase() }}</td>
                     <!-- <td>{{ transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.depositAssetCode }})</td>
                     <td>{{ transaction.receiptAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.receiptAssetCode }})</td> -->
-                    <td>{{ transaction.rate.toFixed(3).replace(/\.([^0]*)(0+)$/g, '.$1') }}</td>
-                    <td>{{ transaction.receiptAsset.type == 'fiat'? `${user.assetAccounts[transaction.receiptAddress].address.number}, ${user.assetAccounts[transaction.receiptAddress].address.bankName}` : transaction.receiptAsset.type == 'digital'? transaction.receiptAddress : undefined }}</td>
+                    <td>{{ transaction.rate.toFixed(8).replace(/\.([^0]*)(0+)$/g, '.$1') | numberFormat }}</td>
+                    <td>
+                      {{ transaction.receiptAsset.type == 'fiat'? 
+                      `${user.assetAccounts[transaction.receiptAddress].address.number}, 
+                      ${user.assetAccounts[transaction.receiptAddress].address.bankName}` : 
+                      transaction.receiptAsset.type == 'digital'? transaction.receiptAddress : 
+                      undefined }}
+                    </td>
                     <td>{{ transaction.status | capitalize }}</td>
 
                     <td>
@@ -93,14 +98,16 @@
 import moment from 'moment';
 import transaction from '../transactions/transaction.vue';
 import sideBar from './../sideBar';
-import {mapState, mapGetters} from 'vuex';
+import transactionModal from '../transactionModal.vue';
+import {mapState, mapActions, mapGetters} from 'vuex';
 
 window.moment = moment;
 export default {
   inject: ['global'],
   components: {
     'side-bar': sideBar,
-    transaction
+    transaction,
+    transactionModal
   },
   data() {
     return {
@@ -110,29 +117,22 @@ export default {
   computed: Object.assign({
     _userTransactions() {
 
-    }
+    },
   },
-    mapState([
-        'user'
-    ]),
-    // caption() {
-    //     let caption = 'Total Transactions';
-    //     let userCreatedAt = new Date(this.global.user.createdAt);
-    //     if (userCreatedAt > } } { { January 01, 2017 - May 15, 2018 } }
-
-    // },
+    mapState({
+        user:'user',
+        stats: (state) => state.userStats.stats,
+})
   ),
   created() {
-    const url = `/transactions?user=${this.user._id}&skip=0&limit=10`;
-    this.global.request('GET', url, null, (err, transactions) => {
-      if(!err){
-        this.userTransactions = transactions;
-      }
-    })
+    this.loadStats(this.user._id)
   },
-  methods: {
+  methods: Object.assign({
+    formatDate(date){
+      return moment(date).format('ll');
+    },
     formatTime(time) {
-      return moment().calendar(new Date(time));
+      return moment(new Date(time)).fromNow();
     },
     showTransaction(trans) {
       this.$refs.transaction.open(trans);
@@ -146,6 +146,6 @@ export default {
         this.$set(tx, 'status', status);
       }
     },
-  },
+  }, mapActions('userStats', ['loadStats'])),
 };
 </script>

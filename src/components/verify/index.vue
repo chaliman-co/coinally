@@ -1,44 +1,7 @@
 <template>
     <div class="dashboard-page">
-        <div class="dashboard__sidebar">
-            <span class="hamburger">
-                <img src="src/img/close.svg" alt="Close">
-            </span>
-            <img src="src/img/avatar.svg" alt="Avatar" class="avatar">
-            <div class="title">
-                Jonathan Doekritz
-            </div>
-
-            <div class="referral-code">
-                <div class="title">
-                    Referral Code
-                </div>
-                <div class="body">
-                    02dh3a35
-                </div>
-                <div class="subtitle">
-                    Total Referrals: 2
-                </div>
-            </div>
-
-            <div class="links">
-                <a href="dashboard.html" class="link active">
-                    Dashboard
-                </a>
-                <a href="verify.html" class="link">
-                    Verify Details
-                </a>
-                <a href="profile.html" class="link">
-                    Edit Profile
-                </a>
-                <a href="bankaccount.html" class="link">
-                    Bank Accounts
-                </a>
-                <a href="/" class="link logout">
-                    Logout
-                </a>
-            </div>
-        </div>
+        <side-bar/>
+        <transaction-modal/>
         <div class="dashboard__content">
             <div class="dashboard__top-bar">
                 <div class="top-bar__table-md">
@@ -49,9 +12,9 @@
                             </div>
                         </div>
                         <div class="top-bar__table-cell top-bar__controls">
-                            <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
-                                <i class="fa fa-plus"></i> New Transaction
-                            </a>
+        <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
+            <i class="fa fa-plus"></i> New Transaction
+        </a>
 
                             <a href="verify.html" class="btn-custom-transparent-astronaut-blue small">
                                 Verify Details
@@ -113,8 +76,15 @@
 </template>
 
 <script>
+import sideBar from './../sideBar';
+import transactionModal from '../transactionModal.vue';
+
 export default {
     inject: ['global'],
+    components: {
+        sideBar,
+        transactionModal
+    },
     data() {
         return {
             isSendingBvn: false,

@@ -5,6 +5,7 @@ const
     usersRoute = require('./users'),
     authRoute = require('./auth'),
     assetsRoute = require('./assets'),
+    statsRoute = require('./stats'),
     configRoute = require('./config'),
     conversionRoute = require('./conversion');
 module.exports = router;
@@ -19,6 +20,7 @@ router
     .use('/config', configRoute)
     .use('/conversion', conversionRoute)
     .use('/transactions', transactionsRoute)
+    .use('/stats', statsRoute)
     .use(serverUtils._404ErrorHandler)
     .use(serverUtils.dbErrorHandler)
     .use(serverUtils.serverErrorHandler);
