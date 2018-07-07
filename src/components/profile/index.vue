@@ -1,45 +1,7 @@
 <template>
     <div class="dashboard-page">
 
-        <div class="dashboard__sidebar">
-            <span class="hamburger">
-                <img src="~src/img/close.svg" alt="Close">
-            </span>
-            <img src="~src/img/avatar.svg" alt="Avatar" class="avatar">
-            <div class="title">
-                Jonathan Doekritz
-            </div>
-
-            <div class="referral-code">
-                <div class="title">
-                    Referral Code
-                </div>
-                <div class="body">
-                    02dh3a35
-                </div>
-                <div class="subtitle">
-                    Total Referrals: 2
-                </div>
-            </div>
-
-            <div class="links">
-                <a href="dashboard.html" class="link active">
-                    Dashboard
-                </a>
-                <a href="verify.html" class="link">
-                    Verify Details
-                </a>
-                <a href="profile.html" class="link">
-                    Edit Profile
-                </a>
-                <a href="bankaccount.html" class="link">
-                    Bank Accounts
-                </a>
-                <a href="/" class="link logout">
-                    Logout
-                </a>
-            </div>
-        </div>
+        <side-bar></side-bar>
         <div class="dashboard__content">
             <div class="dashboard__top-bar">
                 <div class="top-bar__table-md">
@@ -68,56 +30,48 @@
                     <div class="title">
                         Edit your profile
                     </div>
-                    <div class="input-fields">
-
+                    <h2 class="text-danger error-summary">{{errorSummary}}</h2>
+                    <form class="input-fields" @submit.prevent="submit">
                         <div class="form-row custom-form-group">
                             <div class="textbox-component">
                                 <label for="firstname">
                                     First name
                                 </label>
-                                <input type="email" v-model="newFirstName" id="firstname" placeholder="first name" /> </div>
+                                <input type="text" v-model="form.firstName.value" id="firstname" placeholder="first name" /> </div>
                             <div class="textbox-component password">
                                 <label for="lastname">
                                     Last name
                                 </label>
-                                <input type="text" v-model="newLastName" id="lastname" placeholder="Last name" />
+                                <input type="text" v-model="form.lastName.value" id="lastname" placeholder="Last name" />
                             </div>
                         </div>
                         <div class="form-row custom-form-group">
                             <div class="textbox-component">
-                                <label for="email">
-                                    Email
-                                </label>
-                                <input type="email" id="email" v-model="newEmailAddress" placeholder="jane@doe.com" />
-                            </div>
-
-                            <div class="textbox-component">
                                 <label for="image">
                                     Picture
                                 </label>
-                                <input type="file" id="image" v-on:change="newImage=$event.target.files[0]" accept="image/*" />
+                                <input type="file" id="image" v-on:change="form.image.value=$event.target.files[0]" accept="image/*" />
                             </div>
                         </div>
                         <div class="custom-form-group">
                             <label for="phone-number">
                                 Phone number
+                                <font color="red" class="input-error-message" v-if="validationFailed"> *{{validationError.phoneNumber}}</font>
                             </label>
-                            <tel-input v-model="phoneNumber" required> </tel-input>
+                            <tel-input @input="setPhoneNumber" :value="form.phoneNumber.value" errorMessage="please enter a valid phone number" required> </tel-input>
                         </div>
                         <div class="select-component custom-form-group">
                             <label for="country">
                                 Country
                             </label>
-                            <vue-select :options="countryData" label="name" v-model="newCountry" inputId="country" placeholder="type to search...">
-                                <template slot="option" slot-scope="option">
-                                    <span> {{option.name}}</span>
-                                </template>
+                            <vue-select :options="countryNames" v-model="form.country.value" inputId="country" placeholder="type to search...">
                             </vue-select>
                         </div>
-                    </div>
-                    <button class="update btn-custom-astronaut-blue">
-                        Update
-                    </button>
+                        <input type="submit" id="submit" class="hidden">
+                    </form>
+                    <label for="submit" style="width:100%" tabindex="0" class="call-to-action btn-custom-astronaut-blue" :disabled="!isValidated || isWaiting">
+                        {{isWaiting? 'Sending...': 'Update' }}
+                    </label>
                 </div>
 
             </div>
@@ -126,46 +80,126 @@
 </template>
 <script>
 
+import { mapState } from 'vuex';
 import vueSelect from "vue-select";
+import telInput from "./../tel-input";
 import countryNames from "../../COUNTRY_NAMES";
+import sideBar from './../sideBar';
 export default {
     data() {
         return {
-            countryData: countryNames.map(function(name) {
-                return { name }
-            }),
-            newCountry: null,
-            newPhoneNumber: null,
-            newFirstName: null,
-            newLastName: null,
-            newEmailAddress: null,
-            newImage: null
+            form: {
+                country: {
+                    required: true,
+                    value: this.$store.state.user.country,
+                },
+                phoneNumber: {
+                    required: true,
+                    isValid: true,
+                    value: this.$store.state.user.phoneNumber,
+                },
+                firstName: {
+                    required: true,
+                    value: this.$store.state.user.firstName,
+                },
+                lastName: {
+                    required: true,
+                    value: this.$store.state.user.lastName,
+                },
+                image: {
+                    value: undefined,
+                },
+            },
+            errorSummary: '',
+            requestErrors: {},
+            isWaiting: false,
+            countryNames,
+            validationFailed: false,
         }
+    },
+    computed: {
+        isValidated() {
+            return !(Object.keys(this.validationError).length)
+        },
+        validationError() {
+            const errors = {};
+            for (let field in this.form) {
+                if (this.form[field].isValid === false) errors[field] = 'invalid';
+                if (this.form[field].required && !this.form[field].value) errors[field] = 'required';
+                if (this.requestErrors[field]) errors[field] = this.requestErrors[field];
+            }; console.log('errors:', errors)
+            return errors
+        },
     },
     methods: {
         submit() {
-            if (!this.isValidated) return this.error = validationError;
-            let postBody = {
-                firstName: this.newFirstName,
-                lastName: this.newLastName,
-                country: this.newCountry,
-                emailAddress: this.newEmailAddress,
-                image: this.newImage,
-                phoneNumber: this.newPhoneNumber,
-            }
+            if (!this.isValidated) {
+                return this.validationFailed = true;
+            };
+            this.isWaiting = true;
+            let postBody = {};
+            for (const field in this.form) postBody[field] = this.form[field].value; console.log({ postBody })
             if (postBody.image) {
                 postBody = objectToFormData(postBody)
-            }
-            this.$root.request('PATCH', `/users/${this.$root.user._id}`, postBody, function(err, result) {
-                if (err) return console.log("error from post: ", this.err = err, err.response);
-                console.log("success...", result);
-            })
-        }
+            };
+            this.$request('PATCH', `/users/${this.$store.state.user._id}`, postBody, function(err, user) {
+                this.isWaiting = false;
+                if (err) {
+                    this.errorHandler(err);
+                    console.log("error from post: ", this.err = err, err.response);
+                    return
+                };
+                console.log("success...",user);
+                this.$store.commit('updateUser', user)
+                this.errorSummary = '';
+                this.requestErrors = {};
+            }.bind(this));
+        },
+        errorHandler(err) {
+            if (err.message == 'Network Error') {
+                return this.errorSummary = 'Network Error';
+            };
+            if (Math.floor(err.response.status / 100) == 4) this.errorSummary = 'validation failed';
+            else this.errorSummary = 'internal server error';
+            const serverResponse = err.response.data;
+            Object.entries(serverResponse.errors.errorDetails)
+                .forEach(([field, value]) => {
+                    this.requestErrors = Object.assign({}, this.requestErrors, {
+                        [field]: value
+                    });
+                });
+            this.validationFailed = true;
+        },
+        setPhoneNumber({ isValid, digits, region }) {
+            Object.assign(this.form.phoneNumber, { isValid, value: { digits, region } });
+        },
     },
     mounted() {
     },
     components: {
         "vue-select": vueSelect,
+        "tel-input": telInput,
+        'side-bar': sideBar,
     }
 }
+
+var objectToFormData = function(obj, form, namespace) {
+    var fd = form || new FormData();
+    var formKey;
+    for (var property in obj) {
+        if (obj.hasOwnProperty(property)) {
+            if (namespace) {
+                formKey = namespace + '[' + property + ']';
+            } else {
+                formKey = property;
+            }
+            if (typeof obj[property] === 'object' && !(obj[property] instanceof File)) {
+                objectToFormData(obj[property], fd, property);
+            } else {
+                fd.append(formKey, obj[property]);
+            }
+        }
+    }
+    return fd;
+};
 </script>

@@ -45,7 +45,7 @@ router
     }), handleGetUser) // admin and owner can access this route
     .patch('/:_id/', auth.bounceUnauthorised({
         owner: true,
-    }), handlePatchUser)
+    }), multer({dest: imageStoragePath}).single('image'), handlePatchUser)
     .use('/:_id/asset_accounts', assetAccountsRoute)
     .use('/:_id/verification_details', verificationDetailsRoute)
     .use('/:_id/status', statusRoute);

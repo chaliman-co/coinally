@@ -143,10 +143,7 @@ export default {
   },
   methods: {
     setPhoneNumber({isValid, digits, region}) {
-      console.log({isValid, digits, region});
       Object.assign(this.form.phoneNumber, {isValid, value: {digits, region}});
-      // this.form.phoneNumber.value = {digits, region};
-      // this.form.phoneNumber.isValid = isValid
     },
     updateCountry(val) {
       let countryInput = document.getElementById('country');
