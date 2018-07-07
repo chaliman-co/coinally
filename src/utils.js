@@ -10,9 +10,7 @@ const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhos
 
 const apiUrl = `${apiRootUrl}/api`;
 
-const axiosInstance = axios.create({
-    baseURL: apiUrl,
-});
+const axiosInstance = axios.create({});
 
 axiosInstance.interceptors.request.use(config => {
     NProgress.start();
