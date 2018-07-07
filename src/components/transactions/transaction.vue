@@ -46,11 +46,11 @@
                     alt="Ether">
                 </div>
                 <div class="amount">
-                  <span title="Deposit">D:</span> {{ transaction.depositAmount }} {{ transaction.depositAssetCode }},
-                  <span title="Receive">R:</span> {{ transaction.receiptAmount }} {{ transaction.receiptAssetCode }}
+                  <span title="Deposit">D:</span> {{ transaction.depositAmount.toString() | numberFormat }} {{ transaction.depositAssetCode }},
+                  <span title="Receive">R:</span> {{ transaction.receiptAmount.toString() | numberFormat }} {{ transaction.receiptAssetCode }}
                 </div>
                 <div class="exchange-rate">
-                  1 {{ transaction.depositAssetCode }} = {{ transaction.rate }} {{ transaction.receiptAssetCode }}
+                  1 {{ transaction.depositAssetCode }} = {{ transaction.rate.toString() | numberFormat }} {{ transaction.receiptAssetCode }}
                 </div>
               </div>
               <template v-if="user.role === 'admin'">

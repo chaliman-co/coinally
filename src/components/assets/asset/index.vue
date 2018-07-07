@@ -9,7 +9,7 @@
         :src="`${global.apiRootUrl}/${imagePath}`"
         alt="Image">
     </td>
-    <td>{{ price_usd }}</td>
+    <td>{{ price_usd.toString() | numberFormat }}</td>
     <td v-html = "type === 'fiat'? `${depositAddress.name} <br/> ${depositAddress.number} <br/> ${depositAddress.bankName}`: depositAddress"/>
     <td>
       <div class="checkbox-component">
