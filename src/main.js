@@ -2,6 +2,7 @@ import Vue from 'vue';
 import vueSelect from 'vue-select';
 import socketIoClient from 'socket.io-client';
 import jwtDecode from 'jwt-decode';
+import moment from 'moment';
 
 import './js/js-bundle';
 
@@ -19,6 +20,14 @@ let globalUser = null;
 
 Vue.prototype.$request = utils.request;
 Vue.prototype.$log = utils.log;
+
+Vue.filter('humanizeDate', (value) => {
+    if (value) {
+        return moment(new Date(value)).fromNow();
+    } else {
+        return '';
+    }
+});
 
 Vue.filter('capitalize', (value) => {
     if (!value) return '';

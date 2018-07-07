@@ -39,7 +39,7 @@
                         v-for="(transaction, index) in transactions"
                         :key="index">
                         <td>{{ index + 1 + pageNo }}</td>
-                        <td>Today</td>
+                        <td>{{ transaction.createdAt | humanizeDate }}</td>
                         <td>{{ transaction.depositAssetCode.toUpperCase() }}</td>
                         <td>{{ transaction.receiptAssetCode.toUpperCase() }}</td>
                         <!-- <td>{{ transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.depositAssetCode }})</td>
@@ -92,6 +92,7 @@
 
 <script>
 
+import moment from 'moment';
 import transaction from '../transactions/transaction.vue'
   
 import pagination from './../pagination';

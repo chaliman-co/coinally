@@ -157,9 +157,7 @@
               }else {
                 this.inputError = 'value cannot be greater than '+Number(this.checkMaxValue).toLocaleString();
               }
-              // this.amount = Math.max(Math.min(newAmount,this.checkMaxValue));
               this.amount = previousAmount;
-              console.log(newAmount, previousAmount);
               
           } else if(parseInt(newAmount) < 0){
               this.inputError = 'value cannot be lower than 0';
@@ -184,7 +182,6 @@
     },
     methods: {
       UpdateRate(query) {
-        console.log(query);
         if (!this.socket) {
           const socket = socketIoClient(`${this.global.apiRootUrl}/rates`, {
             reconnectionDelay: 10000,
@@ -193,7 +190,6 @@
           
           socket.on('new_rate', (rate) => {
             this.conversionRate = rate;
-            console.log('new rate: ', rate);
           });
           this.socket = socket;
         } else this.socket.emit('parameter_change', query);

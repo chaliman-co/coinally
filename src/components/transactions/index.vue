@@ -35,52 +35,6 @@
         <!-- {{ transactions }} -->
         <div class="admin-dashboard__transactions">
           <div class="transactions__table">
-
-            <!-- <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>User</th>
-                                        <th>Date</th>
-                                        <th>I have</th>
-                                        <th>I want</th>
-                                        <th>Deposit amount</th>
-                                        <th>receipt amount</th>
-                                        <th>Rate</th>
-                                        <th>Receipt account</th>
-                                        <th>Status</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="(transaction, index) in transactions" :key="index">
-                                        <td>{{index}}</td>
-                                        <td>{{transaction.user.firstName}} {{transaction.user.lastName}}</td>
-                                        <td>Today</td>
-                                        <td>{{transaction.depositAssetCode}}</td>
-                                        <td>{{transaction.receiptAssetCode}}</td>
-                                        <td>{{transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1')}} ({{transaction.depositAssetCode}})</td>
-                                        <td>{{transaction.receiptAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1')}} ({{transaction.receiptAssetCode}})</td>
-                                        <td>{{transaction.rate.toFixed(3).replace(/\.([^0]*)(0+)$/g, '.$1')}}</td>
-                                        <td>{{transaction.receiptAsset.type == 'fiat'? `${transaction.user.assetAccounts[transaction.receiptAddress].address.number}, ${transaction.user.assetAccounts[transaction.receiptAddress].address.bankName}` : transaction.receiptAsset.type == 'digital'? transaction.receiptAddress : undefined}}</td>
-                                        <td>
-                                            <div class="custom-form-group ">
-                                                <select class="form-control custom-select" v-model="transaction.status" @change="changeTransactionStatus(transaction, $event.target.value, index)">
-                                                    <option v-for="(option, index) in transactionStatuses" :key="index" :disabled="transactionStatuses.indexOf(transaction.status) >= index" :value="option">{{option}}</option>
-                                                </select>
-                                            </div>
-                                        </td>
-
-                                        <td>
-                                            <button class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
-                                                View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div> -->
             <spinner v-if="loading"></spinner>
             <div class="table-responsive">
               <table class="table table-striped table-hover">
@@ -108,21 +62,9 @@
                     <td>{{ transaction.depositAssetCode }}</td>
                     <td>{{ transaction.receiptAssetCode }}</td>
                     <td>{{ transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1').toString() | numberFormat }} ({{ transaction.depositAssetCode }})</td>
-                    <td>{{ formatTime(transaction.createdAt) }}</td>
-                    <td>{{ formatTime(transaction.lastUpdated) }}</td>
+                    <td>{{ transaction.createdAt | humanizeDate }}</td>
+                    <td>{{ transaction.lastUpdate | humanizeDate }}</td>
                     <td>
-                      <!-- <div class="custom-form-group ">
-                        <select
-                          v-model="transaction.status"
-                          class="form-control custom-select"
-                          @change="changeTransactionStatus(transaction, $event.target.value, index)">
-                          <option
-                            v-for="(option, index) in transactionStatuses"
-                            :key="index"
-                            :disabled="transactionStatuses.indexOf(transaction.status) >= index"
-                            :value="option">{{ option }}</option>
-                        </select>
-                      </div> -->
                       {{ transaction.status | capitalize }}
                     </td>
 
@@ -194,9 +136,6 @@ export default {
     
   },
   methods: {
-    formatTime(time) {
-      return moment().calendar(new Date(time));
-    },
     showTransaction(trans) {
       this.$refs.transaction.open(trans);
     },

@@ -61,18 +61,14 @@
                     v-for="(transaction, index) in stats.recentOrders"
                     :key="index">
                     <td>{{ index + 1 }}</td>
-                    <td>{{ formatTime(transaction.createdAt) }}</td>
+                    <td>{{ transaction.createdAt | humanizeDate }}</td>
                     <td>{{ transaction.depositAssetCode.toUpperCase() }}</td>
                     <td>{{ transaction.receiptAssetCode.toUpperCase() }}</td>
                     <!-- <td>{{ transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.depositAssetCode }})</td>
                     <td>{{ transaction.receiptAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.receiptAssetCode }})</td> -->
                     <td>{{ transaction.rate.toFixed(8).replace(/\.([^0]*)(0+)$/g, '.$1') | numberFormat }}</td>
-                    <td>
-                      {{ transaction.receiptAsset.type == 'fiat'? 
-                      `${user.assetAccounts[transaction.receiptAddress].address.number}, 
-                      ${user.assetAccounts[transaction.receiptAddress].address.bankName}` : 
-                      transaction.receiptAsset.type == 'digital'? transaction.receiptAddress : 
-                      undefined }}
+                    <td :title="transaction.receiptAsset.type === 'digital' ? transaction.receiptAddress: ''">
+                      {{ getReceiptAccount(transaction) }}
                     </td>
                     <td>{{ transaction.status | capitalize }}</td>
 
@@ -128,11 +124,19 @@ export default {
     this.loadStats(this.user._id)
   },
   methods: Object.assign({
+    getReceiptAccount(tx){
+      switch(tx.receiptAsset.type){
+        case 'fiat':
+        return `${this.user.assetAccounts[tx.receiptAddress].address.number}, 
+                      ${this.user.assetAccounts[tx.receiptAddress].address.bankName}`;
+        case 'digital':
+          return tx.receiptAddress ? (tx.receiptAddress.substr(0, 10) + '...') : '';
+        default:
+          return '';
+      }
+    },
     formatDate(date){
       return moment(date).format('ll');
-    },
-    formatTime(time) {
-      return moment(new Date(time)).fromNow();
     },
     showTransaction(trans) {
       this.$refs.transaction.open(trans);
