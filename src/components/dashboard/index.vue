@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-page">
     <side-bar/>
-    <user-dashboard v-if="user.role === 'admin'"/>
+    <user-dashboard v-if="user.role !== 'admin'"/>
     <admin-dashboard v-else/>
   </div>
 </template>
