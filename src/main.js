@@ -80,32 +80,6 @@ const app = new Vue({
         global: {
             apiUrl,
             apiRootUrl,
-            _usertransactions: [],
-            getTransactions(skip, limit, cb) {
-                const transactions = this._usertransactions;
-
-                const endIndex = skip + limit;
-
-                if ((!transactions[endIndex] && transactions[transactions.length - 1] !== 'end')) {
-                    const url = `/transactions?user=${this.user._id}&skip=${transactions.length}&limit=${endIndex - transactions.length - 1}`;
-
-                    utils.request('GET', url, (err, fetchedTransactions) => {
-                        utils.log('done with get from transactions: ', err, fetchedTransactions);
-
-                        if (err) {
-                            utils.log('could not load transactions: ', err.response);
-                            cb(err, null);
-                        } else {
-                            if (fetchedTransactions.length < endIndex - transactions.length - 1) {
-                                fetchedTransactions.push('end');
-                            }
-
-                            cb(fetchedTransactions.slice(skip, endIndex + 1));
-                        }
-                    });
-                }
-                // cb(fetchedTransactions.slice(skip, endIndex + 1));
-            },
             user: null,
             request: utils.request,
             setUser(token, cb) {
