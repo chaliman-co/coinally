@@ -6,41 +6,34 @@
         Items Count Per Page {{itemsCountPerPage}} -->
         <nav aria-label="pagination" class="pull-right">
             <ul class="pagination pagination-sm">
-                <li class="disabled">
-                <a href="#" aria-label="Previous">
-                    <span aria-hidden="true">« Previous</span>
-                </a>
+                <!-- <li class="disabled" v-if="previous">
+                    <a href="#" aria-label="Previous">
+                        <span aria-hidden="true">« Previous</span>
+                    </a>
+                </li> -->
+                <li v-if="previous">
+                    <a href="#" aria-label="Previous">
+                        <span aria-hidden="true" @click.prevent="previousPage">« Previous</span>
+                    </a>
                 </li>
-                <li class="active">
+                <!-- <li class="active">
                     <a href="#">20
                         <span class="sr-only">(current)</span>
                     </a>
-                </li>
+                </li> -->
                 <li v-for="page in totalPageCount" :key="page" v-bind:class="{ active: activePage == page }">
                     <a href="#" @click.prevent="getPage(page)">{{page}}</a>
                 </li>
                 
-                <li>
-                <a href="#" aria-label="Next">
-                    <span aria-hidden="true">Next »</span>
-                </a>
+                <li v-if="next" >
+                    <a href="#" aria-label="Next" @click.prevent="nextPage">
+                        <span aria-hidden="true">Next »</span>
+                    </a>
                 </li>
             </ul>
         </nav>
         <div class="section_cto pager">
-            <nav class="pager_nav">
-                <div class="pager_item hidden prev" v-if="previous">
-                    <a href="#" @click.prevent="previousPage">Previous <i class="fa fa-caret-left"></i></a>
-                </div>
-                <div class="pager_item" v-for="page in totalPageCount"
-                :key="page" v-bind:class="{ active: activePage == page }">
-                    <a href="#" @click.prevent="getPage(page)">{{page}}</a>
-                </div>
-                <div class="pager_item next" v-if="next">
-                    <a href="#" @click.prevent="nextPage"> <i class="fa fa-caret-right"></i> Next</a>
-                </div>
-            </nav>
-
+            
         </div>
 
     </div>
@@ -50,14 +43,15 @@
   export default {
     props: ['activePage', 'totalItemsCount', 'itemsCountPerPage'],
     computed: {
+      
+      totalPageCount() {
+        return Math.ceil(this.totalItemsCount / this.itemsCountPerPage);
+      },
       next() {
-        return this.activePage !== this.totalPageCount;
+        return this.activePage !== this.totalPageCount && this.totalPageCount !== 0;
       },
       previous() {
         return this.activePage !== 1;
-      },
-      totalPageCount() {
-        return Math.ceil(this.totalItemsCount / this.itemsCountPerPage);
       },
     },
     methods: {
@@ -65,6 +59,7 @@
         this.$emit('changePage', page);
       },
       nextPage() {
+        // alert(this.totalPageCount);
         const newPage = this.activePage + 1;
         this.getPage(newPage);
       },

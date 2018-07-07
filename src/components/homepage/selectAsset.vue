@@ -111,23 +111,6 @@ class="header__table-cell header__cta-form">
         }
       },
       
-      // preventExceedMinAndMax(newAmount, previousAmount){
-      //     if(parseInt(this.amount) > this.checkMaxValue){
-      //         if(this.checkMaxValue == ''){
-      //           this.inputError = 'Please choose a deposit currency';
-      //         }else {
-      //           this.inputError = 'value cannot be greater than '+Number(this.checkMaxValue).toLocaleString();
-      //         }
-      //         this.amount = Math.max(Math.min(this.amount,this.checkMaxValue));
-      //         console.log(this.amount);
-      //     } else if(parseInt(this.amount) < 0){
-      //         this.inputError = 'value cannot be lower than 0';
-      //         this.amount = '';
-      //     } else {
-      //         this.inputError = '';
-      //     }
-      // }
-      
 
     },
     watch: {
