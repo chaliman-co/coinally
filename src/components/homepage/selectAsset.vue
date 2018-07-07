@@ -13,7 +13,7 @@ class="header__table-cell header__cta-form">
           <div class="select-component custom-form-group">
             <label for="deposit">Deposit</label>
             <!-- {{depositAsset}} -->
-            <vue-select :options="depositAssets" v-model="depositAsset" input-id="deposit" label="name">
+            <vue-select :options="assets" v-model="depositAsset" input-id="deposit" label="name">
               <template slot="option" slot-scope="option">
                 <img :src="`${global.apiRootUrl}/${option.imagePath}`" 
                   style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
@@ -42,10 +42,10 @@ class="header__table-cell header__cta-form">
         <div v-if="depositAsset && receiptAsset && conversionRate" class="expected-amount">
           <div class="amount">
             
-            {{ `${amount} ${depositAsset.code.toUpperCase()} (${receiptAmount}${receiptAsset.code.toUpperCase()})` }}
+            {{ `${amount}`.toString() | numberFormat }} {{`${depositAsset.code.toUpperCase()}` }} ({{ `${receiptAmount}`.toString() | numberFormat }} {{ `${receiptAsset.code.toUpperCase()}` }})
           </div>
           <div class="exchange-rate">
-            {{ `1 ${depositAsset.code.toUpperCase()} = ${conversionRate.toFixed(8).replace(/(?:\.)?0+$/, "")}${receiptAsset.code.toUpperCase()}` }}
+            1 {{ `${depositAsset.code.toUpperCase()}` }} = {{ `${conversionRate.toFixed(8).replace(/(?:\.)?0+$/, "")}`.toString() | numberFormat }} {{ `${receiptAsset.code.toUpperCase()}` }}
           </div>
         </div>
         <label :disabled="!isValidated" 

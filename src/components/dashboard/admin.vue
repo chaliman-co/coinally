@@ -33,7 +33,7 @@
                                             {{tx.depositAmount | numberFormat}} {{tx.depositAsset.code.toUpperCase() }} to {{tx.receiptAsset.code.toUpperCase()}}
                                         </div>
                                         <div class="order-item__subtitle">
-                                            {{formatTime(tx.createdAt)}} - {{`${tx.user.firstName} ${tx.user.lastName}` | capitalize}}
+                                            {{tx.createdAt | humanizeDate}} - {{`${tx.user.firstName} ${tx.user.lastName}` | capitalize}}
                                         </div>
                                     </div>
                                 </div>
@@ -182,9 +182,6 @@ export default {
                 return 0;
             }
         },
-    formatTime(time) {
-      return moment(new Date(time)).fromNow();
-    },
     },
     mapActions('adminStats', ['loadStats'])),
     created(){

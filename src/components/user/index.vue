@@ -54,75 +54,11 @@
               <span class="status__indicator"/>
             </div>
           </div>
-          <div class="dashboard-pane dashboard-pane--lg">
-            <div class="dashboard-pane__header">
-              <div class="header__title">
-                Transactions
-              </div>
-              <div class="header__subtitle">
-                {{ user.transactionCount }} Total Transactions
-              </div>
-            </div>
-            <div class="dashboard-pane__body is--padded">
-              <div class="user-transactions__table">
-                <div class="table-responsive">
-                  <table class="table table-striped table-hover">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Date</th>
-                        <th>I have</th>
-                        <th>I want</th>
-                        <!-- <th>Deposit amount</th>
-                        <th>receipt amount</th> -->
-                        <th>Rate</th>
-                        <th>Receipt account</th>
-                        <th>Status</th>
-                        <th/>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr
-                        v-for="(transaction, index) in userTransactions"
-                        :key="index">
-                        <td>{{ index + 1 }}</td>
-                        <td>Today</td>
-                        <td>{{ transaction.depositAssetCode }}</td>
-                        <td>{{ transaction.receiptAssetCode }}</td>
-                        <!-- <td>{{ transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.depositAssetCode }})</td>
-                        <td>{{ transaction.receiptAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.receiptAssetCode }})</td> -->
-                        <td>{{ transaction.rate.toFixed(3).replace(/\.([^0]*)(0+)$/g, '.$1') }}</td>
-                        <td>{{ transaction.receiptAsset.type == 'fiat'? `${user.assetAccounts[transaction.receiptAddress].address.number}, ${user.assetAccounts[transaction.receiptAddress].address.bankName}` : transaction.receiptAsset.type == 'digital'? transaction.receiptAddress : undefined }}</td>
-                        <td>
-                          <!-- <div class="custom-form-group ">
-                            <select
-                              v-model="transaction.status"
-                              class="form-control custom-select"
-                              @change="changeTransactionStatus(transaction, $event.target.value, index)">
-                              <option
-                                v-for="(option, index) in transactionStatuses"
-                                :key="index"
-                                :disabled="transactionStatuses.indexOf(transaction.status) >= index"
-                                :value="option">{{ option }}</option>
-                            </select>
-                          </div> -->
-                          {{ transaction.status | capitalize }}
-                        </td>
+          <!-- User Transactions -->
+          
+          <user-transaction :user="user"></user-transaction>
+          <!-- End of User Transactions -->
 
-                        <td>
-                          <button
-                            class="btn-custom-astronaut-blue small"
-                            @click="showTransaction(transaction)">
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
           <div class="dashboard-pane dashboard-pane--lg">
             <div class="dashboard-pane__header">
               <div class="header__title">
@@ -168,6 +104,7 @@
               </div>
             </div>
           </div>
+
           <div class="dashboard-pane dashboard-pane--lg">
             <div class="dashboard-pane__header">
               <div class="header__title">
@@ -226,14 +163,17 @@
 <script>
 import vueSelect from 'vue-select';
 import sideBar from '../sideBar.vue';
-import transaction from '../transactions/transaction.vue';
+// import transaction from '../transactions/transaction.vue';
+
+import userTransaction from './usertransaction';
 
 export default {
     inject: ['global'],
     components: {
         'vue-select': vueSelect,
         sideBar,
-        transaction,
+        // transaction,
+        userTransaction
     },
     data() {
         return {
@@ -249,20 +189,12 @@ export default {
                 transactionCount: undefined,
             },
             userTransactions: [],
-            transactionStatuses: ['initialized', 'payment_received', 'completed', 'failed'],
+            transactionsStatus: ['all', 'failed', 'awaiting payment', 'payment received', 'pending', 'completed'],
+            // transactionStatuses: ['initialized', 'payment_received', 'completed', 'failed'],
         };
     },
     created() {
-        this.$request('GET', `/users/${this.$route.params._id}/`, (err, user) => {
-            if (user) {
-                this.user = user;
-                this.$request('GET', `/transactions/?user=${this.user._id}`, (bug, trans) => {
-                    if (!bug) {
-                        this.userTransactions = trans;
-                    }
-                });
-            }
-        });
+        this.getTransactionsAndUser();
     },
     methods: {
         // changeTransactionStatus(transaction, status, index) {
@@ -270,16 +202,29 @@ export default {
         //         transaction.status = res;
         //     });
         // },
-
-    changeStatus(trans, status) {
-      const tx = this.userTransactions.find(t => t._id === trans._id);
-      if (tx) {
-        this.$set(tx, 'status', status);
-      }
+    getTransactionsAndUser(){
+      this.$request('GET', `/users/${this.$route.params._id}/`, (err, user) => {
+            if (user) {
+                this.user = user;
+                // this.$request('GET', `/transactions/users/${this.user._id}`, (bug, trans) => {
+                //   console.log('Transactions ',trans);
+                //     if (!bug) {
+                //         this.userTransactions = trans.items;
+                //         this.transactionsTotalCount = trans.totalCount;
+                //     }
+                // });
+            }
+        });
     },
-    showTransaction(trans) {
-      this.$refs.transaction.open(trans);
-    },
+    // changeStatus(trans, status) {
+    //   const tx = this.userTransactions.find(t => t._id === trans._id);
+    //   if (tx) {
+    //     this.$set(tx, 'status', status);
+    //   }
+    // },
+    // showTransaction(trans) {
+    //   this.$refs.transaction.open(trans);
+    // },
         changeVerificationDetailApproval(index, status) {
             this.global.request('POST', `/users/${this.user._id}/verification_details/${index}/is_approved`, { isApproved: status }, (err, res) => {
                 this.user.verificationDetails[index].isApproved = res;
