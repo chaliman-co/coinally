@@ -1,4 +1,5 @@
 import axios from 'axios';
+import NProgress from 'nprogress';
 import store from './store';
 import router from './router';
 
@@ -9,6 +10,20 @@ const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhos
 
 const apiUrl = `${apiRootUrl}/api`;
 
+const axiosInstance = axios.create({
+    baseURL: apiUrl,
+});
+
+axiosInstance.interceptors.request.use(config => {
+    NProgress.start();
+    return config
+})
+
+// before a response is returned stop nprogress
+axiosInstance.interceptors.response.use(response => {
+    NProgress.done();
+    return response
+})
 
 /**
  * Log message to console
@@ -42,7 +57,7 @@ export default {
 
             if (bearerToken) headers.Authorization = `Bearer ${bearerToken}`;
         }
-        axios({
+        axiosInstance({
             method,
             url,
             data,

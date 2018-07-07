@@ -9,7 +9,8 @@
         :src="`${global.apiRootUrl}/${imagePath}`"
         alt="Image">
     </td>
-    <td>{{ price_usd.toString() | numberFormat }}</td>
+    <td v-if="price_usd">{{ price_usd.toFixed(8) | numberFormat }}</td>
+    <td v-else>***</td>
     <td v-html = "type === 'fiat'? `${depositAddress.name} <br/> ${depositAddress.number} <br/> ${depositAddress.bankName}`: depositAddress"/>
     <td>
       <div class="checkbox-component">

@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import NProgress from 'nprogress';
 import VueRouter from 'vue-router';
 import jwtDecode from 'jwt-decode';
 import qs from 'qs';
@@ -90,5 +91,16 @@ router.beforeEach((to, from, next) => {
     }
     return next();
 });
+
+router.beforeResolve((to, from, next) => {
+    if (to.name) {
+        NProgress.start()
+    }
+    next()
+})
+
+router.afterEach((to, from) => {
+    NProgress.done()
+})
 
 export default router;
