@@ -31,7 +31,7 @@ class="header__table-cell header__cta-form">
           </div>
           <div class="textbox-component">
             <label for="amount">
-              Amount (Min: {{ checkMinValue.toString() | numberFormat }} Max: {{ checkMaxValue.toString() | numberFormat}})
+              Amount (Min: {{ checkMinValue | numberFormat }} Max: {{ checkMaxValue | numberFormat}})
             </label>
             <input id="amount" 
               v-model="amount" type="number" placeholder="0" step="0.0000001" :min="checkMinValue" :max="checkMaxValue">
@@ -42,10 +42,10 @@ class="header__table-cell header__cta-form">
         <div v-if="depositAsset && receiptAsset && conversionRate" class="expected-amount">
           <div class="amount">
             
-            {{ `${amount}`.toString() | numberFormat }} {{`${depositAsset.code.toUpperCase()}` }} ({{ `${receiptAmount}`.toString() | numberFormat }} {{ `${receiptAsset.code.toUpperCase()}` }})
+            {{ `${amount}` | numberFormat }} {{`${depositAsset.code.toUpperCase()}` }} ({{ `${receiptAmount}` | numberFormat }} {{ `${receiptAsset.code.toUpperCase()}` }})
           </div>
           <div class="exchange-rate">
-            1 {{ `${depositAsset.code.toUpperCase()}` }} = {{ `${conversionRate.toFixed(8).replace(/(?:\.)?0+$/, "")}`.toString() | numberFormat }} {{ `${receiptAsset.code.toUpperCase()}` }}
+            1 {{ `${depositAsset.code.toUpperCase()}` }} = {{ `${conversionRate.toFixed(8).replace(/(?:\.)?0+$/, "")}` | numberFormat }} {{ `${receiptAsset.code.toUpperCase()}` }}
           </div>
         </div>
         <label :disabled="!isValidated" 
@@ -60,7 +60,6 @@ class="header__table-cell header__cta-form">
 <script>
 import vueSelect from 'vue-select';
 import socketIoClient from 'socket.io-client';
-
 export default {
   inject: ['global'],
   components: {
@@ -102,22 +101,22 @@ export default {
       isValidated() {
         return !!(this.depositAsset && this.receiptAsset);
       },
-      receiptAssets(){
+      receiptAssets() {
         return this.assets.filter(asset => this.depositAsset === null || asset._id !== this.depositAsset._id)
       },
-      depositAssets(){
+      depositAssets() {
         let depositAsset = this.assets;
         return depositAsset;
       },
-      checkMinValue(){
-        if(this.depositAsset === null){
+      checkMinValue() {
+        if (this.depositAsset === null) {
           return '';
         } else {
           return this.depositAsset.minDepositAmount;
         }
       },
-      checkMaxValue(){
-        if(this.depositAsset === null){
+      checkMaxValue() {
+        if (this.depositAsset === null) {
           return '';
         } else {
           return this.depositAsset.maxDepositAmount;
@@ -133,45 +132,45 @@ export default {
           from: this.depositAsset.code,
           to: newAsset.code,
         });
-    },
-    depositAsset(newAsset, previousAsset) {
-      if (!(this.depositAsset && this.receiptAsset)) return;
-      this.UpdateRate(previousAsset ? {
-        from: newAsset.code,
-      } : {
+      },
+      depositAsset(newAsset, previousAsset) {
+        if (!(this.depositAsset && this.receiptAsset)) return;
+        this.UpdateRate(previousAsset ? {
+          from: newAsset.code,
+        } : {
           from: newAsset.code,
           to: this.receiptAsset.code,
         });
       },
-      amount(newAmount, previousAmount){
-          
-          if(parseInt(newAmount) > this.checkMaxValue){
-              if(this.checkMaxValue == ''){
-                this.inputError = 'Please choose a deposit currency';
-              }else {
-                this.inputError = 'value cannot be greater than '+Number(this.checkMaxValue).toLocaleString();
-              }
-              // this.amount = Math.max(Math.min(newAmount,this.checkMaxValue));
-              this.amount = previousAmount;
-              console.log(newAmount, previousAmount);
-              
-          } else if(parseInt(newAmount) < 0){
-              this.inputError = 'value cannot be lower than 0';
-              this.amount = '';
-          } else if(this.amount == '') {
-              this.inputError = '';
+      amount(newAmount, previousAmount) {
+
+        if (parseInt(newAmount) > this.checkMaxValue) {
+          if (this.checkMaxValue == '') {
+            this.inputError = 'Please choose a deposit currency';
+          } else {
+            this.inputError = 'value cannot be greater than ' + Number(this.checkMaxValue).toLocaleString();
           }
+          // this.amount = Math.max(Math.min(newAmount,this.checkMaxValue));
+          this.amount = previousAmount;
+          console.log(newAmount, previousAmount);
+
+        } else if (parseInt(newAmount) < 0) {
+          this.inputError = 'value cannot be lower than 0';
+          this.amount = '';
+        } else if (this.amount == '') {
+          this.inputError = '';
+        }
       }
     },
     created() {
       this.$request('GET', '/assets/', (err, res) => {
         if (err) {
           console.error("couldn't load assets");
-        }else{
-        this.assets = res;
-        let resLength = res.length;
-        this.depositAsset = res[0];
-        this.receiptAsset = res[resLength - 1];
+        } else {
+          this.assets = res;
+          let resLength = res.length;
+          this.depositAsset = res[0];
+          this.receiptAsset = res[resLength - 1];
         }
       });
     },
@@ -195,21 +194,21 @@ export default {
         } else this.socket.emit('parameter_change', query);
       },
       setSelect(inputId, modelProp, value) {
-        
+
         const input = document.getElementById(inputId);
         if (!input) return;
         this[modelProp] = value;
-        
+
         if (!value) return input.setCustomValidity('please select one');
         return input.setCustomValidity('');
       },
       proceed() {
-          sessionStorage.transaction = JSON.stringify({
-            depositAsset: this.depositAsset,
-            receiptAsset: this.receiptAsset,
-            amount: this.amount,
-            rate: this.conversionRate,
-          });
+        sessionStorage.transaction = JSON.stringify({
+          depositAsset: this.depositAsset,
+          receiptAsset: this.receiptAsset,
+          amount: this.amount,
+          rate: this.conversionRate,
+        });
         if (!this.global.user) {
           return this.$router.push({
             path: '/login',
@@ -223,8 +222,6 @@ export default {
         }
         this.$router.push('transaction/payment');
       },
-      
-      
     },
   },
 };
