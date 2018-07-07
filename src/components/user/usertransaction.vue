@@ -8,15 +8,12 @@
               <div class="header__title">
                 Transactions
               </div>
-              <!-- <p v-for="t in transactions">{{t}}</p> -->
-              
               <div class="header__subtitle">
                 
                 {{ transactionsCount }} Total Transactions
               </div>
             </div>
             <div class="dashboard-pane__body is--padded">
-              <spinner v-if="loading"></spinner>
               <div class="user-transactions__table">
                 <div class="table-responsive">
                   <table class="table table-striped table-hover">
