@@ -60,7 +60,7 @@
                     <td>{{ transaction.user.firstName }} {{ transaction.user.lastName }}</td>
                     <td>{{ transaction.depositAssetCode }}</td>
                     <td>{{ transaction.receiptAssetCode }}</td>
-                    <td>{{ transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1').toString() | numberFormat }} ({{ transaction.depositAssetCode }})</td>
+                    <td>{{ transaction.depositAmount.toFixed(6).replace(/\.([^0]*)(0+)$/, '.$1') | numberFormat }} ({{ transaction.depositAssetCode }})</td>
                     <td>{{ transaction.createdAt | humanizeDate }}</td>
                     <td>{{ transaction.lastUpdate | humanizeDate }}</td>
                     <td>

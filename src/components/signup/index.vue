@@ -5,7 +5,7 @@
       <div class="title">
         Create an account
       </div>
-      <h2 class="text-danger error-summary">{{errorSummary}}</h2>
+      <h6 class="text-danger error-summary">{{errorSummary}}</h6>
       <form class="input-fields" @submit.prevent="submit">
         <div class="form-row custom-form-group">
           <div class="textbox-component">
@@ -50,10 +50,12 @@
         </div>
 
         <div class="custom-form-group">
+          <div class="select-component ">
           <label for="phone-number">
             Phone number
             <font color="red" class="input-error-message" v-if="validationFailed"> *{{validationError.phoneNumber}}</font>
           </label>
+          </div>
           <tel-input @input="setPhoneNumber" errorMessage="please enter a valid phone number" required> </tel-input>
         </div>
         <div class="select-component custom-form-group">

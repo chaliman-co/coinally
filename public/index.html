@@ -28,63 +28,68 @@
                 <div class="nav__table-row">
                     <div class="nav__table-cell nav__logo">
                         <!-- ONLY SHOW THIS HAMBURGER WHEN A USER IS LOGGED IN -->
-                        <span class="hamburger" v-if="global.user">
-                    <img src="/assets/menu.svg?68baac8e6388c3a978bc570e78fcfe3d" alt="Menu">
-                </span>
+                        <span class="hamburger" v-if="$store.getters.isAuth">
+                            <img src="/assets/menu.svg?68baac8e6388c3a978bc570e78fcfe3d" alt="Menu">
+                        </span>
                         <!--  -->
                         <a href="/" class="logo">
                             <img src="/assets/logo.svg?60d6eba9eb7e287c61b42c2ea6416f56" alt="Logo">
                         </a>
                     </div>
                     <template v-cloak>
-                    <div class="nav__table-cell nav__links" v-if="$store.getters.isAuth">
-                        <router-link to="/dashboard" class="nav__link login"> Dashboard </router-link>
-                    </div>
-                    <div v-else class="nav__table-cell nav__links">
-                        <a class="nav__link login">
+                    <div class="nav__table-cell nav__links">
+                        <router-link to="/about" class="nav__link">
+                            About us
+                        </router-link>
+                        <router-link v-if="$store.getters.isAuth" to="/dashboard" class="nav__link login"> 
+                            Dashboard </router-link>
+                        <template v-else>
+                            <a class="nav__link login">
                             <router-link to="/login"> Login </router-link>
-                        </a>
-                        <a class="nav__link">
-                            <router-link to="/signup"> Signup </router-link>
-                        </a>
-                    </div>
-                  </template>
+                            </a>
+                            <a class="nav__link">
+                                <router-link to="/signup"> Signup </router-link>
+                            </a>
+                        </template>
+
                 </div>
+                </template>
             </div>
-        </nav>
+    </div>
+    </nav>
 
-        <router-view></router-view>
+    <router-view></router-view>
 
-        <footer>
-            <div class="footer__table-md">
-                <div class="footer__table-row">
-                    <div class="footer__table-cell footer__logo">
-                        <a href="" class="logo">
-                            <img src="/assets/logo-white.svg?253258bc709aa557ffbb0aa6b01c5719" alt="Logo">
-                        </a>
-                    </div>
-                    <div class="footer__table-cell footer__links">
-                        <div class="links">
-                            <a href="" class="link">
+    <footer>
+        <div class="footer__table-md">
+            <div class="footer__table-row">
+                <div class="footer__table-cell footer__logo">
+                    <a href="" class="logo">
+                        <img src="/assets/logo-white.svg?253258bc709aa557ffbb0aa6b01c5719" alt="Logo">
+                    </a>
+                </div>
+                <div class="footer__table-cell footer__links">
+                    <div class="links">
+                        <a href="" class="link">
                         Home
                     </a>
-                            <a href="" class="link">
+                        <a href="" class="link">
                         Login
                     </a>
-                            <a href="" class="link">
+                        <a href="" class="link">
                         Sign up
                     </a>
-                            <a href="" class="link">
+                        <a href="" class="link">
                         Terms and Conditions
                     </a>
-                        </div>
-                        <div class="privacy">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat fugiat illum ipsam minima, velit atque veritatis nesciunt quas dignissimos quisquam porro, consequuntur maiores dolores dicta temporibus magni explicabo qui tenetur.
-                        </div>
+                    </div>
+                    <div class="privacy">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quaerat fugiat illum ipsam minima, velit atque veritatis nesciunt quas dignissimos quisquam porro, consequuntur maiores dolores dicta temporibus magni explicabo qui tenetur.
                     </div>
                 </div>
             </div>
-        </footer>
+        </div>
+    </footer>
     </div>
     <script src="https://js.paystack.co/v1/inline.js"></script>
 <script type="text/javascript" src="/scripts/main.bundle.js"></script></body>
