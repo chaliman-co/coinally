@@ -1,7 +1,7 @@
 <template>
     <div>
-        <div class="btn-group flags-dropdown" style="">
-            <button type="button" class="btn btn-default dropdown-toggle" style="width: 100%;" data-toggle="dropdown">
+        <div class="btn-group flags-dropdown" style="height: 100%">
+            <button type="button" class="btn btn-default dropdown-toggle" style="width: 100%" data-toggle="dropdown">
                 <img class="selected-image" style="" :src="`${countryFlagsUrl}/${countryCode}.png`" :alt="`${countryCode}`">
             </button>
             <ul class="dropdown-menu country-menu" role="menu">
@@ -31,7 +31,7 @@ export default {
             countryFlagsUrl: 'https://raw.githubusercontent.com/behdad/region-flags/gh-pages/png',
             countryData,
             rawInput: null,
-            countryCode: null,
+            countryCode: countryData[0][0].toUpperCase(),
             formatter: null,
             currentValue: null,
         }
@@ -53,18 +53,20 @@ export default {
             this.formatter = new Libphonenumber.AsYouTypeFormatter(this.value.region)
             this.oninput({ target: { value: this.value.digits } });
         }
-        const request = new XMLHttpRequest();
-        request.open("GET", "https://ipinfo.io/json");
-        request.onreadystatechange = () => {
-            if (request.readyState == 4) {
-                this.countryCode = JSON.parse(request.response).country;
-            }
-        }
-        request.send();
-        request.onerror = event => {
-            console.log("couldn't load country data");
-        }
 
+        fetch({
+            url: "https://ipinfo.io/json", 
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(!data){
+                this.countryCode = data.country;
+            }else{
+                this.countryCode = this.countryData[0][1].toUpperCase();
+            }
+        })
+        .catch(() => this.countryCode = this.countryData[0][1].toUpperCase());
     },
     methods: {
         oninput(event) {
