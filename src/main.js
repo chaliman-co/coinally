@@ -55,7 +55,8 @@ Vue.filter('countFormat', (num) => {
     return (num / units[i].value).toFixed(3).replace(regex, '$1') + units[i].symbol;
 });
 
-Vue.filter('numberFormat', (value) => {
+Vue.filter('nFormat', (value) => {
+    console.log(value);
     if (value) {
         value = String(value);
         if (value.indexOf(".") !== -1) {
@@ -72,6 +73,13 @@ Vue.filter('numberFormat', (value) => {
         return 0;
     }
 
+});
+
+Vue.filter('numberFormat', (value) => {
+
+    if (value) {
+        return Number(value).toLocaleString('en-Us', { maximumFractionDigits: 6 });
+    }
 });
 
 const app = new Vue({

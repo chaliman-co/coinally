@@ -9,6 +9,7 @@
               <div class="title">
                 Users ({{ total }})
               </div>
+              
             </div>
             <div class="top-bar__table-cell top-bar__controls">
 
