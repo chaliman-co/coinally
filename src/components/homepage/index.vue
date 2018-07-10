@@ -1,7 +1,7 @@
 <template lang="html">
       <div class="home-page" data-controller="HomeController">
     <header>
-      
+      {{ '1KFzzGtDdnq5hrwxXGjwVnKzRbvf8WVxck' | walletValidator('bitcoin') }}
       
       <div class="header__table-md">
         <div class="header__table-row">
