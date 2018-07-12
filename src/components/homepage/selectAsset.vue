@@ -86,11 +86,10 @@ export default {
       return !!(this.depositAsset && this.receiptAsset);
     },
     receiptAssets() {
-      return this.assets.filter(asset => this.depositAsset === null || asset._id !== this.depositAsset._id)
+      return this.assets.filter(asset => this.depositAsset === null || asset._id !== this.depositAsset._id && asset.sellable)
     },
     depositAssets() {
-      let depositAsset = this.assets;
-      return depositAsset;
+      return this.assets.filter(asset => asset.buyable)
     },
     checkMinValue() {
       if (this.depositAsset === null) {
@@ -153,8 +152,8 @@ export default {
       } else {
         this.assets = res;
         let resLength = res.length;
-        this.depositAsset = res[0];
-        this.receiptAsset = res[resLength - 1];
+        this.depositAsset = this.depositAssets[0];
+        this.receiptAsset = this.receiptAssets[this.receiptAssets.length - 1];
         this.amount = this.depositAsset.minDepositAmount;
       }
     });

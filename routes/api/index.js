@@ -20,7 +20,7 @@ router
     .use('/config', configRoute)
     .use('/conversion', conversionRoute)
     .use('/transactions', transactionsRoute)
-    .use('/stats', statsRoute)
+    .use('/stats',  statsRoute)
     .use(serverUtils._404ErrorHandler)
     .use(serverUtils.dbErrorHandler)
     .use(serverUtils.serverErrorHandler);

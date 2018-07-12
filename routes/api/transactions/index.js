@@ -19,15 +19,19 @@ router
     .post('/', handlePostTransaction)
     .get('/', handleGetTransactions)
 
-.param('userid', resolveUser)
+    .param('userId', resolveUser)
 
-.get('/users/:_userid', auth.bounceUnauthorised({ admin: true }), handleGetUserTransactions)
+    .get('/users/:_userId', auth.bounceUnauthorised({
+        admin: true
+    }), handleGetUserTransactions)
     .get('/recent', handleGetRecentTransactions)
 
-.param('_id', resolveTransaction)
+    .param('_id', resolveTransaction)
 
-.get('/:_id', auth.bounceUnauthorised({ admin: true, owner: true }), handleGetTransaction)
-    .put('/:_id/status', auth.bounceUnauthorised({ admin: true }), handlePutTransactionStatus)
+    .get('/:_id', handleGetTransaction)
+    .put('/:_id/status', auth.bounceUnauthorised({
+        admin: true
+    }), handlePutTransactionStatus)
     .put('/:_id/payment/verify', handleVerifyPaystack)
     .put('/:_id/receiptAddress', handleAddReceiptAddress);
 
@@ -39,7 +43,7 @@ function resolveTransaction(req, res, next, _id) {
         .populate('user', ['firstName', 'lastName', 'emailAddress'])
         .then((transaction) => {
             if (!transaction) {
-                return res._sendError('item not found', new serverUtils.ErrorReport({
+                return res._sendError('item not found', new serverUtils.ErrorReport(404, {
                     _id: '_id not found',
                 }));
             }
@@ -67,24 +71,6 @@ function resolveUser(req, res, next, _id) {
     }).catch(err => next(err));
 }
 
-function resolveUser(req, res, next, _id) {
-    req._params = req._params || {};
-    if (req.user._id == _id) {
-        req._params.user = req.user;
-        return next();
-    } // In case it's the admin or another user
-    User.findOne({
-        _id,
-    }).populate('assetAccounts.asset', 'addressType').then((user) => {
-        if (!user) {
-            return res._sendError("item not found", new serverUtils.ErrorReport(404, {
-                _id: "user not found"
-            }));
-        }
-        req._params.user = user;
-        return next();
-    }).catch(err => next(err));
-}
 
 function handleGetTransaction(req, res) {
     res._success(req._params.transaction);
@@ -120,7 +106,9 @@ function handleGetTransactions(req, res, next) {
         page = 1, pageSize = 20, status = null
     } = req.query;
 
-    const query = req.user.role === 'admin' ? {} : { user: req.user._id };
+    const query = req.user.role === 'admin' ? {} : {
+        user: req.user._id
+    };
 
     if (status) {
         query.status = status.toLowerCase();
@@ -150,7 +138,9 @@ function handleGetUserTransactions(req, res, next) {
         page = 1, pageSize = 20, status = null
     } = req.query;
 
-    const query = { user: req.user._id };
+    const query = {
+        user: req.user._id
+    };
 
     if (status) {
         query.status = status.toLowerCase();
@@ -197,8 +187,12 @@ function handleAddReceiptAddress(req, res, next) {
                 receiptAddress: 'receiptAddress not provided',
             }));
     }
-    const { transaction } = req._params;
-    const { receiptAddress } = req.body;
+    const {
+        transaction
+    } = req._params;
+    const {
+        receiptAddress
+    } = req.body;
 
     transaction.receiptAddress = receiptAddress
     transaction.save()
@@ -216,9 +210,15 @@ function handlePutTransactionStatus(req, res, next) {
                 status: 'status not provided',
             }));
     }
-    const { transaction } = req._params;
-    const { status } = req.body;
-    const { _id } = req.params;
+    const {
+        transaction
+    } = req._params;
+    const {
+        status
+    } = req.body;
+    const {
+        _id
+    } = req.params;
 
     transaction.status = status.toLowerCase();
     transaction.save()
@@ -231,10 +231,12 @@ function handlePutTransactionStatus(req, res, next) {
 
 async function handleVerifyPaystack(req, res, next) {
     try {
-        const { transaction } = req._params;
+        const {
+            transaction
+        } = req._params;
 
         paystack.transaction
-            .verify(transaction._id, async function(error, body) {
+            .verify(transaction._id, async function (error, body) {
                 if (error) {
                     throw error;
                 }

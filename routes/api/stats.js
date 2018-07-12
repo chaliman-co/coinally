@@ -6,12 +6,14 @@ const {
     User,
     Transaction,
 } = require('../../lib/db');
+const auth = require("./../../lib/auth");
 
 module.exports = router;
 
 router
-    .get('/', handleGetStats)
-    .get('/users/:userId', handleGetStatsByUser);
+    .use(auth.bounceUnauthenticated)
+    .get('/', auth.bounceNonAdmin, handleGetStats)
+    .get('/users/:userId', auth.bounceUnauthorised({owner: true}), handleGetStatsByUser);
 
 function handleGetStats(req, res, next) {
     let getRegistrationCount = User.count({ role: 'user' }).exec();
