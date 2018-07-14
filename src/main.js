@@ -88,8 +88,10 @@ Vue.filter('walletValidator', (value, coin) => {
     if (value) {
         let valid = WAValidator.validate(value, coin)
         if (valid) {
+            return true;
             console.log('valid coin');
         } else {
+            return false;
             console.log('not a valid coin');
         }
     }
