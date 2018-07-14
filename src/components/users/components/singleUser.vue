@@ -1,7 +1,7 @@
 <template>
     <router-link class="user-item is--hoverable" :to="`/users/${_id}`">
         <div class="user-item__profile">
-            <div class="profile__image" v-if="imagePath" :style="`background-image: url('${global.apiRootUrl}/${imagePath.replace(/\\/g, '/')}')`"></div>
+            <div class="profile__image" v-if="imagePath" :style="`background-image: url('${$generateUrl(imagePath.replace(/\\/g, '/'))}')`"></div>
             <div class="profile__image" v-else :style="`background-image: url('${global.apiRootUrl}/images/profile_pictures/default')`"></div>
             <div class="profile__title">
                 {{firstName}} {{lastName}}

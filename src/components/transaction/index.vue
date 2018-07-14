@@ -8,8 +8,8 @@
                     </router-view>
                     <div class="order-details">
                         <div v-if="depositAsset && receiptAsset && conversionRate" class="transaction__type">
-                            <img :src="global.apiRootUrl + '/' + depositAsset.imagePath" :alt="depositAsset.name"> →
-                            <img :src="global.apiRootUrl + '/' + receiptAsset.imagePath" :alt="receiptAsset.name">
+                            <img :src="$generateUrl(depositAsset.imagePath)" :alt="depositAsset.name"> →
+                            <img :src="$generateUrl(receiptAsset.imagePath)" :alt="receiptAsset.name">
                         </div>
                         <div v-if="depositAsset && receiptAsset && conversionRate" class="expected-amount">
                             <div class="amount">

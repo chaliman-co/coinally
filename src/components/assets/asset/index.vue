@@ -6,7 +6,7 @@
     <td>{{ code }}</td>
     <td>
       <img
-        :src="`${global.apiRootUrl}/${imagePath}`"
+        :src="$generateUrl(imagePath)"
         alt="Image">
     </td>
     <td v-if="price_usd">{{ price_usd.toFixed(8) | numberFormat }}</td>

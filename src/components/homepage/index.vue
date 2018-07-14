@@ -1,8 +1,6 @@
 <template lang="html">
       <div class="home-page" data-controller="HomeController">
-    <header>
-      {{ '1KFzzGtDdnq5hrwxXGjwVnKzRbvf8WVxck' | walletValidator('bitcoin') }}
-      
+    <header>      
       <div class="header__table-md">
         <div class="header__table-row">
           <div class="header__table-cell header__caption">
@@ -130,6 +128,45 @@
         </div>
       </div>
     </section>
+    <section class="how-it-works">
+        <div class="how-it-works__table-md">
+            <div class="how-it-works__table-row">
+                <div class="how-it-works__table-cell">
+                    <div class="how-it-works__title">
+                        Whether you're new to trading and digital assets or you are a lord in the field of digital assets trading we're here to help.
+                        In just a few clicks, you should be done!
+                    </div>
+                </div>
+                <div class="how-it-works__table-cell">
+                    <div class="how-it-works-item" data-index="01">
+                        <div class="how-it-works-item__title">
+                            Join
+                        </div>
+                        <div class="how-it-works-item__body">
+                            Create a free Coinaly Wallet on web, iOS or Android and go through a very simple identity verification process.
+                        </div>
+                    </div>
+                    <div class="how-it-works-item" data-index="02">
+                        <div class="how-it-works-item__title">
+                            Initiate
+                        </div>
+                        <div class="how-it-works-item__body">
+                            Login to your Coinaly account, click on create new order. Select Buy or Sell order and fill the amount.
+                        </div>
+                    </div>
+                    <div class="how-it-works-item" data-index="03">
+                        <div class="how-it-works-item__title">
+                            Receive
+                        </div>
+                        <div class="how-it-works-item__body">
+                            Processing time is averagely less than 4 hours. Once your transaction is confirmed, we’ll remit your assets to your desired
+                            account.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     <section class="recent-transactions">
       <img src="~src/img/exchange.svg" alt="Exchnge" class="icon">
       <h3 class="title">
@@ -216,386 +253,23 @@
         </div>
       </div>
     </section>
-    <!-- Exchange Modal Partial -->
-
-    <!-- USE EITHER verified OR not-verified CLASSES TO CHANGE COLOR OF HEADER -->
-    <div class="modal-component modal fade exchange-modal verified" id="exchange-modal">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header clearfix">
-            <!-- CHANGE THE TEXT IN THE FOLLOWING DIV TO BE EITHER Verified OR Not Verified BASED ON THE VERIFICATION OF THE USER -->
-            <span class="modal-title">
-                    Verified
-                </span>
-            <button type="button" data-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="modal-body__container">
-
-              <!-- ASSETS SELECTION, ONLY SHOW WHEN TRANSACTION IS INITIATED FROM DASHBOARD -->
-              <div class="modal__pane" id="assets-selection">
-                <div class="modal__title">
-                  Choose which assets to trade
+    <section class="referral">
+        <div class="referral__table-md">
+            <div class="referral__table-row">
+                <div class="referral__table-cell referral__image">
+                    <img src="~img/referral.jpg" alt="Referral" class="image">
                 </div>
-                <div class="input-fields">
-                  <div class="select-component custom-form-group">
-                    <label for="deposit">
-                                    Deposit
-                                </label>
-                    <select name="deposit" id="deposit" class="custom-select">
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/bitcoin.png">Bitcoin</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/bitcoincash.png">Bitcoin Cash</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/ether.png">Ether</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/gnosis.png">Gnosis</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/etherclassic.png">Golem</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/litecoin.png">Litecoin</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/reddcoin.png">Reddcoin</option>
-                                </select>
-                    <!-- <input type="text" id="deposit" placeholder="ETH" /> -->
-                  </div>
-                  <div class="select-component custom-form-group">
-                    <label for="receive">
-                                    Receive
-                                </label>
-                    <select name="receive" id="receive" class="custom-select">
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/bitcoin.png">Bitcoin</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/bitcoincash.png">Bitcoin Cash</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/ether.png">Ether</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/gnosis.png">Gnosis</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/etherclassic.png">Golem</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/litecoin.png">Litecoin</option>
-                                    <option value="BTC" data-option-image="https://shapeshift.io/images/coins/reddcoin.png">Reddcoin</option>
-                                </select>
-                  </div>
-                  <div class="textbox-component custom-form-group">
-                    <label for="amount">
-                                    Amount (Min: 0, Max: 100)
-                                </label>
-                    <input type="number" id="amount" placeholder="0" />
-                  </div>
+                <div class="referral__table-cell referral__content">
+                    <h3 class="referral__title">
+                        Mention us to your friends and get rewarded every time!
+                    </h3>
+                    <router-link to="/signup" class="btn-custom-white">
+                        Get your referral link already!
+                    </router-link>
                 </div>
-
-                <!-- REMOVE THE toggle-pane CLASS IN PRODUCTION -->
-                <button class="call-to-action btn-custom-astronaut-blue toggle-pane">
-                            Convert
-                        </button>
-              </div>
-              <!-- END OF ASSETS SELECTION -->
-
-              <!-- LOGIN PANE -->
-              <div class="modal__pane hidden" id="login">
-                <div class="modal__title">
-                  Login to continue
-                </div>
-                <div class="input-fields">
-                  <div class="textbox-component custom-form-group">
-                    <label for="email">
-                                    Email
-                                </label>
-                    <input type="email" placeholder="jane@doe.com" />
-                  </div>
-                  <div class="textbox-component password custom-form-group">
-                    <label for="password">
-                                    Password
-                                </label>
-                    <input type="password" placeholder="Password" />
-                    <div class="footnote">
-                      <a href="" class="forgot-password">
-                                        Forgot password?
-                                    </a>
-                    </div>
-                  </div>
-                </div>
-                <div class="alternative">
-                  Don't have an account?
-                  <a href="signup.html">Sign up here</a>
-                </div>
-
-                <!-- REMOVE THE toggle-pane CLASS IN PRODUCTION -->
-                <button class="call-to-action btn-custom-astronaut-blue toggle-pane">
-                            Login
-                        </button>
-              </div>
-              <!-- END OF LOGIN -->
-
-              <!-- SIGNUP -->
-              <div class="modal__pane hidden" id="signup">
-                <div class="modal__title">
-                  Create an account
-                </div>
-                <div class="input-fields">
-                  <div class="textbox-component custom-form-group">
-                    <label for="fullname">
-                                    Full name
-                                </label>
-                    <input type="text" id="fullname" placeholder="Jane Doe" />
-                  </div>
-                  <div class="form-row custom-form-group">
-                    <div class="textbox-component">
-                      <label for="email">
-                                        Email
-                                    </label>
-                      <input type="email" id="email" placeholder="jane@doe.com" />
-                    </div>
-                    <div class="textbox-component password">
-                      <label for="password">
-                                        Password
-                                    </label>
-                      <input type="password" id="password" placeholder="Password" />
-                    </div>
-                  </div>
-                  <div class="form-row custom-form-group">
-                    <div class="textbox-component">
-                      <label for="phone">
-                                        Phone
-                                    </label>
-                      <input type="tel" id="phone" placeholder="Phone" />
-                    </div>
-                    <div class="textbox-component">
-                      <label for="referral">
-                                        Referral code
-                                    </label>
-                      <input type="text" id="referral" placeholder="Referral code" />
-                    </div>
-                  </div>
-                  <div class="select-component custom-form-group">
-                    <label for="country">
-                                    Country
-                                </label>
-                    <select name="country" id="country" class="custom-select">
-                                    <option value="NG">Nigeria</option>
-                                    <option value="UK">United Kingdom</option>
-                                    <option value="US">United States</option>
-                                </select>
-                  </div>
-                </div>
-                <div class="alternative">
-                  Already signed up?
-                  <a href="login.html">Login here</a>
-                </div>
-                <!-- REMOVE THE toggle-pane CLASS IN PRODUCTION -->
-                <button class="call-to-action btn-custom-astronaut-blue toggle-pane">
-                            Continue
-                        </button>
-              </div>
-              <!-- END OF SIGNUP -->
-
-              <!-- REFUND INSTRUCTIONS -->
-              <div class="modal__pane hidden" id="refund">
-                <div class="modal__title">
-                  Refund Instructions
-                </div>
-                <div class="input-fields">
-
-                  <!-- IF CRYPTOCURRENCY, REMOVE HIDDEN FROM FOLLOWING DIV -->
-                  <div class="textbox-component custom-form-group hidden">
-                    <label for="refund-address">
-                                    Your Bitcoin refund address
-                                </label>
-                    <input type="text" id="refund-address" placeholder="Refund address" />
-                  </div>
-
-                  <!-- IF BANK ACCOUNT, REMOVE HIDDEN FROM FOLLOWING DIV -->
-                  <div class="bank-account">
-                    <div class="select-component form-group existing-account">
-                      <label for="bank-name">
-                                        Select an existing account
-                                    </label>
-                      <select name="bank-name" id="bank-name" class="custom-select">
-                                        <option value="ACCESS">Access Bank, 2033884492</option>
-                                        <option value="UBA">UBA, 2033884492</option>
-                                        <option value="ZENITH">Zenith Bank, 2033884492</option>
-                                    </select>
-                    </div>
-                    <button class="btn-custom-japanese-laurel add-new-account__button small custom-form-group">
-                                    <i class="fa fa-plus"></i>
-                                    Add New
-                                </button>
-                    <div class="add-new-account hidden">
-                      <div class="select-component custom-form-group">
-                        <label for="bank-name">
-                                            Bank Name
-                                        </label>
-                        <select name="bank-name" id="bank-name" class="custom-select">
-                                            <option value="ACCESS">Access Bank</option>
-                                            <option value="UBA">UBA</option>
-                                            <option value="ZENITH">Zenith Bank</option>
-                                        </select>
-                      </div>
-                      <div class="select-component custom-form-group">
-                        <label for="account-type">
-                                            Account Type
-                                        </label>
-                        <select name="account-type" id="account-type" class="custom-select">
-                                            <option value="CURRENT">Current</option>
-                                            <option value="SAVINGS">Savings</option>
-                                        </select>
-                      </div>
-                      <div class="textbox-component custom-form-group">
-                        <label for="account-number">
-                                            10-Digit NUBAN Account Number
-                                        </label>
-                        <input type="number" max="10" id="account-number" placeholder="0..." />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- REMOVE THE toggle-pane CLASS IN PRODUCTION -->
-                <button class="call-to-action btn-custom-astronaut-blue toggle-pane">
-                            Continue
-                        </button>
-              </div>
-              <!-- END OF REFUND INSTRUCTIONS -->
-
-              <!-- DESTINATION ADDRESS -->
-              <div class="modal__pane hidden" id="destination">
-                <div class="modal__title">
-                  Destination Address
-                </div>
-                <div class="input-fields">
-
-                  <!-- IF CRYPTOCURRENCY, REMOVE HIDDEN FROM FOLLOWING DIV -->
-                  <div class="textbox-component custom-form-group hidden">
-                    <label for="destination-address">
-                                    Your Ether destination address
-                                </label>
-                    <input type="text" id="destination-address" placeholder="Destination address" />
-                  </div>
-
-                  <!-- IF BANK ACCOUNT, REMOVE HIDDEN FROM FOLLOWING DIV -->
-                  <div class="bank-account">
-                    <div class="select-component form-group existing-account">
-                      <label for="bank-name">
-                                        Select an existing account
-                                    </label>
-                      <select name="bank-name" id="bank-name" class="custom-select">
-                                        <option value="ACCESS">Access Bank, 2033884492</option>
-                                        <option value="UBA">UBA, 2033884492</option>
-                                        <option value="ZENITH">Zenith Bank, 2033884492</option>
-                                    </select>
-                    </div>
-                    <button class="btn-custom-japanese-laurel add-new-account__button small custom-form-group">
-                                    <i class="fa fa-plus"></i>
-                                    Add New
-                                </button>
-                    <div class="add-new-account hidden">
-                      <div class="select-component custom-form-group">
-                        <label for="bank-name">
-                                            Bank Name
-                                        </label>
-                        <select name="bank-name" id="bank-name" class="custom-select">
-                                            <option value="ACCESS">Access Bank</option>
-                                            <option value="UBA">UBA</option>
-                                            <option value="ZENITH">Zenith Bank</option>
-                                        </select>
-                      </div>
-                      <div class="select-component custom-form-group">
-                        <label for="account-type">
-                                            Account Type
-                                        </label>
-                        <select name="account-type" id="account-type" class="custom-select">
-                                            <option value="CURRENT">Current</option>
-                                            <option value="SAVINGS">Savings</option>
-                                        </select>
-                      </div>
-                      <div class="textbox-component custom-form-group">
-                        <label for="account-number">
-                                            10-Digit NUBAN Account Number
-                                        </label>
-                        <input type="number" max="10" id="account-number" placeholder="0..." />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- REMOVE THE toggle-pane CLASS IN PRODUCTION -->
-                <button class="call-to-action btn-custom-astronaut-blue toggle-pane">
-                            Start Transaction
-                        </button>
-              </div>
-              <!-- END OF DESTINATION ADDRESS -->
-
-              <!-- PAYMENT INSTRUCTIONS -->
-              <div class="modal__pane hidden" id="payment">
-                <div class="modal__title">
-                  <span>Order ID</span>: 8c477954-d632-4099-9aea-6d579b20705e
-                </div>
-                <div class="payment-address__table-md">
-                  <div class="payment-address__table-row">
-                    <div class="payment-address__table-cell payment-address__qr-code">
-                      <img src="~src/img/qr-code.png" alt="QR Code">
-                    </div>
-                    <div class="payment-address__table-cell payment-address__description">
-
-                      <!-- IF CRYPTOCURRENCY, REMOVE hidden FROM THE FOLLOWING DIV -->
-                      <div class="description__cryptocurrency hidden">
-                        <div class="title">
-                          Send to this address:
-                        </div>
-                        <div class="body">
-                          <p>
-                            0xbb9bc244d798123fde783fcc1c72d3bb8c189413
-                          </p>
-                          <p>
-                            <span>Amount:</span> 0.0002334 BTC
-                          </p>
-                        </div>
-                      </div>
-                      <!--  -->
-
-                      <!-- IF FIAT, REMOVE hidden FROM THE FOLLOWING DIV -->
-                      <div class="description__fiat">
-                        <div class="title">
-                          Click to pay online
-                        </div>
-                        <div class="body">
-                          <p>
-                            <span>Amount:</span>
-                            <i class="naira"></i>25,234.02
-                          </p>
-                        </div>
-                        <button class="btn-custom-astronaut-blue small description__call-to-action">
-                                            Pay now
-                                        </button>
-                      </div>
-                      <!--  -->
-
-                    </div>
-                  </div>
-                </div>
-                <div class="progress__indicator">
-                  <div class="indicator__label">
-                    Awaiting Deposit
-                  </div>
-                  <div class="indicator__composite">
-                    <div class="indicator__bg"></div>
-                    <div class="indicator__progress" style="width:20%"></div>
-                  </div>
-                  <div class="indicator__progress-value">
-                    20%
-                  </div>
-                </div>
-              </div>
-              <!-- END OF PAYMENT INSTRUCTIONS -->
             </div>
-            <div class="order-details">
-              <div class="transaction__type">
-                <img src="https://shapeshift.io/images/coins/bitcoin.png" alt="Bitcoin"> &rarr;
-                <img src="https://shapeshift.io/images/coins/ether.png" alt="Ether">
-              </div>
-              <div class="amount">
-                <span title="Deposit">D:</span> 2.2334BTC,
-                <span title="Receive">R:</span> 10.22344ETH
-              </div>
-              <div class="exchange-rate">
-                1 BTC = 5 ETH
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
+    </section>
   </div>
 </template>
 

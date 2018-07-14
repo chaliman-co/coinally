@@ -23,6 +23,22 @@ let globalUser = null;
 Vue.prototype.$request = utils.request;
 Vue.prototype.$log = utils.log;
 
+Vue.prototype.$generateUrl = (value) => {
+    if (!value) {
+        return '';
+    }
+    if (value.startsWith('http')) {
+        return value;
+    } else {
+        return `${apiRootUrl}/${value}`;
+    }
+};
+
+Vue.prototype.$capitalize = (value) => {
+    if (!value) return '';
+    return value.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+};
+
 Vue.filter('humanizeDate', (value) => {
     if (value) {
         return moment(new Date(value)).fromNow();

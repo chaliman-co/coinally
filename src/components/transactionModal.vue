@@ -23,7 +23,7 @@
                                         </label>
                                         <vue-select :options="depositAssets" v-model="depositAsset" input-id="deposit" label="name">
                                         <template slot="option" slot-scope="option">
-                                            <img :src="`${global.apiRootUrl}/${option.imagePath}`" 
+                                            <img :src="$generateUrl(option.imagePath)" 
                                             style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
                                         </template>
                                         </vue-select>
@@ -34,7 +34,7 @@
                                         </label>
                                         <vue-select :options="receiptAssets" v-model="receiptAsset" input-id="receipt" label="name">
                                         <template slot="option" slot-scope="option">
-                                            <img :src="`${global.apiRootUrl}/${option.imagePath}`" 
+                                            <img :src="$generateUrl(option.imagePath)" 
                                             style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
                                         </template>
                                         </vue-select>
@@ -58,10 +58,10 @@
                             v-if="depositAsset && receiptAsset && conversionRate">
                             <div class="transaction__type">
                                 <img
-                                :src="global.apiRootUrl + '/' + depositAsset.imagePath"
+                                :src="$generateUrl(depositAsset.imagePath)"
                                 :alt="depositAsset.name"> →
                                 <img
-                                :src="global.apiRootUrl + '/' + receiptAsset.imagePath"
+                                :src="$generateUrl(receiptAsset.imagePath)"
                                 :alt="receiptAsset.name">
                             </div>
                             <div class="amount">
