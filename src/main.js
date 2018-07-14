@@ -4,6 +4,8 @@ import socketIoClient from 'socket.io-client';
 import jwtDecode from 'jwt-decode';
 import moment from 'moment';
 
+import WAValidator from 'wallet-address-validator';
+
 import './js/js-bundle';
 
 import router from './router';
@@ -71,7 +73,8 @@ Vue.filter('countFormat', (num) => {
     return (num / units[i].value).toFixed(3).replace(regex, '$1') + units[i].symbol;
 });
 
-Vue.filter('numberFormat', (value) => {
+Vue.filter('nFormat', (value) => {
+    console.log(value);
     if (value) {
         value = String(value);
         if (value.indexOf(".") !== -1) {
@@ -88,6 +91,26 @@ Vue.filter('numberFormat', (value) => {
         return 0;
     }
 
+});
+
+Vue.filter('numberFormat', (value) => {
+
+    if (value) {
+        return Number(value).toLocaleString('en-Us', { maximumFractionDigits: 6 });
+    }
+});
+
+Vue.filter('walletValidator', (value, coin) => {
+    if (value) {
+        let valid = WAValidator.validate(value, coin)
+        if (valid) {
+            return true;
+            console.log('valid coin');
+        } else {
+            return false;
+            console.log('not a valid coin');
+        }
+    }
 });
 
 const app = new Vue({
