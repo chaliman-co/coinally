@@ -71,7 +71,7 @@
                                 <img src="~img/chart.svg" class="dashboard-pane__icon" alt="" />
                                 <div class="dashboard-pane__body">
                                     <div class="body__title">
-                                        {{saleStats * 100}}%
+                                        {{(saleStats * 100).toFixed(2)}}%
                                     </div>
                                     <div class="body__subtitle">
                                         Sale Stats

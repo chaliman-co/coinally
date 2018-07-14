@@ -3,7 +3,7 @@
     <span class="hamburger">
       <img src="~img/close.svg" alt="Close">
     </span>
-    <img v-if="user.imagePath" :src="`${global.apiRootUrl}${user.imagePath}`" alt="Avatar" class="avatar">
+    <img v-if="user.imagePath" :src="$generateUrl(user.imagePath)" alt="Avatar" class="avatar">
     <img v-else src="~img/avatar.svg" alt="Avatar" class="avatar">
     <div class="title">
       {{ user.firstName }} {{ user.lastName }}

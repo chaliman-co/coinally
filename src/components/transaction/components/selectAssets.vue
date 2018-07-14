@@ -2,7 +2,7 @@
   <div>
     <div class="modal-header clearfix">
       <span class="modal-title">
-        Verified
+        <!-- Verified -->
       </span>
       <button 
 type="button"
@@ -29,7 +29,7 @@ class="input-fields"
 slot="option"
                           slot-scope="option">
                   <img 
-:src="`${global.apiRootUrl}/${option.imagePath}`"
+:src="$generateUrl(option.imagePath)"
                        style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
                 </template>
               </vue-select>
@@ -44,7 +44,7 @@ slot="option"
                 slot="option"
                           slot-scope="option">
                   <img 
-:src="`${global.apiRootUrl}/${option.imagePath}`"
+:src="$generateUrl(option.imagePath)"
                        style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
                 </template>
               </vue-select>

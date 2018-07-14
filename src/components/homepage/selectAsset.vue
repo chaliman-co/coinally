@@ -15,8 +15,8 @@ class="header__table-cell header__cta-form">
             <!-- {{depositAsset}} -->
             <vue-select :options="assets" v-model="depositAsset" input-id="deposit" label="name">
               <template slot="option" slot-scope="option">
-                <img :src="`${global.apiRootUrl}/${option.imagePath}`" 
-                  style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
+                <img :src="$generateUrl(option.imagePath)" 
+                  style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name | capitalize }}
               </template>
             </vue-select>
           </div>
@@ -24,17 +24,17 @@ class="header__table-cell header__cta-form">
             <label for="receipt">Receive</label>
             <vue-select :options="receiptAssets" v-model="receiptAsset" input-id="receipt" label="name">
               <template slot="option" slot-scope="option">
-                <img :src="`${global.apiRootUrl}/${option.imagePath}`" 
-                  style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
+                <img :src="$generateUrl(option.imagePath)" 
+                  style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name | capitalize }}
               </template>
             </vue-select>
           </div>
           <div class="textbox-component">
             <label for="amount">
-              Amount (Min: {{ checkMinValue | numberFormat }} Max: {{ checkMaxValue | numberFormat}})
+              Amount (Min: {{ minValue | numberFormat }} Max: {{ maxValue | numberFormat}})
             </label>
             <input id="amount" 
-              v-model="amount" type="number" placeholder="0" step="0.0000001" :min="checkMinValue" :max="checkMaxValue">
+              v-model="amount" type="number" placeholder="0" step="0.0000001" :min="minValue" :max="maxValue">
               <p v-if="inputError" class="text-danger">{{ inputError }}</p>
           </div>
           <button id="submitbutton" type="submit" class="hidden" />
@@ -83,23 +83,37 @@ export default {
       return (this.conversionRate * this.amount).toFixed(8).replace(/(?:\.)?0+$/, '');
     },
     isValidated() {
-      return !!(this.depositAsset && this.receiptAsset);
+      return !(this.depositAsset && this.receiptAsset);
     },
     receiptAssets() {
-      return this.assets.filter(asset => this.depositAsset === null || asset._id !== this.depositAsset._id)
+      let receiptAssets = [];
+      if(this.depositAsset && this.depositAsset.code !== 'ngn'){
+        receiptAssets = this.assets.filter(asset => asset.code === 'ngn');
+        this.receiptAsset = receiptAssets[0];
+      }else{
+        receiptAssets = this.assets
+        .filter(asset => (this.depositAsset === null || asset._id !== this.depositAsset._id) && asset.buyable);
+      }
+      return receiptAssets;
     },
     depositAssets() {
-      let depositAsset = this.assets;
-      return depositAsset;
+      let depositAssets = [];
+      if(this.receiptAsset && this.receiptAsset.code !== 'ngn'){
+        depositAssets = this.assets.filter(asset => asset.code === 'ngn');
+        this.depositAsset = depositAssets[0];
+      }else{
+        depositAssets = this.assets.filter(asset => asset.sellable);
+      }
+      return depositAssets;
     },
-    checkMinValue() {
+    minValue() {
       if (this.depositAsset === null) {
         return '';
       } else {
         return this.depositAsset.minDepositAmount;
       }
     },
-    checkMaxValue() {
+    maxValue() {
       if (this.depositAsset === null) {
         return '';
       } else {
@@ -109,32 +123,28 @@ export default {
   },
   watch: {
     receiptAsset(newAsset, previousAsset) {
-      if (!(this.depositAsset && this.receiptAsset)) return;
-      this.UpdateRate(previousAsset ? {
-        to: newAsset.code,
-      } : {
+      if (!this.depositAsset || !this.receiptAsset) return;
+      this.updateRate({
         from: this.depositAsset.code,
         to: newAsset.code,
       });
     },
     depositAsset(newAsset, previousAsset) {
-      if (!(this.depositAsset && this.receiptAsset)) return;
-      this.UpdateRate(previousAsset ? {
-        from: newAsset.code,
-      } : {
+      if (!this.depositAsset || !this.receiptAsset) return;
+      this.updateRate({
         from: newAsset.code,
         to: this.receiptAsset.code,
       });
     },
     amount(newAmount, previousAmount) {
 
-      if (parseInt(newAmount) > this.checkMaxValue) {
-        if (this.checkMaxValue == '') {
+      if (parseInt(newAmount) > this.maxValue) {
+        if (this.maxValue == '') {
           this.inputError = 'Please choose a deposit currency';
         } else {
-          this.inputError = 'value cannot be greater than ' + Number(this.checkMaxValue).toLocaleString();
+          this.inputError = 'value cannot be greater than ' + Number(this.maxValue).toLocaleString();
         }
-        // this.amount = Math.max(Math.min(newAmount,this.checkMaxValue));
+        // this.amount = Math.max(Math.min(newAmount,this.maxValue));
         this.amount = previousAmount;
         console.log(newAmount, previousAmount);
 
@@ -147,36 +157,41 @@ export default {
     }
   },
   created() {
-    this.$request('GET', '/assets/', (err, res) => {
+    this.$request('GET', '/assets/', (err, result) => {
       if (err) {
         console.error("couldn't load assets");
       } else {
-        this.assets = res;
-        let resLength = res.length;
-        this.depositAsset = res[0];
-        this.receiptAsset = res[resLength - 1];
+        this.assets = result.map(x => {
+          x.name = this.$capitalize(x.name);
+          return x;
+        });
+        let resLength = result.length;
+        this.depositAsset = result[0];
+        this.receiptAsset = result[resLength - 1];
         this.amount = this.depositAsset.minDepositAmount;
       }
     });
   },
   methods: {
-    UpdateRate(query) {
+    updateRate(query) {
       console.log(query);
       if (!this.socket) {
         const socket = socketIoClient(`${this.global.apiRootUrl}/rates`, {
           reconnectionDelay: 10000,
           query,
         });
-        socket.on('seen', msg => console.log('seen: ', msg));
-        socket.on('exception', err => console.log('exception: ', err));
-        socket.on('error', (...args) => console.log('error event: ', ...args));
-        socket.on('connect_timeout', (...args) => console.log('timeout: ', ...args));
+        // socket.on('seen', msg => console.log('seen: ', msg));
+        // socket.on('exception', err => console.log('exception: ', err));
+        // socket.on('error', (...args) => console.log('error event: ', ...args));
+        // socket.on('connect_timeout', (...args) => console.log('timeout: ', ...args));
         socket.on('new_rate', (rate) => {
           this.conversionRate = rate;
           console.log('new rate: ', rate);
         });
         this.socket = socket;
-      } else this.socket.emit('parameter_change', query);
+      } else {
+        this.socket.emit('parameter_change', query)
+      };
     },
     setSelect(inputId, modelProp, value) {
 
