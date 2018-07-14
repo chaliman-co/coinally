@@ -6,6 +6,7 @@ import assets from '../components/assets/index.vue';
 import transactions from '../components/transactions/index.vue';
 // import transaction from './components/transaction/index.vue';
 import homePage from '../components/homepage/index.vue';
+import aboutPage from '../components/homepage/about.vue';
 import profile from '../components/profile/index.vue';
 import login from '../components/login/index.vue';
 import loginComponents from '../components/login/components';
@@ -20,6 +21,9 @@ import notFoundComponent from '../components/404.vue';
 export default [{
         path: '/',
         component: homePage,
+    }, {
+        path: '/about',
+        component: aboutPage,
     }, {
         path: '/signup',
         component: signup,

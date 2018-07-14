@@ -29,11 +29,11 @@
           <div class="user__profile">
             <div
               v-if="user.imagePath"
-              :style="`background-image: url('${global.apiRootUrl}/${user.imagePath.replace(/\\/g, '/')}')`"
+              :style="`background-image: url('${$generateUrl(user.imagePath.replace(/\\/g, '/'))}')`"
               class="profile__image"/>
             <div
               v-else
-              :style="`background-image: url('${global.apiRootUrl}/images/profile_pictures/default')`"
+              :style="`background-image: url('${$generateUrl('/images/profile_pictures/default')}`"
               class="profile__image"/>
             <div class="profile__title">
               {{ user.firstName }} {{ user.lastName }}
@@ -136,7 +136,7 @@
                         <td>
                           <img
                             v-if="verificationDetail.imagePath"
-                            :src="`${global.apiRootUrl}/${verificationDetail.imagePath}`"
+                            :src="$generateUrl(verificationDetail.imagePath)"
                             alt="Image">
                         </td>
                         <td>

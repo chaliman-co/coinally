@@ -73,27 +73,25 @@ io.of('/rates')
         client.emit('new_rate', Asset.convert(assetCodes.from, assetCodes.to));
         let roomName = `${assetCodes.from}-${assetCodes.to}`;
         client.join(roomName);
-        client.on(
-            'parameter_change',
-            ({ from, to } = {}) => {
-                newAssetCodes = { from, to };
-                client.leave(roomName, (err) => {
-                    for (const asset in newAssetCodes) {
-                        const assetCode = newAssetCodes[asset];
-                        if (assetCode) {
-                            if (!Asset.exists(String(assetCode).toLowerCase())) errorDetails[asset] = `${asset} not found`;
-                            else assetCodes[asset] = assetCode;
-                        }
+        client.on('parameter_change', ({ from, to } = {}) => {
+            newAssetCodes = { from, to };
+            client.leave(roomName, (err) => {
+                for (const asset in newAssetCodes) {
+                    const assetCode = newAssetCodes[asset];
+                    if (assetCode) {
+                        if (!Asset.exists(String(assetCode).toLowerCase())) {
+                            errorDetails[asset] = `${asset} not found`;
+                        } else assetCodes[asset] = assetCode;
                     }
-                    if (Object.keys(errorDetails).length) {
-                        client.emit('exception', errorDetails);
-                        return client.disconnect(true);
-                    }
-                    client.emit('new_rate', Asset.convert(assetCodes.from, assetCodes.to));
-                    roomName = `${assetCodes.from}-${assetCodes.to}`;
-                    console.log(roomName, newAssetCodes, Asset.convert(assetCodes.from, assetCodes.to));
-                    client.join(roomName);
-                });
-            },
-        );
+                }
+                if (Object.keys(errorDetails).length) {
+                    client.emit('exception', errorDetails);
+                    return client.disconnect(true);
+                }
+                client.emit('new_rate', Asset.convert(assetCodes.from, assetCodes.to));
+                roomName = `${assetCodes.from}-${assetCodes.to}`;
+
+                client.join(roomName);
+            });
+        }, );
     });

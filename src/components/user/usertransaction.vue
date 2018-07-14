@@ -23,8 +23,6 @@
                         <th>Date</th>
                         <th>I have</th>
                         <th>I want</th>
-                        <!-- <th>Deposit amount</th>
-                        <th>receipt amount</th> -->
                         <th>Rate</th>
                         <th>Receipt account</th>
                         <th>Status</th>
@@ -39,24 +37,9 @@
                         <td>{{ transaction.createdAt | humanizeDate }}</td>
                         <td>{{ transaction.depositAssetCode.toUpperCase() }}</td>
                         <td>{{ transaction.receiptAssetCode.toUpperCase() }}</td>
-                        <!-- <td>{{ transaction.depositAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.depositAssetCode }})</td>
-                        <td>{{ transaction.receiptAmount.toFixed(3).replace(/\.([^0]*)(0+)$/, '.$1') }} ({{ transaction.receiptAssetCode }})</td> -->
-                        <!-- <td>{{ transaction.rate.toFixed(3).replace(/\.([^0]*)(0+)$/g, '.$1') }}</td> -->
-                        <td>{{ transaction.rate.toFixed(10).toString() | numberFormat }}</td>
+                        <td>{{ transaction.rate.toFixed(10) | numberFormat }}</td>
                         <td>{{ transaction.receiptAsset.type == 'fiat'? `${user.assetAccounts[transaction.receiptAddress].address.number}, ${user.assetAccounts[transaction.receiptAddress].address.bankName}` : transaction.receiptAsset.type == 'digital'? transaction.receiptAddress : undefined }}</td>
                         <td>
-                          <!-- <div class="custom-form-group ">
-                            <select
-                              v-model="transaction.status"
-                              class="form-control custom-select"
-                              @change="changeTransactionStatus(transaction, $event.target.value, index)">
-                              <option
-                                v-for="(option, index) in transactionStatuses"
-                                :key="index"
-                                :disabled="transactionStatuses.indexOf(transaction.status) >= index"
-                                :value="option">{{ option }}</option>
-                            </select>
-                          </div> -->
                           {{ transaction.status | capitalize }}
                         </td>
 
@@ -121,8 +104,6 @@ import spinner from './../spinner';
       getTransactions(){
         this.loading = true;
         let url = `/transactions/users/${this.id}?page=${this.page}&pageSize=${this.pageSize}`;
-        // this.$request('GET', `/transactions/users/${this.user._id}`, (bug, trans) => {
-        // this.$request('GET', `/transactions/users/${this.id}`, (bug, trans) => { 
         this.$request('GET', url, (bug, trans) => {                             
           console.log('Transactions ',trans);
             if (!bug) {

@@ -14,10 +14,10 @@ module.exports = router;
 router
     .get('/', handleGetAssets)
     .post('/', auth.bounceUnauthenticated, auth.bounceUnauthorised({ admin: true }), multer({ dest: assetsStoragePath }).single('image'), handlePostAsset, )
-    
-    .param('_id', resolveAsset)
 
-    .get('/:_id', handleGetAsset)
+.param('_id', resolveAsset)
+
+.get('/:_id', handleGetAsset)
     .use(auth.bounceUnauthenticated)
     .use(auth.bounceUnauthorised({ admin: true }))
     .put('/:_id', handlePutAsset)
@@ -95,11 +95,6 @@ function handleGetAssets(req, res, next) {
         .exec()
         .then(
             (assets) => {
-                if (!assets.length)
-                    return res._sendError(
-                        "No matching documents",
-                        new serverUtils.ErrorReport(404, { assets: "no assets found" })
-                    );
                 assets.forEach(function(asset) {
                     asset.price_usd = Asset.get("price_usd", asset.code);
                 });
