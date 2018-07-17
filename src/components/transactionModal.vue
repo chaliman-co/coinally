@@ -163,7 +163,7 @@
       },
       depositAssets() {
         let depositAssets = [];
-        if (this.receiptAsset && this.receiptAsset.code !== 'ngn') {
+        if (false && this.depositAssets && this.receiptAsset && this.receiptAsset.code !== 'ngn') {
           depositAssets = this.assets.filter(asset => asset.code === 'ngn');
           [this.depositAsset] = depositAssets;
         } else {
@@ -185,6 +185,11 @@
       },
     },
     watch: {
+      receiptAssets(assets) {
+          if (assets.indexOf(this.receiptAsset) === -1) {
+            [this.receiptAsset] = assets;
+          }
+      },
       receiptAsset(newAsset) {
         if (!this.depositAsset || !this.receiptAsset) return;
         this.updateRate({
