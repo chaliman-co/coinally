@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "coinaly-demo02",
+  "private_key_id": "dcd4bd4230890511df9d1017f270ece8bea53382",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDDIva+2GgBT/Ai\nCVwNHLCMzPesJ8SWuiTolLu609I/O1I/ntNYP4X951dUzZJ6s+CCRJ4wpI5dmcEN\nsYrCK3oPFYaHc0q8rVkKHy3H/glsYtKwaBfp8aHjNxvedb4Lbxdi0klpmZMnrtJr\n32ecu67lcgFAduCqAC4nWBSgiT4eLo7NAgkfmJNwyigTz1M86AE/6LdHQdARllIz\nWX+M9Y6a9Mz9VRWTJapPwlXu0PGRvfc+GgzCZFeMquWDrxAr+WtTiKdM0Y7eKegx\nGkjwsY+/fqfAYhrmKIcQ+pybGq8CrXXQiLkPd84NLZo7sUvMzeq046MoyuUtQFFy\ntOBGk3PdAgMBAAECggEAIJVjxMHPehqeQxyze3gFLfmiyKMaUz3RYGnHgB6THp5Z\n8Ugky7lNtzQsM7ug4C7NiAsLrB0qLYx5PT9eZ2ZJmx+xx0fT3LYIZmWG6Dxt1+SX\ngD/dcGG58b4Xv/mCqpeZ/NUWz5SGiyuItN0IyNXZEjSLa3d+M7zUeBrf1N+d2P2M\nE8bopda6flIVE3kdQNZ0nnaruiWh2k3eYE+36EoNO1UiBzeHFte0HGus99FfV5hs\nO43oBB2KFt4PDs0Hat4mtbtu2UcV9TW4DbVnLhzh/cVQ/1kF+HYRsuvqpWbjBDQq\ntveb0fqiBv+OoDm64kKVm+ABkhWAkZHkm6mMDq/VOQKBgQDf64pJSp25LPwewa8N\nrhrjcjXru2lCqhA+9aqvVmDXkxzJ+Yf9mp9KiazwPsRKj85H2CDT6k+z0JfWeA8+\nsQtSP97holxyA1ZnpcfwlAMlFHY1rRPvBnU2VZ99iF+9BmKwZIB1TS1Jo5NrkUs4\nBSP+JJW9T7B3jOfuaR1uU/HJpQKBgQDfF8OjrBRTe4gyod0pkxbLhOEvhbVbYokn\nLHyKpxeuuQvWWUAJLu/eKN4FkfUgZZGH2jBS1ujfHvv0I/IQfiah1mL51Ya6cYc9\nQTfazyfQen8DxAlJsegrRfuNRaguB0hekdiVCY3rW6bnyGX4LQo1ZmjrI4KYdT/o\nR3soRsS72QKBgHqBc+u7LeVUji8Jigsy+LT9FDD/HIyDXFYFs7cvy9XFP5fktBj0\nUjfGcN4TiPK+EH5P6U3nQGnBMoD8uGJ1HBuIpBjP6kHaP5h/I48kez/7HN0q7t/z\nqYbre1GDndVdu/qDUaBbc+541rugBwYEEfgF7gJfqc0OQwm1aouk04CdAoGASSdP\nvbHFkIJnbMLq9KEIzn+qH50mlOrAspnB1O1ptJ91JDpr5xb/DMg11XnA+XiUuglv\n4xoZjmBomevXilTzcgoMtoOwBB8KC6oBGLzo/1HLqH511TaDPP1buT1oIn+82VXV\nwTk60jxhhIuP9EtAl7YXHVOtlTSNWitmVRSvmjECgYBfq/7vsoH+agOzEyHfPJiA\nT6vEtYFetFgGiu1ZkFm3m3FfbIjYpt806fwLLI8QQfLkUsAC4dnY6iyAQubAsJ9p\nzbQ2Pc6GTTu7c5G86XLNQQl/hms4LwIqzhFAO4XdGbijafFk1ACmdNMqy9ll2EWy\n9TnQ6zABqm7G+XM1itW0AA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "coinaly-default@coinaly-demo02.iam.gserviceaccount.com",
+  "client_id": "111922746456179273929",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/coinaly-default%40coinaly-demo02.iam.gserviceaccount.com"
+}

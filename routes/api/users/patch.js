@@ -1,24 +1,14 @@
-const
-    path = require('path'),
-    serverUtils = require('../../../lib/utils'),
-    {
-        User,
-    } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'))
-;
+const path = require('path');
+const serverUtils = require('../../../lib/utils');
 
-module.exports = {
-    handlePatchUser,
-};
+const { User } = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
+
 
 function handlePatchUser(req, res, next) {
-    console.log('in patch. req.body:', req.body);
-    let
-        rawInput = req.body,
-        {
-            user,
-        } = req._params,
-        newUserDetails = new User.Fields(),
-        newUpdate;
+    const rawInput = req.body;
+    const { user } = req._params;
+    const newUserDetails = new User.Fields();
+    let newUpdate;
     try {
         serverUtils.deepAssign(newUserDetails, rawInput);
     } catch (err) {
@@ -32,7 +22,7 @@ function handlePatchUser(req, res, next) {
     newUserDetails.emailAddress = undefined; // Don't overwrite main emailAddress
     serverUtils.removeFrom(newUserDetails, undefined); // Don't overwrite unchanged fields
     serverUtils.deepAssign(user, newUserDetails);
-    console.log({ user, newUserDetails });
+
     if (newEmailAddress) {
         newUpdate = {
             field: 'emailAddress',
@@ -46,10 +36,15 @@ function handlePatchUser(req, res, next) {
             if (err) return res._sendError(new serverUtils.ServerError(err));
             user.save().then(
                 user => res._success(user),
-                err => next(err));
+                err => next(err),
+            );
         });
     }
     user.save().then(user =>
         res._success(user)).catch(err =>
-            next(err));
+        next(err));
 }
+
+module.exports = {
+    handlePatchUser,
+};

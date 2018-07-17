@@ -19,6 +19,9 @@
           v-model="depositAddress"
           :placeholder="`${capitalize(type)} address`"
           type="text">
+        <small
+          v-if="!isAddressValid"
+          class="text-danger">This address is not valid. Please confirm your address</small>
       </div>
 
       <!-- IF BANK ACCOUNT, REMOVE HIDDEN FROM FOLLOWING DIV -->
@@ -138,6 +141,8 @@
 </template>
 
 <script>
+import WAValidator from 'wallet-address-validator';
+
 export default {
   props: {
     type: {
@@ -176,13 +181,16 @@ export default {
     user() {
       return this.$store.state.user;
     },
+    isAddressValid() {
+      return !this.depositAddress || WAValidator.validate(this.depositAddress, this.asset.code.toUpperCase());
+    },
     isValid() {
       if (this.isAdding) {
         return Object.values(this.newAccount).indexOf(null) === -1;
       }
 
       if (!this.isFiat) {
-        return this.depositAddress != null;
+        return this.depositAddress != null && this.isAddressValid;
       }
 
       return this.selectedAccount != null;
@@ -225,7 +233,7 @@ export default {
     },
     goToNext() {
       const address = this.isFiat ?
-        this.user.assetAccounts.findIndex(acc => acc._id === this.selectedAccount._id)
+        this.user.assetAccounts.findIndex(acc => acc && acc._id === this.selectedAccount._id)
         : this.depositAddress;
 
       this.$emit('done', address);

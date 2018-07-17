@@ -1,24 +1,13 @@
 const router = require('express').Router();
-const ObjectId = require('mongoose').Types.ObjectId;
+const { ObjectId } = require('mongoose').Types;
 const { txStatus } = require('../../lib/enum');
-const {
-    Asset,
-    User,
-    Transaction,
-} = require('../../lib/db');
-const auth = require("./../../lib/auth");
+const { User, Transaction } = require('../../lib/db');
+const auth = require('./../../lib/auth');
 
-module.exports = router;
+function handleGetStats(req, res) {
+    const getRegistrationCount = User.count({ role: 'user' }).exec();
 
-router
-    .use(auth.bounceUnauthenticated)
-    .get('/', auth.bounceNonAdmin, handleGetStats)
-    .get('/users/:userId', auth.bounceUnauthorised({owner: true}), handleGetStatsByUser);
-
-function handleGetStats(req, res, next) {
-    let getRegistrationCount = User.count({ role: 'user' }).exec();
-
-    let getNewOrdersCount = Transaction.count({
+    const getNewOrdersCount = Transaction.count({
         status: {
             $in: [txStatus.AWAITING_PAYMENT, txStatus.PAYMENT_RECEIVED],
         },
@@ -27,11 +16,11 @@ function handleGetStats(req, res, next) {
         },
     }).exec();
 
-    let getTransactionsCount = Transaction.count({}).exec();
+    const getTransactionsCount = Transaction.count({}).exec();
 
-    let getCompletedTransactionCount = Transaction.count({ status: txStatus.COMPLETED }).exec();
+    const getCompletedTransactionCount = Transaction.count({ status: txStatus.COMPLETED }).exec();
 
-    let getRecentOrders = Transaction.find({})
+    const getRecentOrders = Transaction.find({})
         .populate('user', ['firstName', 'lastName'])
         .populate('depositAsset')
         .populate('receiptAsset')
@@ -39,19 +28,19 @@ function handleGetStats(req, res, next) {
         .limit(5)
         .exec();
 
-    let getTransactionSumByAsset = Transaction.aggregate([{
+    const getTransactionSumByAsset = Transaction.aggregate([{
             $group: {
-                _id: "$depositAssetCode",
-                count: { $sum: '$depositAmount' }
+                _id: '$depositAssetCode',
+                count: { $sum: '$depositAmount' },
             },
         },
         {
             $project: {
                 code: '$_id',
                 totalDeposit: '$count',
-                _id: 0
-            }
-        }
+                _id: 0,
+            },
+        },
         // {
         //     $lookup: {
         //         from: 'assets',
@@ -68,40 +57,47 @@ function handleGetStats(req, res, next) {
             getCompletedTransactionCount,
             getNewOrdersCount,
             getRecentOrders,
-            getTransactionSumByAsset
+            getTransactionSumByAsset,
         ])
-        .then(([regCount, txCount, completedTxCount, newOrderCount, recentOrders, transactionStats]) => {
+        .then(([
+            regCount,
+            txCount,
+            completedTxCount,
+            newOrderCount,
+            recentOrders,
+            transactionStats,
+        ]) => {
             res._success({
                 regCount,
                 txCount,
                 completedTxCount,
                 newOrderCount,
                 recentOrders,
-                transactionStats
-            })
-        })
-};
+                transactionStats,
+            });
+        });
+}
 
 function handleGetStatsByUser(req, res) {
-    let getTransactionSumByAsset = Transaction.aggregate([{
-            $match: { user: ObjectId(req.params.userId) }
+    const getTransactionSumByAsset = Transaction.aggregate([{
+            $match: { user: ObjectId(req.params.userId) },
         },
         {
             $group: {
-                _id: "$depositAssetCode",
-                count: { $sum: '$depositAmount' }
+                _id: '$depositAssetCode',
+                count: { $sum: '$depositAmount' },
             },
         },
         {
             $project: {
                 code: '$_id',
                 totalDeposit: '$count',
-                _id: 0
-            }
-        }
+                _id: 0,
+            },
+        },
     ]).exec();
 
-    let getRecentOrders = Transaction.find({ user: req.params.userId })
+    const getRecentOrders = Transaction.find({ user: req.params.userId })
         .populate(['depositAsset', 'receiptAsset'])
         .sort('-createdAt')
         .limit(5)
@@ -109,12 +105,20 @@ function handleGetStatsByUser(req, res) {
 
     Promise.all([
             getRecentOrders,
-            getTransactionSumByAsset
+            getTransactionSumByAsset,
         ])
         .then(([recentOrders, transactionStats]) => {
             res._success({
                 recentOrders,
-                transactionStats
-            })
-        })
+                transactionStats,
+            });
+        });
 }
+
+
+router
+    .use(auth.bounceUnauthenticated)
+    .get('/', auth.bounceNonAdmin, handleGetStats)
+    .get('/users/:userId', auth.bounceUnauthorised({ owner: true }), handleGetStatsByUser);
+
+module.exports = router;

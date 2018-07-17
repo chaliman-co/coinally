@@ -14,6 +14,9 @@ export default {
         state.user = user;
         localStorage.setItem(USER, JSON.stringify(user));
     },
+    updateAssets(state, assets) {
+        state.assets = assets;
+    },
     updateToken(state, token) {
         state.token = token;
         localStorage.setItem(TOKEN, token);

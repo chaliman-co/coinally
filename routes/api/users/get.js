@@ -1,40 +1,4 @@
-const path = require('path');
-const serverUtils = require('../../../lib/utils');
-
-const {
-    User,
-} = require(path.join(serverUtils.getRootDirectory(), 'lib/db'));
-
-module.exports = {
-    handleGetUsers,
-    handleGetUser,
-};
-
-function handleGetUsers(req, res, next) {
-    let {
-        page = 1,
-            pageSize = 20,
-            sortBy = 'date'
-    } = req.query;
-
-    sortBy = handleSort(sortBy);
-
-    const getUsers = User.find({ role: 'user' })
-        .limit(Number(pageSize))
-        .skip(Number((page - 1) * pageSize))
-        .sort(sortBy)
-        .exec();
-
-    const getUserCount = User.count({ role: 'user' });
-
-    Promise.all([getUsers, getUserCount])
-        .then(([users, total]) => {
-            return res._success({
-                items: users,
-                total
-            });
-        }, err => next(err));
-}
+const { User } = require('../../../lib/db');
 
 function handleSort(sortBy) {
     switch (sortBy) {
@@ -44,7 +8,7 @@ function handleSort(sortBy) {
         case 'name':
             sortBy = {
                 firstName: 1,
-                lastName: 1
+                lastName: 1,
             };
             break;
         case 'email':
@@ -59,15 +23,43 @@ function handleSort(sortBy) {
     return sortBy;
 }
 
-function handleGetUser(req, res, next) {
+function handleGetUsers(req, res, next) {
     const {
-        user,
-    } = req._params;
-    User.count({
-        referrer: user._id,
-    }).then((count) => {
-        const payload = user.toObject();
-        payload.refCount = count;
-        res._success(payload);
-    });
+        page = 1,
+            pageSize = 20,
+    } = req.query;
+    let { sortBy = 'date' } = req.query;
+
+    sortBy = handleSort(sortBy);
+
+    const getUsers = User.find({ /* role: 'user' */ })
+        .limit(Number(pageSize))
+        .skip(Number((page - 1) * pageSize))
+        .sort(sortBy)
+        .exec();
+
+    const getUserCount = User.count({ role: 'user' });
+
+    Promise.all([getUsers, getUserCount])
+        .then(([users, total]) => res._success({
+            items: users,
+            total,
+        }), err => next(err));
 }
+
+function handleGetUser(req, res, next) {
+    const { user } = req._params;
+    User.count({
+            referrer: user._id,
+        }).then((count) => {
+            const payload = user.toObject();
+            payload.refCount = count;
+            res._success(payload);
+        })
+        .catch(next);
+}
+
+module.exports = {
+    handleGetUsers,
+    handleGetUser,
+};

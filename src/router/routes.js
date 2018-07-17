@@ -39,7 +39,7 @@ export default [{
             component: loginComponents.verificationCodeInput,
         }],
     }, {
-        path: '/account',
+        path: '/accounts',
         component: account,
         meta: {
             requiresUser: true,

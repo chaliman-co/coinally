@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-page">
     <side-bar/>
-
+    <transaction-modal/>
     <div class="dashboard__content">
       <div class="dashboard__top-bar">
         <div class="top-bar__table-md">
@@ -13,17 +13,18 @@
             </div>
             <div class="top-bar__table-cell top-bar__controls">
               <a
-                href=""
+                href="#"
                 class="btn-custom-astronaut-blue small"
                 data-toggle="modal"
                 data-target="#exchange-modal">
                 <i class="fa fa-plus"/> New Transaction
               </a>
-              <a
-                href="verify.html"
+
+              <router-link
+                to="/verify"
                 class="btn-custom-transparent-astronaut-blue small">
                 Verify Details
-              </a>
+              </router-link>
             </div>
           </div>
         </div>
@@ -32,6 +33,7 @@
         <div class="panel-heading">
           <h4 class="panel-title">
             <button
+              id="addButton"
               class="btn-custom-japanese-laurel small"
               data-toggle="collapse"
               data-target="#collapseOne">
@@ -43,7 +45,7 @@
           id="collapseOne"
           class="panel-collapse collapse">
           <div class="panel-body">
-            <h2 class="text-danger error-summary">{{ errorSummary }}</h2>
+            <p class="text-danger error-summary">{{ errorSummary }}</p>
             <form
               class="input-fields"
               @submit.prevent="submit">
@@ -97,16 +99,17 @@
                 <div class="select-component custom-form-group  col-md-6 col-md-offset-3">
                   <label for="asset">Currency</label>
                   <vue-select
-                    :options="assets.filter(asset => asset.type == 'fiat')"
-                    :on-change="val => setSelect('asset', 'form.asset', val && val._id)"
+                    :options="assets"
+                    v-model="form.asset"
                     input-id="asset"
                     label="name">
                     <template
                       slot="option"
                       slot-scope="option">
                       <img
-                        :src="`${global.apiRootUrl}/${option.imagePath}`"
-                        style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1"> {{ option.name }}
+                        :src="$generateUrl(option.imagePath)"
+                        style="height:2rem; margin-right: .3rem; margin-bottom: 0; line-height: 1">
+                      {{ option.name | capitalize }}
                     </template>
                   </vue-select>
                 </div>
@@ -139,7 +142,7 @@
                 </tr>
               </thead>
               <tbody>
-                <template v-if="global.user">
+                <template v-if="user">
                   <tr
                     v-for="(assetAccount, index) in bankAccounts"
                     v-if="assetAccount"
@@ -173,14 +176,17 @@
 </template>
 
 <script>
-import sideBar from './../sideBar';
 import vueSelect from 'vue-select';
+import { mapState, mapActions, mapMutations } from 'vuex';
+import sideBar from './../sideBar.vue';
+import transactionModal from '../transactionModal.vue';
 
 export default {
   inject: ['global'],
   components: {
     'side-bar': sideBar,
     'vue-select': vueSelect,
+    transactionModal,
   },
   data() {
     return {
@@ -188,7 +194,6 @@ export default {
       requestErrors: {},
       errorSummary: '',
       isWaiting: false,
-      assets: [],
       waitingAccounts: [],
       form: {
         asset: undefined,
@@ -201,34 +206,17 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      user: 'user',
+      assets: state => state.assets.filter(a => a.type === 'fiat'),
+    }),
     bankAccounts() {
-      const bankAccounts = this.global.user.assetAccounts.filter((assetAccount, index) => {
-        if (assetAccount != null) {
-          const asset = assetAccount.asset;
-          for (const fullAsset of this.assets) {
-            if (fullAsset._id == asset) fullAsset.addressType == 'bank account' ? bankAccounts.push(assetAccount) : bankAccounts.push(null);
-          }
-
-          // TODO: Remove this line after fix
-          assetAccount.index = index;
-        }
-
-
-        return assetAccount != null && assetAccount.asset.addressType == 'bank account';
+      return this.user.assetAccounts.filter((account, index) => {
+        if (!account) return false;
+        account.index = index;
+        const asset = this.assets.find(a => a._id === account.asset._id || a._id === account.asset);
+        return account && asset && asset.addressType === 'bank account';
       });
-      // const bankAccounts = [];
-
-      // for (let assetAccount of this.global.user.assetAccounts) {
-      //     if (!assetAccount) { bankAccounts.push(null); continue };
-      //     let asset = assetAccount.asset;
-      //     if (typeof asset == 'object') asset.addressType == 'bank account' ? bankAccounts.push(assetAccount) : bankAccounts.push(null);
-      //     else {
-      //         for (let fullAsset of this.assets) {
-      //             if (fullAsset._id == asset) fullAsset.addressType == 'bank account' ? bankAccounts.push(assetAccount) : bankAccounts.push(null);
-      //         }
-      //     }
-      // }
-      return bankAccounts;
     },
     isValidated() {
       return !(Object.keys(this.validationError).length);
@@ -245,61 +233,69 @@ export default {
     },
   },
   created() {
-    this.global.request('GET', '/assets/', (err, res) => {
-      if (err) console.error("couldn't load assets");
-      this.assets = res;
-    });
+    this.loadAssets();
   },
   methods: {
+    ...mapActions(['loadAssets']),
+    ...mapMutations(['updateUser']),
     removeAccount(account, index) {
-      if (!confirm('Are you sure you want to delete this bank account?')) return;
+      const isConfirmed = window.confirm('Are you sure you want to delete this bank account?');
+      if (!isConfirmed) return;
+
       this.waitingAccounts = Object.assign({ [index]: true }, this.waitingAccounts);
-      this.global.request('DELETE', `/users/${this.global.user._id}/asset_accounts/${index}`, (err, result) => {
+
+      const url = `/users/${this.global.user._id}/asset_accounts/${index}`;
+      this.$request('DELETE', url, (err) => {
         this.waitingAccounts = Object.assign({ [index]: false }, this.waitingAccounts);
-        if (err) {
-          console.log('error from post: ', this.err = err, err.response);
-          return;
-        }
-        console.log('success...', result);
-        this.global.user.assetAccounts.splice(index, 1, null);
+          if (!err) {
+            const updatedUser = this.user;
+            updatedUser.assetAccounts.splice(index, 1, null);
+            this.updateUser(updatedUser);
+          }
       });
     },
     submit() {
       if (!this.isValidated) {
-        return this.validationFailed = true;
+        this.validationFailed = true;
+        return;
       }
       this.isWaiting = true;
-      this.global.request('POST', `/users/${this.global.user._id}/asset_accounts`, this.form, (err, result) => {
-        this.isWaiting = false;
-        if (err) {
-          this.errorHandler(err);
-          console.log('error from post: ', this.err = err, err.response);
-          return;
-        }
-        console.log('success...', result);
-        this.errorSummary = '';
-        this.requestErrors = {};
-        this.global.user.assetAccounts.push(result);
+      const url = `/users/${this.user._id}/asset_accounts`;
+      this.$request('POST', url, { ...this.form, asset: this.form.asset._id }, (err, result) => {
+          this.isWaiting = false;
+          if (err) {
+            this.errorHandler(err);
+          } else {
+            this.errorSummary = '';
+            this.requestErrors = {};
+
+            const updatedUser = this.user;
+            updatedUser.assetAccounts.push(result);
+            this.updateUser(updatedUser);
+
+            document.getElementById('addButton').click();
+          }
       });
     },
     setSelect(inputId, modelProp, value) {
       const input = document.getElementById(inputId);
       if (!input) return;
-      eval(`this.${modelProp} = value`);
-      if (!value) return input.setCustomValidity('please select one');
-      return input.setCustomValidity('');
+      this[modelProp] = value;
+      input.setCustomValidity(value ? '' : 'please select one');
     },
     errorHandler(err) {
-      if (err.message == 'Network Error') {
-        return this.errorSummary = 'Network Error';
+      if (err.message === 'Network Error') {
+        this.errorSummary = 'Network Error';
+      } else {
+        if (Math.floor(err.response.status / 100) === 4) {
+          this.errorSummary = 'validation failed';
+        } else {
+          this.errorSummary = 'internal server error';
+        }
+        this.validationFailed = true;
+        const serverResponse = err.response.data;
+        Object.assign(this.requestErrors, serverResponse.errors.errorDetails);
       }
-      if (Math.floor(err.response.status / 100) == 4) this.errorSummary = 'validation failed';
-      else this.errorSummary = 'internal server error';
-      const serverResponse = err.response.data;
-      for (const field in serverResponse.errors.errorDetails) {
-        this.requestErrors = Object.assign({ [field]: serverResponse.errors.errorDetails[field] }, this.requestErrors);
-      }
-      this.validationFailed = true;
     },
   },
 };

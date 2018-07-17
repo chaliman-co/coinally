@@ -56,42 +56,74 @@ io.of('/transaction')
 
 io.of('/rates')
     .on('connection', (client) => {
-        console.log('conversion client received');
-        client.emit('seen', 'smiles..');
         const { to, from } = client.handshake.query;
-        const assetCodes = { to, from };
-        const errorDetails = {};
-        for (const asset in assetCodes) {
-            const assetCode = assetCodes[asset];
-            if (!assetCode) errorDetails[asset] = `${asset} not provided`;
-            else if (!Asset.exists(String(assetCode).toLowerCase())) errorDetails[asset] = `${asset} not found`;
-        }
-        if (Object.keys(errorDetails).length) {
-            client.emit('exception', errorDetails);
-            return client.disconnect(true);
-        }
-        client.emit('new_rate', Asset.convert(assetCodes.from, assetCodes.to));
-        let roomName = `${assetCodes.from}-${assetCodes.to}`;
-        client.join(roomName);
+        emitRate(from, to, client);
+        // const assetCodes = { to, from };
+        // const errorDetails = {};
+        // for (const asset in assetCodes) {
+        //     const assetCode = assetCodes[asset];
+        //     if (!assetCode) errorDetails[asset] = `${asset} not provided`;
+        //     else if (!Asset.exists(String(assetCode).toLowerCase())) errorDetails[asset] = `${asset} not found`;
+        // }
+        // if (Object.keys(errorDetails).length) {
+        //     client.emit('exception', errorDetails);
+        //     return client.disconnect(true);
+        // }
+        // client.emit('new_rate', Asset.convert(assetCodes.from, assetCodes.to));
+        // let roomName = `${assetCodes.from}-${assetCodes.to}`;
+        // client.join(roomName);
         client.on('parameter_change', ({ from, to } = {}) => {
-            newAssetCodes = { from, to };
-            client.leave(roomName, (err) => {
-                for (const asset in newAssetCodes) {
-                    const assetCode = newAssetCodes[asset];
-                    if (assetCode) {
-                        if (!Asset.exists(String(assetCode).toLowerCase())) {
-                            errorDetails[asset] = `${asset} not found`;
-                        } else assetCodes[asset] = assetCode;
-                    }
-                }
-                if (Object.keys(errorDetails).length) {
-                    client.emit('exception', errorDetails);
-                    return client.disconnect(true);
-                }
-                client.emit('new_rate', Asset.convert(assetCodes.from, assetCodes.to));
-                roomName = `${assetCodes.from}-${assetCodes.to}`;
+            emitRate(from, to, client);
+            // newAssetCodes = { from, to };
+            // for (const asset in newAssetCodes) {
+            //     const assetCode = newAssetCodes[asset];
+            //     if (assetCode) {
+            //         if (!Asset.exists(String(assetCode).toLowerCase())) {
+            //             errorDetails[asset] = `${asset} not found`;
+            //         } else assetCodes[asset] = assetCode;
+            //     }
+            // }
+            // if (Object.keys(errorDetails).length) {
+            //     client.emit('exception', errorDetails);
+            //     return client.disconnect(true);
+            // }
+            // client.emit('new_rate', Asset.convert(assetCodes.from, assetCodes.to));
+            // client.leave(roomName, (err) => {
+            //     for (const asset in newAssetCodes) {
+            //         const assetCode = newAssetCodes[asset];
+            //         if (assetCode) {
+            //             if (!Asset.exists(String(assetCode).toLowerCase())) {
+            //                 errorDetails[asset] = `${asset} not found`;
+            //             } else assetCodes[asset] = assetCode;
+            //         }
+            //     }
+            //     if (Object.keys(errorDetails).length) {
+            //         client.emit('exception', errorDetails);
+            //         return client.disconnect(true);
+            //     }
+            //     client.emit('new_rate', Asset.convert(assetCodes.from, assetCodes.to));
+            //     roomName = `${assetCodes.from}-${assetCodes.to}`;
 
-                client.join(roomName);
-            });
+            //     client.join(roomName);
+            // });
         }, );
     });
+
+function emitRate(from, to, client) {
+    const errorDetails = {};
+    const assetCodes = { from, to };
+    for (const code in assetCodes) {
+        const assetCode = assetCodes[code];
+        if (assetCode) {
+            if (!Asset.exists(String(assetCode).toLowerCase())) {
+                errorDetails[code] = `${code} not found`;
+            }
+        }
+    }
+    if (Object.keys(errorDetails).length) {
+        client.emit('exception', errorDetails);
+        client.disconnect(true);
+    }
+    const rate = Asset.convert(from, to)
+    client.emit('new_rate', rate);
+}

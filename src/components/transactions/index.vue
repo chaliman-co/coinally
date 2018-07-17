@@ -19,10 +19,15 @@
               <div class="select-component sort-by is--minified">
                 <select
                   id="sort-by"
+                  v-model="status"
                   name="sort-by"
-                  class="custom-select-no-title pull-right"
-                  v-model="status">
-                  <option v-for="(transactionStatus, index) in transactionsStatus" :key="index" :value="transactionStatus" >{{transactionStatus | capitalize}}</option>
+                  class="custom-select-no-title pull-right">
+                  <option
+                    v-for="(transactionStatus, index) in transactionsStatus"
+                    :key="index"
+                    :value="transactionStatus" >
+                    {{ transactionStatus | capitalize }}
+                  </option>
                   <!-- <option value="pending">Pending Transactions</option> -->
                 </select>
               </div>
@@ -51,18 +56,18 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-if="transactions.length == 0 && !loading"><p>No {{this.status | capitalize}} transactions</p></tr>
-                  
+                  <tr v-if="transactions.length == 0 && !loading"><p>No {{ this.status | capitalize }} transactions</p></tr>
+
                   <tr
                     v-for="(transaction, index) in transactions"
                     :key="index">
                     <td>{{ index + 1 + pageNo }}</td>
-                    <td>{{ transaction.user.firstName }} {{ transaction.user.lastName }}</td>
-                    <td>{{ transaction.depositAssetCode }}</td>
-                    <td>{{ transaction.receiptAssetCode }}</td>
-                    <td>{{ transaction.depositAmount.toFixed(6).replace(/\.([^0]*)(0+)$/, '.$1') | numberFormat }} ({{ transaction.depositAssetCode }})</td>
+                    <td>{{ `${transaction.user.firstName} ${transaction.user.lastName}` | capitalize }}</td>
+                    <td>{{ transaction.depositAssetCode | uppercase }}</td>
+                    <td>{{ transaction.receiptAssetCode | uppercase }}</td>
+                    <td>{{ transaction.depositAmount | numberFormat }} ({{ transaction.depositAssetCode | uppercase }})</td>
                     <td>{{ transaction.createdAt | humanizeDate }}</td>
-                    <td>{{ transaction.lastUpdate | humanizeDate }}</td>
+                    <td>{{ transaction.updatedAt | humanizeDate }}</td>
                     <td>
                       {{ transaction.status | capitalize }}
                     </td>
@@ -82,12 +87,12 @@
         </div>
 
         <pagination
-        :active-page="page"
-        :total-items-count="transactionsCount"
-        :items-count-per-page="pageSize"
-        @changePage="updatePage"
-        v-if="!loading && transactionsCount > 0"
-        ></pagination>
+          v-if="!loading && transactionsCount > 0"
+          :active-page="page"
+          :total-items-count="transactionsCount"
+          :items-count-per-page="pageSize"
+          @changePage="updatePage"
+        />
 
       </div>
     </div>
@@ -95,34 +100,30 @@
 </template>
 
 <script>
-import moment from 'moment';
 import transaction from './transaction.vue';
-import transactionModal from '../transactionModal.vue';
 import sideBar from './../sideBar.vue';
 
-import pagination from './../pagination';
-import spinner from './../spinner';
-
-import utils from './../../utils.js';
+import pagination from './../pagination.vue';
+import spinner from './../spinner.vue';
 
 export default {
   components: {
     'side-bar': sideBar,
     transaction,
     pagination,
-    spinner
+    spinner,
   },
   data() {
     return {
       loading: false,
       transactions: [],
       transactionsStatus: ['all', 'failed', 'awaiting payment', 'payment received', 'pending', 'completed'],
-      status : 'all',
+      status: 'all',
       page: 1,
       pageSize: 10,
       transactionsCount: 0,
       pageNo: 0,
-      st: this.$getStatus
+      st: this.$getStatus,
     };
   },
   inject: ['global'],
@@ -131,9 +132,17 @@ export default {
       return this.$store.state.user;
     },
   },
+  watch: {
+    status() {
+      this.page = 1;
+      this.pageNo = (this.page - 1) * this.pageSize;
+      this.loading = true;
+      this.transactions = [];
+      this.getTransactions();
+    },
+  },
   created() {
     this.getTransactions();
-    
   },
   methods: {
     showTransaction(trans) {
@@ -148,19 +157,19 @@ export default {
         this.$set(tx, 'status', status);
       }
     },
-    getTransactions(){
+    getTransactions() {
       this.loading = true;
       // let getStatus = this.status;
       // if(getStatus){
       //   getStatus = null;
       // }
-      
+
       let url = `/transactions?page=${this.page}&pageSize=${this.pageSize}`;
-      if(this.status !== 'all'){
+      if (this.status !== 'all') {
         url += `&status=${this.status}`;
       }
       // const url = `/transactions?page=${this.page}&pageSize=${this.pageSize}`;
-      
+
       this.$request('GET', url, (err, response) => {
         if (!err) {
           this.transactions = response.items;
@@ -168,7 +177,6 @@ export default {
           this.loading = false;
         }
       });
-      
     },
     updatePage(page) {
       this.pageNo = (page - 1) * this.pageSize;
@@ -177,17 +185,6 @@ export default {
       this.transactions = [];
       this.getTransactions();
     },
-
   },
-  watch: {
-    status(){
-      this.page = 1;
-      this.pageNo = (this.page - 1) * this.pageSize;
-      this.loading = true;
-      this.transactions = [];
-      this.getTransactions();
-      
-    }
-  }
 };
 </script>

@@ -4,24 +4,30 @@ import store from './store';
 import router from './router';
 
 
-// const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:9000';
-const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://coinally.herokuapp.com';
+const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:9000';
+// const apiRootUrl = process.env.NODE_ENV === 'production' ? '' : 'http://coinally.herokuapp.com';
 
 
 const apiUrl = `${apiRootUrl}/api`;
 
 const axiosInstance = axios.create({});
 
-axiosInstance.interceptors.request.use(config => {
+axiosInstance.interceptors.request.use((config) => {
     NProgress.start();
-    return config
-})
+    return config;
+}, (err) => {
+    NProgress.done();
+    return Promise.reject(err);
+});
 
 // before a response is returned stop nprogress
-axiosInstance.interceptors.response.use(response => {
+axiosInstance.interceptors.response.use((response) => {
     NProgress.done();
-    return response
-})
+    return response;
+}, (err) => {
+    NProgress.done();
+    return Promise.reject(err);
+});
 
 /**
  * Log message to console

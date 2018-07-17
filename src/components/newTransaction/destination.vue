@@ -23,7 +23,7 @@ export default {
   created() {
     this.transaction = JSON.parse(sessionStorage.getItem('transaction'));
     this.asset = this.transaction.receiptAsset;
-    if(this.transaction.id){
+    if (this.transaction.id) {
       this.isEditing = true;
     }
   },
@@ -34,7 +34,7 @@ export default {
   //     this.$router.push('/transaction/refund');
   //   },
   // },
-  
+
   methods: {
     refreshTransaction() {
       this.transaction = JSON.parse(sessionStorage.getItem('transaction'));
@@ -50,13 +50,17 @@ export default {
         receiptAddress: destAccount,
       };
 
-      if(!this.isEditing){
+      if (!this.isEditing) {
         data.depositAmount = this.transaction.amount;
         data.depositAssetCode = this.transaction.depositAsset.code;
         data.receiptAssetCode = this.transaction.receiptAsset.code;
         data.user = this.$store.state.user._id;
-      }else{
+      } else {
         url += `/${this.transaction.id}/receiptAddress`;
+      }
+
+      if (this.transaction.cardDetail) {
+        data.cardDetail = this.transaction.cardDetail;
       }
 
       this.$request(this.isEditing ? 'PUT' : 'POST', url, data, (err, result) => {
@@ -67,7 +71,7 @@ export default {
         }
       });
     },
-  }
+  },
 };
 </script>
 

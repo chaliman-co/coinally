@@ -1,12 +1,24 @@
 <template>
-  <div v-if="user" class="dashboard__sidebar">
+  <div
+    v-if="user"
+    class="dashboard__sidebar">
     <span class="hamburger">
-      <img src="~img/close.svg" alt="Close">
+      <img
+        src="~img/close.svg"
+        alt="Close">
     </span>
-    <img v-if="user.imagePath" :src="$generateUrl(user.imagePath)" alt="Avatar" class="avatar">
-    <img v-else src="~img/avatar.svg" alt="Avatar" class="avatar">
+    <img
+      v-if="user.imagePath"
+      :src="$generateUrl(user.imagePath)"
+      alt="Avatar"
+      class="avatar">
+    <img
+      v-else
+      src="~img/avatar.svg"
+      alt="Avatar"
+      class="avatar">
     <div class="title">
-      {{ user.firstName }} {{ user.lastName }}
+      {{ `${user.firstName} ${user.lastName}` | capitalize }}
     </div>
 
     <div class="referral-code">
@@ -14,18 +26,26 @@
         Referral Code
       </div>
       <div class="body">
-        {{user.refCode}}
+        {{ user.refCode }}
       </div>
       <div class="subtitle">
-        Total Referrals: {{user.refCount}}
+        Total Referrals: {{ user.refCount }}
       </div>
     </div>
 
     <div class="links">
-      <router-link v-for="(link, index) in displayLinks" :key="index" :to="link.path" :class="$route.path == link.path? 'link active' : 'link'">
+      <router-link
+        v-for="(link, index) in displayLinks"
+        :key="index"
+        :to="link.path"
+        class="link"
+        active-class="active">
         {{ link.label }}
       </router-link>
-      <a href="" class="link logout" @click.prevent="logOut">
+      <a
+        href=""
+        class="link logout"
+        @click.prevent="logOut">
         Logout
       </a>
     </div>

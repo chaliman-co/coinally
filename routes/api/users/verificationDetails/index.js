@@ -1,100 +1,111 @@
-const
-    multer = require("multer"),
-    router = require("express").Router({ mergeParams: true }),
-    path = require("path"),
-    serverUtils = require("../../../../lib/utils"),
-    auth = require('./../../../../lib/auth'),
-    { User, Approval } = require(path.join(serverUtils.getRootDirectory(), "lib/db")),
-    verificationDetailsStoragePath = path.join(serverUtils.getPublicDirectory(), "images/verification_details")
-;
+const multer = require('multer');
+const router = require('express').Router({ mergeParams: true });
+const path = require('path');
+const serverUtils = require('../../../../lib/utils');
+const auth = require('./../../../../lib/auth');
+const emailer = require('./../../../../lib/emailer');
+const { User, Approval } = require('../../../../lib/db');
 
-module.exports = router;
+const verificationDetailsStoragePath = path.join(serverUtils.getPublicDirectory(), 'images/verification_details');
 
-router
-    .post("/", auth.bounceUnauthorised({owner: true}), multer({dest: verificationDetailsStoragePath}).single("image"), handlePostVerificationDetail)
-    .param("index", resolveIndex)
-    .post("/:index/is_approved", auth.bounceUnauthorised({ admin: true, }), handlePutVerificationDetailIsApproved)
-    .delete("/:index", auth.bounceUnauthorised({owner: true}), handleDeleteVerificationDetail)
-;
 
 function resolveIndex(req, res, next, index) {
-    const { user } = req._params; 
-    verificationDetail = user.verificationDetails[index];
-    if (!verificationDetail) return res._sendError("item not found", new serverUtils.ErrorReport(404, {index: "index not found"}));
-    req._params.verificationDetail = verificationDetail;
-    return next() 
+    const { user } = req._params;
+    const verificationDetail = user.verificationDetails[index];
+    if (!verificationDetail) {
+        const error = new serverUtils.ErrorReport(404, { index: 'index not found' });
+        res._sendError('item not found', error);
+    } else {
+        req._params.verificationDetail = verificationDetail;
+        next();
+    }
 }
 
 function handlePostVerificationDetail(req, res, next) {
-    let 
-        user = req._params.user,
-        rawInput = req.body,
-        details = new User.verificationDetails.Fields()
-    ;
+    const { user } = req._params;
+    const rawInput = req.body;
+    const details = new User.verificationDetails.Fields();
     try {
         serverUtils.deepAssign(details, rawInput);
     } catch (err) {
-        let unknownField = err.message.match(/property (.+),/)[1];
-        return res._sendError("unknown field", serverUtils.ErrorReport(400, { unknownField: `${field} not recognized` }))
+        const unknownField = err.message.match(/property (.+),/)[1];
+        const error = serverUtils.ErrorReport(400, { unknownField: `${unknownField} not recognized` });
+        return res._sendError('unknown field', error);
     }
-    if (req.file) details.imagePath = path.join("images/verification_details", req.file.filename);
-    verificationDetailIndex = user.verificationDetails.push(details)-1;
-    user.save().then( function updatedUser(user) {
-        let approvalDetails = new Approval.Fields();
-        serverUtils.deepAssign(approvalDetails, {
-            user: user._id.toString(),
-            userProperty: `verificationDetails[${verificationDetailIndex}]`
+    if (req.file) {
+        details.imagePath = path.join('images/verification_details', req.file.filename);
+    }
+
+    const verificationDetailIndex = user.verificationDetails.push(details) - 1;
+    user
+        .save()
+        .then(() => {
+            const approvalDetails = new Approval.Fields();
+            serverUtils.deepAssign(approvalDetails, {
+                user: user._id.toString(),
+                userProperty: `verificationDetails[${verificationDetailIndex}]`,
+            });
+            const approval = new Approval(approvalDetails);
+            return approval.save();
         })
-        let approval = new Approval(approvalDetails);
-        approval.save().then(function savedApproval(approval) {
-            return res._success(user.verificationDetails[verificationDetailIndex])
-        }, function failedToSave(err) {
-            next(err)
+        .then(() => {
+            res._success(user.verificationDetails[verificationDetailIndex]);
+            emailer.sendOnVerificationDetail(user);
         })
-    }, function failedToUpdate(err) {
-        return next(err)
-    })
+        .catch(err => next(err));
 }
 
 function handlePutVerificationDetailIsApproved(req, res, next) {
-    if (! (req.body && req.body.hasOwnProperty("isApproved")) ) return res._sendError("missing or invalid parameters", new serverUtils.ErrorReport(400, {isApproved: "isApproved not provided"}));
-    const 
-        { isApproved } = req.body,
-        { index } = req.params,
-        { user } = req._params,
-        { verificationDetail } = req._params
-    ;
+    const { isApproved } = req.body;
+    const { index } = req.params;
+    const { user, verificationDetail } = req._params;
+
+    if (isApproved == null) {
+        const error = new serverUtils.ErrorReport(400, {
+            isApproved: 'isApproved not provided',
+        });
+        res._sendError('missing or invalid parameters', error);
+    }
+
 
     verificationDetail.isApproved = isApproved;
-    user.save().then(function updatedUser(user) {
-        Approval.findOneAndUpdate({ userId: user._id, userProperty: `verificationDetails[${index}]` }, { status: isApproved? "granted" : "denied" }).then(function updatedApproval(approval) {
-            return res._success(verificationDetail.isApproved)
-        }, function failedToUpdate(err) {
-            return next(err)
-        })
-    }, function failedToUpdate(err) {
-        return next(err)
-    })
+    user.save()
+        .then(() => Approval
+            .findOneAndUpdate({
+                userId: user._id,
+                userProperty: `verificationDetails[${index}]`,
+            }, {
+                status: isApproved ? 'granted' : 'denied',
+            }))
+        .then(() => res._success(verificationDetail.isApproved))
+        .catch(err => next(err));
 }
 
 function handleDeleteVerificationDetail(req, res, next) {
-    const
-        { verificationDetail } = req._params,
-        { user } = req._params,
-        index = Number(req.params.index)
-    ;
+    const { verificationDetail, user } = req._params;
+    const index = Number(req.params.index);
+
     user.verificationDetails.splice(index, 1, null);
-    user.save().then(function updatedUser(user) {
+    user.save().then(() => {
         if (!verificationDetail.isApproved) {
-            return Approval.findOneAndUpdate({ user: user._id, userProperty: `verificationDetails[${index}]` }, { status: "aborted" }).then(function updatedApproval(approval) {
-                console.log("rem: ", approval, "\n user verifi ", user.verificationDetails[index]);
-                return res._success(verificationDetail)
-            }, function failedToUpdate(err) {
-                return next(err)
-            })
+            return Approval
+                .findOneAndUpdate({
+                    user: user._id,
+                    userProperty: `verificationDetails[${index}]`,
+                }, { status: 'aborted' })
+                .then(() =>
+                    res._success(verificationDetail), err => next(err));
+            // console.log('rem: ', approval, '\n user verifi ', user.verificationDetails[index]);
         }
-        return res._success(verificationDetail)
-    }, function failedToUpdate(err) {
-        return next(err)
-    })
+        return res._success(verificationDetail);
+    }, err => next(err));
 }
+
+router
+    .post('/', auth.bounceUnauthorised({ owner: true }), multer({ dest: verificationDetailsStoragePath })
+        .single('image'), handlePostVerificationDetail)
+    .param('index', resolveIndex)
+    .post('/:index/is_approved', auth.bounceUnauthorised({ admin: true }), handlePutVerificationDetailIsApproved)
+    .delete('/:index', auth.bounceUnauthorised({ owner: true }), handleDeleteVerificationDetail);
+
+module.exports = router;

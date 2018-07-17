@@ -5,7 +5,7 @@
         <div class="modal-content">
           <div class="modal-header clearfix">
             <span class="modal-title">
-              Verified
+              <!-- Verified -->
             </span>
             <button
               type="button"
@@ -21,21 +21,23 @@
                 v-if="depositAsset && receiptAsset && conversionRate"
                 class="transaction__type">
                 <img
-                  :src="global.apiRootUrl + '/' + depositAsset.imagePath"
+                  :src="$generateUrl(depositAsset.imagePath)"
                   :alt="depositAsset.name"> →
                 <img
-                  :src="global.apiRootUrl + '/' + receiptAsset.imagePath"
+                  :src="$generateUrl(receiptAsset.imagePath)"
                   :alt="receiptAsset.name">
               </div>
               <div
                 v-if="depositAsset && receiptAsset && conversionRate"
                 class="expected-amount">
                 <div class="amount">
-                  <span title="Deposit">D:</span>{{amount | numberFormat}} {{depositAsset.code.toUpperCase()}},
-                  <span title="Receive">R:</span>{{receiptAmount.toFixed(8) | numberFormat}} {{receiptAsset.code.toUpperCase()}}
+                  <span title="Deposit">D:</span>{{ amount | numberFormat }} {{ depositAsset.code.toUpperCase() }},
+                  <span title="Receive">R:</span>{{ receiptAmount | numberFormat }} {{ receiptAsset.code.toUpperCase() }}
                 </div>
                 <div class="exchange-rate">
-                  {{ `1 ${depositAsset.code.toUpperCase()} = ${conversionRate.toFixed(8).replace(/(?:\.)?0+$/, "")}${receiptAsset.code.toUpperCase()}` }}
+                  1 {{ depositAsset.code.toUpperCase() }} =
+                  {{ conversionRate | numberFormat }}
+                  {{ receiptAsset.code.toUpperCase() }}
                 </div>
               </div>
 
@@ -106,19 +108,20 @@ export default {
           query,
         });
 
-        socket.on('exception', err => console.log('exception: ', err));
-        socket.on('error', (...args) => console.log('error event: ', ...args));
-        socket.on('connect_timeout', (...args) => console.log('timeout: ', ...args));
+        // socket.on('exception', err => console.log('exception: ', err));
+        // socket.on('error', (...args) => console.log('error event: ', ...args));
+        // socket.on('connect_timeout', (...args) => console.log('timeout: ', ...args));
+
         socket.on('new_rate', (rate) => {
           this.conversionRate = rate;
 
           const transaction = sessionStorage.getItem('transaction');
 
-          if(transaction){
+          if (transaction) {
             this.transaction = JSON.parse(transaction);
             this.transaction.rate = rate;
             sessionStorage.setItem('transaction', JSON.stringify(this.transaction));
-          }else{
+          } else {
             this.$router.push('/');
           }
         });

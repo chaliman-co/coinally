@@ -5,7 +5,7 @@
         <div class="modal-content">
           <div class="modal-header clearfix">
             <span class="modal-title">
-              Verified
+              <!-- Verified -->
             </span>
             <button
               v-if="!id"
@@ -14,100 +14,112 @@
               @click="goBack"/>
           </div>
           <div class="modal-body">
-            <div class="modal-body__container" v-if="transaction">
+            <div
+              v-if="transaction"
+              class="modal-body__container">
               <div
                 id="payment"
                 class="modal__pane">
                 <div class="modal__title">
                   <span>Order ID</span>: {{ id }}
                 </div>
-                <div class="payment-address__table-md" v-if="!hasPaid">
-            <div class="payment-address__table-row" v-if="isFiat">
-                <div class="payment-address__table-cell payment-address__description">
-                    <div class="description__fiat">
+                <div
+                  v-if="!hasPaid"
+                  class="payment-address__table-md">
+                  <div
+                    v-if="isFiat"
+                    class="payment-address__table-row">
+                    <div class="payment-address__table-cell payment-address__description">
+                      <div class="description__fiat">
                         <div class="title">
-                            Click to pay online
+                          Click to pay online
                         </div>
                         <div class="body">
-                            <p>
-                                <span>Amount:</span>
-                                <i class="naira" />{{ amount | numberFormat }}
-                            </p>
+                          <p>
+                            <span>Amount:</span>
+                            <i class="naira" />{{ amount | numberFormat }}
+                          </p>
                         </div>
-                        <button 
-                        :disabled="isLoading"
-                        @click="payWithPaystack" 
-                        class="btn-custom-astronaut-blue small description__call-to-action">
-                            Pay now
-                            <i
-                                v-if="isLoading"
-                                class="fa fa-spinner fa-pulse"/>
+                        <button
+                          :disabled="isLoading"
+                          class="btn-custom-astronaut-blue small description__call-to-action"
+                          @click="payWithPaystack">
+                          Pay now
+                          <i
+                            v-if="isLoading"
+                            class="fa fa-spinner fa-pulse"/>
                         </button>
+                      </div>
                     </div>
-                </div>
-                <div class="payment-address__table-cell">
-                    <div class="description__fiat">
+                    <div class="payment-address__table-cell">
+                      <div class="description__fiat">
                         <div class="title">
-                            OR
+                          OR
                         </div>
                         <div class="body">
-                            <p>
-                                <strong>Pay to</strong>
-                                <br> {{depositAsset.depositAddress.name}}
-                                <br> {{depositAsset.depositAddress.number}}
-                                <br> {{depositAsset.depositAddress.bankName}}
-                            </p>
+                          <p>
+                            <strong>Pay to</strong>
+                            <br> {{ depositAsset.depositAddress.name }}
+                            <br> {{ depositAsset.depositAddress.number }}
+                            <br> {{ depositAsset.depositAddress.bankName }}
+                          </p>
                         </div>
+                      </div>
                     </div>
-                </div>
-            </div>
-            <div class="payment-address__table-row" v-else-if="isDigital">
-                <div class="payment-address__table-cell payment-address__qr-code">
-                    <img :src="`https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${depositAsset.depositAddress}`" alt="QR Code">
-                </div>
-                <div class="payment-address__table-cell payment-address__description">
-                    <div class="description__cryptocurrency">
+                  </div>
+                  <div
+                    v-else-if="isDigital"
+                    class="payment-address__table-row">
+                    <div class="payment-address__table-cell payment-address__qr-code">
+                      <img
+                        :src="`https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${depositAsset.depositAddress}`"
+                        alt="QR Code">
+                    </div>
+                    <div class="payment-address__table-cell payment-address__description">
+                      <div class="description__cryptocurrency">
                         <div class="title">
-                            Send to this address:
+                          Send to this address:
                         </div>
                         <div class="body">
-                            <p>
-                                {{ depositAsset.depositAddress }}
-                            </p>
-                            <p>
-                                <span>Amount:</span> {{ amount | numberFormat }}
-                            </p>
+                          <p>
+                            {{ depositAsset.depositAddress }}
+                          </p>
+                          <p>
+                            <span>Amount:</span> {{ amount | numberFormat }}
+                          </p>
                         </div>
+                      </div>
                     </div>
-                </div>
-            </div>
+                  </div>
 
-            <div class="payment-address__table-row" v-else>
-                <div class="payment-address__table-cell payment-address__description text-center">
-                    <div class="description__fiat">
+                  <div
+                    v-else
+                    class="payment-address__table-row">
+                    <div class="payment-address__table-cell payment-address__description text-center hidden">
+                      <div class="description__fiat">
                         <div class="title">
-                            Upload Card Details:
+                          Upload Card Details:
                         </div>
                         <div class="body">
-                            <p>
-                                <span>Amount:</span> {{ amount | numberFormat }}
-                            </p>
+                          <p>
+                            <span>Amount:</span> {{ amount | numberFormat }}
+                          </p>
                         </div>
-                    </div>
-                    <div class="description__fiat ">
+                      </div>
+                      <div class="description__fiat ">
                         <div class="body">
-                            <p>Card Details</p>
-                            <button class="btn-custom-astronaut-blue small">
-                                Upload
-                            </button>
-                            <p>Card receipt (optional)</p>
-                            <button class="btn-custom-astronaut-blue small">
-                                Upload
-                            </button>
+                          <p>Card Details</p>
+                          <button class="btn-custom-astronaut-blue small">
+                            Upload
+                          </button>
+                          <p>Card receipt (optional)</p>
+                          <button class="btn-custom-astronaut-blue small">
+                            Upload
+                          </button>
                         </div>
+                      </div>
                     </div>
-                </div>
-            </div>
+                  </div>
                 </div>
                 <div class="progress__indicator">
                   <div class="indicator__label">
@@ -116,11 +128,11 @@
                   <div class="indicator__composite">
                     <div class="indicator__bg"/>
                     <div
-                      class="indicator__progress"
-                      :style="{width: `${progress}%`}"/>
+                      :style="{width: `${progress}%`}"
+                      class="indicator__progress"/>
                   </div>
                   <div class="indicator__progress-value">
-                    {{progress}}%
+                    {{ progress }}%
                   </div>
                 </div>
               </div>
@@ -130,21 +142,23 @@
                 v-if="depositAsset && receiptAsset && conversionRate"
                 class="transaction__type">
                 <img
-                  :src="global.apiRootUrl + '/' + depositAsset.imagePath"
+                  :src="$generateUrl(depositAsset.imagePath)"
                   :alt="depositAsset.name"> →
                 <img
-                  :src="global.apiRootUrl + '/' + receiptAsset.imagePath"
+                  :src="$generateUrl(receiptAsset.imagePath)"
                   :alt="receiptAsset.name">
               </div>
               <div
                 v-if="depositAsset && receiptAsset && conversionRate"
                 class="expected-amount">
                 <div class="amount">
-                  {{amount | numberFormat}}
-                  {{depositAsset.code.toUpperCase()}} ({{receiptAmount.toFixed(8) | numberFormat}} {{receiptAsset.code.toUpperCase()}})
+                  <span title="Deposit">D:</span>{{ amount | numberFormat }} {{ depositAsset.code.toUpperCase() }},
+                  <span title="Receive">R:</span>{{ receiptAmount | numberFormat }} {{ receiptAsset.code.toUpperCase() }}
                 </div>
                 <div class="exchange-rate">
-                  {{ `1 ${depositAsset.code.toUpperCase()} = ${conversionRate.toFixed(8)}${receiptAsset.code.toUpperCase()}` }}
+                  1 {{ depositAsset.code.toUpperCase() }} =
+                  {{ conversionRate | numberFormat }}
+                  {{ receiptAsset.code.toUpperCase() }}
                 </div>
               </div>
 
@@ -206,7 +220,7 @@ export default {
       return this.depositAsset.type === 'digital';
     },
     progress() {
-      if(!this.status) return 0;
+      if (!this.status) return 0;
 
       const index = this.statuses.indexOf(this.status);
 
@@ -214,9 +228,9 @@ export default {
 
       return (index / (this.statuses.length - 1)) * 100;
     },
-    hasPaid(){
+    hasPaid() {
       return this.status !== txStatus.AWAITING_PAYMENT;
-    }
+    },
   },
   created() {
     const url = `/transactions/${this.id}`;
@@ -253,7 +267,7 @@ export default {
         this.socket = socket;
       }
     },
-    payWithPaystack(){
+    payWithPaystack() {
         this.isLoading = true;
         const options = {
             key: utils.paystackKey,
@@ -266,13 +280,13 @@ export default {
             },
             onClose: () => {
                 this.isLoading = false;
-            }
+            },
         };
 
         const handler = window.PaystackPop.setup(options);
         handler.openIframe();
     },
-    verifyPayment(response){
+    verifyPayment(response) {
         const url = `/transactions/${this.transaction._id}/payment/verify`;
 
         this.$request('PUT', url, null, (err, result) => {

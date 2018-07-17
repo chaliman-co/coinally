@@ -12,6 +12,7 @@
         "deploy": "npm run client-build && git commit -a && git push heroku master"
     },
     "dependencies": {
+        "@google-cloud/storage": "^1.6.0",
         "@sendgrid/mail": "^6.2.1",
         "async": "~2.6.1",
         "axios": "^0.18.0",
@@ -73,6 +74,7 @@
         "not ie <= 8"
     ],
     "devDependencies": {
+        "babel-preset-stage-3": "^6.24.1",
         "eslint": "^4.19.1",
         "eslint-config-airbnb-base": "^12.1.0",
         "eslint-plugin-import": "^2.12.0",

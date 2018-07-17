@@ -11,15 +11,6 @@
                 User
               </div>
             </div>
-            <div class="top-bar__table-cell top-bar__controls">
-              <!-- <a href="" class="btn-custom-astronaut-blue small" data-toggle="modal" data-target="#exchange-modal">
-                                                                                                                                                            <i class="fa fa-plus"></i> New Transaction
-                                                                                                                                                        </a> -->
-
-              <!-- <a href="verify.html" class="btn-custom-transparent-astronaut-blue small">
-                                                                                                                                                            Verify Details
-                                                                                                                                                        </a> -->
-            </div>
           </div>
         </div>
       </div>
@@ -33,10 +24,10 @@
               class="profile__image"/>
             <div
               v-else
-              :style="`background-image: url('${$generateUrl('/images/profile_pictures/default')}`"
+              :style="`background-image: url('${$generateUrl('images/profile_pictures/avatar.svg')}`"
               class="profile__image"/>
             <div class="profile__title">
-              {{ user.firstName }} {{ user.lastName }}
+              {{ `${user.firstName} ${user.lastName}` | capitalize }}
             </div>
             <div class="profile__subtitle">
               {{ user.emailAddress }}
@@ -55,8 +46,8 @@
             </div>
           </div>
           <!-- User Transactions -->
-          
-          <user-transaction :user="user"></user-transaction>
+
+          <user-transaction :user="user"/>
           <!-- End of User Transactions -->
 
           <div class="dashboard-pane dashboard-pane--lg">
@@ -65,7 +56,7 @@
                 Bank Accounts
               </div>
               <div class="header__subtitle">
-                2 Bank Accounts
+                {{ user.assetAccounts.length }} Bank Accounts
               </div>
             </div>
             <div class="dashboard-pane__body is--padded">
@@ -110,6 +101,9 @@
               <div class="header__title">
                 Verification Details
               </div>
+              <div class="header__subtitle">
+                {{ user.verificationDetails.length }} Verification Details
+              </div>
             </div>
             <div class="dashboard-pane__body is--padded">
               <div class="user-verification__table">
@@ -130,9 +124,12 @@
                         v-for="(verificationDetail, index) in user.verificationDetails"
                         v-if="verificationDetail"
                         :key="index">
-                        <td>{{ index }}.</td>
-                        <td>{{ verificationDetail.type }}</td>
-                        <td>{{ verificationDetail.value }}</td>
+                        <td>{{ index + 1 }}</td>
+                        <td>
+                          {{ verificationDetail.type | capitalize }}
+                          {{ verificationDetail.name ? `(${verificationDetail.name})`: '' }}
+                        </td>
+                        <td>{{ verificationDetail.number }}</td>
                         <td>
                           <img
                             v-if="verificationDetail.imagePath"
@@ -141,9 +138,10 @@
                         </td>
                         <td>
                           <button
-                            :class="verificationDetail.isApproved? 'btn-custom-transparent-astronaut-blue small' : 'btn-custom-japanese-laurel small'"
+                            :class="verificationDetail.isApproved ?
+                            'btn-custom-transparent-astronaut-blue small' : 'btn-custom-japanese-laurel small'"
                             title="Verify"
-                            @click.prevent="changeVerificationDetailApproval(index, verificationDetail.isApproved? false : true)">
+                            @click.prevent="changeVerificationDetailApproval(index, !verificationDetail.isApproved)">
                             <i :class="verificationDetail.isApproved? 'fa fa-times' : 'fa fa-check'"/>
                           </button>
                         </td>
@@ -165,81 +163,68 @@ import vueSelect from 'vue-select';
 import sideBar from '../sideBar.vue';
 // import transaction from '../transactions/transaction.vue';
 
-import userTransaction from './usertransaction';
+import userTransaction from './usertransaction.vue';
 
 export default {
-    inject: ['global'],
-    components: {
-        'vue-select': vueSelect,
-        sideBar,
-        // transaction,
-        userTransaction
-    },
-    data() {
-        return {
-            user: {
-                phoneNumber: {},
-                lastName: undefined,
-                firstName: undefined,
-                emailAddress: undefined,
-                assetAccounts: [],
-                verificationDetails: [],
-                imagePath: undefined,
-                country: undefined,
-                transactionCount: undefined,
-            },
-            userTransactions: [],
-            transactionsStatus: ['all', 'failed', 'awaiting payment', 'payment received', 'pending', 'completed'],
-            // transactionStatuses: ['initialized', 'payment_received', 'completed', 'failed'],
-        };
-    },
-    created() {
-        this.getTransactionsAndUser();
-    },
-    methods: {
-        // changeTransactionStatus(transaction, status, index) {
-        //     this.global.request('PUT', `/transactions/${transaction._id}/status`, { status }, (err, res) => {
-        //         transaction.status = res;
-        //     });
-        // },
-    getTransactionsAndUser(){
+  inject: ['global'],
+  components: {
+    'vue-select': vueSelect,
+    sideBar,
+    // transaction,
+    userTransaction,
+  },
+  data() {
+    return {
+      user: {
+        phoneNumber: {},
+        lastName: undefined,
+        firstName: undefined,
+        emailAddress: undefined,
+        assetAccounts: [],
+        verificationDetails: [],
+        imagePath: undefined,
+        country: undefined,
+        transactionCount: undefined,
+      },
+      userTransactions: [],
+      transactionsStatus: ['all', 'failed', 'awaiting payment', 'payment received', 'pending', 'completed'],
+      // transactionStatuses: ['initialized', 'payment_received', 'completed', 'failed'],
+    };
+  },
+  created() {
+    this.getTransactionsAndUser();
+  },
+  methods: {
+    getTransactionsAndUser() {
       this.$request('GET', `/users/${this.$route.params._id}/`, (err, user) => {
-            if (user) {
-                this.user = user;
-                // this.$request('GET', `/transactions/users/${this.user._id}`, (bug, trans) => {
-                //   console.log('Transactions ',trans);
-                //     if (!bug) {
-                //         this.userTransactions = trans.items;
-                //         this.transactionsTotalCount = trans.totalCount;
-                //     }
-                // });
-            }
-        });
+        if (user) {
+          this.user = user;
+        }
+      });
     },
-    // changeStatus(trans, status) {
-    //   const tx = this.userTransactions.find(t => t._id === trans._id);
-    //   if (tx) {
-    //     this.$set(tx, 'status', status);
-    //   }
-    // },
-    // showTransaction(trans) {
-    //   this.$refs.transaction.open(trans);
-    // },
-        changeVerificationDetailApproval(index, status) {
-            this.global.request('POST', `/users/${this.user._id}/verification_details/${index}/is_approved`, { isApproved: status }, (err, res) => {
-                this.user.verificationDetails[index].isApproved = res;
-            });
-        },
-        changeAssetAccountVerification(index, status) {
-            this.global.request('POST', `/users/${this.user._id}/asset_accounts/${index}/is_verified`, { isVerified: status }, (err, res) => {
-                this.user.assetAccounts[index].isVerified = res;
-            });
-        },
-        changeUserStatus(status) {
-            this.global.request.open('PUT', `/users/${this.user._id}/status`, { status }, (err, res) => {
-                this.user.status = res;
-            });
-        },
+    changeVerificationDetailApproval(index, status) {
+      const url = `/users/${this.user._id}/verification_details/${index}/is_approved`;
+      this.global.request('POST', url, {
+        isApproved: status,
+      }, (err, res) => {
+        this.user.verificationDetails[index].isApproved = res;
+      });
     },
+    changeAssetAccountVerification(index, status) {
+      const url = `/users/${this.user._id}/asset_accounts/${index}/is_verified`;
+      this.global.request('POST', url, {
+        isVerified: status,
+      }, (err, res) => {
+        this.user.assetAccounts[index].isVerified = res;
+      });
+    },
+    changeUserStatus(status) {
+      this.global.request.open('PUT', `/users/${this.user._id}/status`, {
+        status,
+      }, (err, res) => {
+        this.user.status = res;
+      });
+    },
+  },
 };
 </script>

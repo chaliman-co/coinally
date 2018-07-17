@@ -4,7 +4,7 @@
       <span>{{ $route.query.message }}</span>
       <p style="font-size: 0.7em;font-family: PT Serif,serif;">Enter the code sent to {{ emailAddress }}</p>
     </div>
-    <h2 class="text-danger error-summary">{{ errorSummary }}</h2>
+    <p class="text-danger error-summary"><strong>{{ errorSummary }}</strong></p>
     <div class="input-fields">
       <div class="textbox-component custom-form-group">
         <label for="code">

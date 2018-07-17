@@ -20,7 +20,7 @@
               </div>
               <img
                 src="~img/qr-code.png"
-                class="qr-code"
+                class="qr-code hidden"
                 alt="QR Code">
               <div class="progress__indicator">
                 <div class="indicator__label">
@@ -39,18 +39,24 @@
               <div class="order-details custom-form-group">
                 <div class="transaction__type">
                   <img
-                    src="https://shapeshift.io/images/coins/bitcoin.png"
-                    alt="Bitcoin"> &rarr;
+                    :src="$generateUrl(transaction.depositAsset.imagePath)"
+                    :alt="transaction.depositAsset.name"> →
                   <img
-                    src="https://shapeshift.io/images/coins/ether.png"
-                    alt="Ether">
+                    :src="$generateUrl(transaction.receiptAsset.imagePath)"
+                    :alt="transaction.receiptAsset.name">
                 </div>
                 <div class="amount">
-                  <span title="Deposit">D:</span> {{ transaction.depositAmount.toString() | numberFormat }} {{ transaction.depositAssetCode }},
-                  <span title="Receive">R:</span> {{ transaction.receiptAmount.toString() | numberFormat }} {{ transaction.receiptAssetCode }}
+                  <span title="Deposit">D:</span>
+                  {{ transaction.depositAmount.toString() | numberFormat }}
+                  {{ transaction.depositAssetCode }},
+                  <span title="Receive">R:</span>
+                  {{ transaction.receiptAmount.toString() | numberFormat }}
+                  {{ transaction.receiptAssetCode }}
                 </div>
                 <div class="exchange-rate">
-                  1 {{ transaction.depositAssetCode }} = {{ transaction.rate.toString() | numberFormat }} {{ transaction.receiptAssetCode }}
+                  1 {{ transaction.depositAssetCode }} =
+                  {{ transaction.rate.toString() | numberFormat }}
+                  {{ transaction.receiptAssetCode }}
                 </div>
               </div>
               <template v-if="user.role === 'admin'">
@@ -90,11 +96,11 @@
 </template>
 
 <script>
-import utils from '../../utils';
 import jQuery from 'jquery';
 import bootstrap from 'bootstrap3';
 
 import { mapState } from 'vuex';
+import utils from '../../utils';
 
 // const jQuery = window.jQuery;
 
@@ -140,10 +146,10 @@ export default {
       this.transaction = transaction;
       this.selectedStatus = transaction.status;
 
-      $('#view-transaction').modal('show');
+      window.jQuery('#view-transaction').modal('show');
     },
     close() {
-      $('#view-transaction').modal('hide');
+      window.jQuery('#view-transaction').modal('hide');
     },
     save() {
       const data = { status: this.selectedStatus };

@@ -5,7 +5,7 @@
     <div class="title">
       <p style="font-size: 0.7em;font-family: PT Serif,serif;">A verification code will be sent to &#10; the email address provided.</p>
     </div>
-    <p class="text-danger error-summary">{{ errorSummary }}</p>
+    <p class="text-danger error-summary"><strong>{{ errorSummary }}</strong></p>
     <div class="input-fields">
       <div class="textbox-component custom-form-group">
         <label for="email">
