@@ -64,6 +64,9 @@ export default {
         path: '/profile',
         label: 'Edit profile',
       }, {
+        path: '/transactions',
+        label: 'Transactions',
+      }, {
         path: '/accounts',
         label: 'Bank Accounts',
       }, {

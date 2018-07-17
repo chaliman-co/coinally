@@ -24,6 +24,31 @@
                   <span>Order ID</span>: {{ id }}
                 </div>
                 <div
+                  v-show="transaction.cardDetail"
+                  class="row text-center">
+                  <h3><strong>Card Details</strong></h3>
+                  <div :class="transaction.cardDetail && transaction.cardDetail.receiptUrl ? 'col-md-6' : 'col-md-12'">
+                    <h4><strong>Card Image</strong></h4>
+                    <img
+                      :src="$generateUrl(transaction.cardDetail ? transaction.cardDetail.imageUrl : '')"
+                      :data-zoom="$generateUrl(transaction.cardDetail ? transaction.cardDetail.imageUrl : '')"
+                      class="zoomable-img"
+                      width="100%"
+                      alt="Card Detail">
+                  </div>
+                  <div
+                    v-show="transaction.cardDetail && transaction.cardDetail.receiptUrl"
+                    class="col-md-6">
+                    <h4><strong>Receipt Image</strong></h4>
+                    <img
+                      :src="$generateUrl(transaction.cardDetail ? transaction.cardDetail.receiptUrl : '')"
+                      :data-zoom="$generateUrl(transaction.cardDetail ? transaction.cardDetail.receiptUrl : '')"
+                      class="zoomable-img"
+                      width="100%"
+                      alt="Card Detail">
+                  </div>
+                </div>
+                <div
                   v-if="!hasPaid"
                   class="payment-address__table-md">
                   <div
@@ -185,6 +210,7 @@
 
 <script>
 import socketIoClient from 'socket.io-client';
+import Drift from 'drift-zoom';
 import utils from '../../utils';
 import { txStatus } from '../../enums';
 
@@ -242,8 +268,22 @@ export default {
         this.conversionRate = result.rate;
         this.amount = result.depositAmount;
         this.status = result.status;
+
+        if (result.cardDetail) {
+          const elements = document.getElementsByClassName('zoomable-img');
+          for (let i = 0; i < elements.length; i++) {
+            const drift = new Drift(elements[i], {
+                zoomFactor: 2,
+            });
+          }
+        }
       }
     });
+  },
+  destroyed() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   },
   methods: {
     initializeSocket() {

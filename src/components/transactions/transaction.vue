@@ -18,6 +18,31 @@
               <div class="modal__title">
                 <span>Order ID</span>: {{ transaction._id }}
               </div>
+              <div
+                v-show="transaction.cardDetail"
+                class="row text-center">
+                <h3><strong>Card Details</strong></h3>
+                <div :class="transaction.cardDetail && transaction.cardDetail.receiptUrl ? 'col-md-6' : 'col-md-12'">
+                  <h4><strong>Card Image</strong></h4>
+                  <img
+                    :src="$generateUrl(transaction.cardDetail ? transaction.cardDetail.imageUrl : '')"
+                    :data-zoom="$generateUrl(transaction.cardDetail ? transaction.cardDetail.imageUrl : '')"
+                    class="zoomable-img"
+                    width="100%"
+                    alt="Card Detail">
+                </div>
+                <div
+                  v-show="transaction.cardDetail && transaction.cardDetail.receiptUrl"
+                  class="col-md-6">
+                  <h4><strong>Receipt Image</strong></h4>
+                  <img
+                    :src="$generateUrl(transaction.cardDetail ? transaction.cardDetail.receiptUrl : '')"
+                    :data-zoom="$generateUrl(transaction.cardDetail ? transaction.cardDetail.receiptUrl : '')"
+                    class="zoomable-img"
+                    width="100%"
+                    alt="Card Detail">
+                </div>
+              </div>
               <img
                 src="~img/qr-code.png"
                 class="qr-code hidden"
@@ -98,6 +123,7 @@
 <script>
 import jQuery from 'jquery';
 import bootstrap from 'bootstrap3';
+import Drift from 'drift-zoom';
 
 import { mapState } from 'vuex';
 import utils from '../../utils';
@@ -146,6 +172,14 @@ export default {
       this.transaction = transaction;
       this.selectedStatus = transaction.status;
 
+      const elements = document.getElementsByClassName('zoomable-img');
+
+      for (let i = 0; i < elements.length; i++) {
+        const drift = new Drift(elements[i], {
+          zoomFactor: 2,
+        });
+      }
+
       window.jQuery('#view-transaction').modal('show');
     },
     close() {
@@ -169,3 +203,9 @@ export default {
   },
 };
 </script>
+
+<style>
+  .drift-zoom-pane.drift-open{
+    z-index: 10000;
+  }
+</style>
