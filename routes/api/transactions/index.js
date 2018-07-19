@@ -135,8 +135,8 @@ function handleGetUserTransactions(req, res, next) {
         .sort('-createdAt')
         .limit(Number(pageSize))
         .skip(Number((page - 1) * pageSize))
-        .populate('receiptAsset', 'type')
-        .populate('depositAsset', 'type')
+        .populate('receiptAsset', ['type', 'name', 'imagePath'])
+        .populate('depositAsset', ['type', 'name', 'imagePath'])
         .populate('user', ['assetAccounts', 'firstName', 'lastName'])
         .exec();
 
