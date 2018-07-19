@@ -46,9 +46,9 @@
                   <tr>
                     <th>#</th>
                     <th>User</th>
-                    <th>Deposit Asset</th>
-                    <th>Receipt Asset</th>
                     <th>Deposit Amount</th>
+                    <!-- <th>Deposit Asset</th> -->
+                    <th>Receipt Asset</th>
                     <th>Created at</th>
                     <th>Last updated</th>
                     <th>Status</th>
@@ -63,9 +63,9 @@
                     :key="index">
                     <td>{{ index + 1 + pageNo }}</td>
                     <td>{{ `${transaction.user.firstName} ${transaction.user.lastName}` | capitalize }}</td>
-                    <td>{{ transaction.depositAssetCode | uppercase }}</td>
-                    <td>{{ transaction.receiptAssetCode | uppercase }}</td>
                     <td>{{ transaction.depositAmount | numberFormat }} ({{ transaction.depositAssetCode | uppercase }})</td>
+                    <!-- <td>{{ transaction.depositAssetCode | uppercase }}</td> -->
+                    <td>{{ transaction.receiptAssetCode | uppercase }}</td>
                     <td>{{ transaction.createdAt | humanizeDate }}</td>
                     <td>{{ transaction.updatedAt | humanizeDate }}</td>
                     <td>

@@ -93,6 +93,11 @@ export default {
     this.initializeSocket();
   },
   inject: ['global'],
+  destroyed() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
+  },
   methods: {
     goBack() {
       this.$router.go(-1);

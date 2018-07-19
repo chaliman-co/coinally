@@ -125,10 +125,13 @@
       </div>
     </div>
     <button
-      :loading="isLoading"
+      :loading="isUploading"
       class="call-to-action btn-custom-astronaut-blue"
       @click="start">
       Continue
+      <i
+        v-if="isUploading"
+        class="fa fa-spinner fa-pulse"/>
     </button>
   </div>
 </template>
@@ -145,6 +148,7 @@ export default {
             depositAsset: {},
             reference: null,
             isLoading: false,
+            isUploading: false,
             cardFile: null,
             cardReceipt: null,
             errorMessage: null,
@@ -202,9 +206,9 @@ export default {
                 data.append('files', this.cardReceipt);
             }
 
-            this.isLoading = true;
+            this.isUploading = true;
             this.$request('POST', '/uploads', data, (err, result) => {
-                this.isLoading = false;
+                this.isUploading = false;
                 if (!err) {
                     const hasError = result.filter(f => f.error).length;
 
