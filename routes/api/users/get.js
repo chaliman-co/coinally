@@ -32,11 +32,38 @@ function handleGetUsers(req, res, next) {
 
     sortBy = handleSort(sortBy);
 
-    const getUsers = User.find({ /* role: 'user' */ })
-        .limit(Number(pageSize))
-        .skip(Number((page - 1) * pageSize))
-        .sort(sortBy)
-        .exec();
+    const getUsers = User.aggregate([{
+            $lookup: {
+                from: 'users',
+                localField: '_id',
+                foreignField: 'referrer',
+                as: 'referrals',
+            },
+        },
+        {
+            $lookup: {
+                from: 'transactions',
+                localField: '_id',
+                foreignField: 'user',
+                as: 'transactions',
+            },
+        },
+        { $skip: Number((page - 1) * pageSize) },
+        { $limit: Number(pageSize) },
+        { $sort: sortBy },
+        {
+            $addFields: {
+                referrals: { $size: '$referrals' },
+                transactions: { $size: '$transactions' },
+            },
+        },
+    ]);
+
+    // const getUsers = User.find({ /* role: 'user' */ })
+    //     .limit(Number(pageSize))
+    //     .skip(Number((page - 1) * pageSize))
+    //     .sort(sortBy)
+    //     .exec();
 
     const getUserCount = User.count({ role: 'user' });
 
