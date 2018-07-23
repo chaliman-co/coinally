@@ -124,7 +124,7 @@ function handleGetUserTransactions(req, res, next) {
     } = req.query;
 
     const query = {
-        user: req.user._id,
+        user: req.params._userId,
     };
 
     if (status) {
