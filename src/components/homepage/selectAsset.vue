@@ -56,6 +56,7 @@
               :min="minValue"
               :max="maxValue"
               type="number"
+              required
               placeholder="0"
               step="0.0000001">
             <p
@@ -65,7 +66,7 @@
           <button
             id="submitbutton"
             type="submit"
-            class="hidden" />
+            class="hidden"/>
         </form>
         <div
           v-if="depositAsset && receiptAsset && conversionRate"
@@ -124,7 +125,7 @@ export default {
     receiptAssets() {
       let receiptAssets = [];
       if (this.depositAsset && this.depositAsset.code !== 'ngn') {
-        receiptAssets = this.assets.filter(asset => asset.code === 'ngn');
+        receiptAssets = this.assets.filter(asset => asset != this.depositAsset);
         [this.receiptAsset] = receiptAssets;
       } else {
         receiptAssets = this.assets
@@ -135,7 +136,7 @@ export default {
     depositAssets() {
       let depositAssets = [];
       if (false && this.receiptAsset && this.receiptAsset.code !== 'ngn') {
-        depositAssets = this.assets.filter(asset => asset.code === 'ngn');
+        depositAssets = this.assets.filter(asset => asset != this.receiptAsset);
         [this.depositAsset] = depositAssets;
       } else {
         depositAssets = this.assets.filter(asset => asset.sellable);
@@ -180,14 +181,11 @@ export default {
         if (this.maxValue === '') {
           this.inputError = 'Please choose a deposit currency';
         } else {
-          this.inputError = `value cannot be greater than ${Number(this.maxValue).toLocaleString()}`;
+          this.inputError = `value cannot be greater than ${Number(this.maxValue)}`;
         }
-        // this.amount = Math.max(Math.min(newAmount,this.maxValue));
-        this.amount = previousAmount;
-      } else if (Number(newAmount) < 0) {
-        this.inputError = 'value cannot be lower than 0';
-        this.amount = '';
-      } else if (this.amount === '') {
+      } else if (Number(newAmount) < this.minValue) {
+        this.inputError = `value cannot be lower than ${Number(this.minValue)}`;
+      } else {
         this.inputError = '';
       }
     },
